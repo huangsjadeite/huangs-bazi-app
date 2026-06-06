@@ -90,10 +90,48 @@ function getSupportElements(usefulGodV3) {
   ]);
 }
 
+function getDayMasterModifier(dayMasterElement, area) {
+  const modifiers = {
+    Wood: {
+      career: 4,
+      wealth: 2,
+      relationship: 3,
+      wellness: -2,
+    },
+    Fire: {
+      career: 5,
+      wealth: 3,
+      relationship: 2,
+      wellness: -5,
+    },
+    Earth: {
+      career: 2,
+      wealth: 4,
+      relationship: 2,
+      wellness: -3,
+    },
+    Metal: {
+      career: 4,
+      wealth: 3,
+      relationship: -2,
+      wellness: 1,
+    },
+    Water: {
+      career: 2,
+      wealth: 1,
+      relationship: 4,
+      wellness: 3,
+    },
+  };
+
+  return modifiers?.[dayMasterElement]?.[area] || 0;
+}
+
 function calculateCareerScore({
   dayMasterStrengthV3,
   usefulGodV3,
   annualElements = [],
+  dayMasterElement,
 }) {
   let score = 60;
 
@@ -110,6 +148,7 @@ function calculateCareerScore({
   if (annualElements.some((el) => supportElements.includes(el))) score += 10;
   if (annualElements.some((el) => avoidElements.includes(el))) score -= 8;
 
+  score += getDayMasterModifier(dayMasterElement, "career");
   return clampScore(score);
 }
 
@@ -117,6 +156,7 @@ function calculateWealthScore({
   dayMasterStrengthV3,
   usefulGodV3,
   annualElements = [],
+  dayMasterElement,
 }) {
   let score = 58;
 
@@ -133,6 +173,7 @@ function calculateWealthScore({
   if (annualElements.some((el) => supportElements.includes(el))) score += 8;
   if (annualElements.some((el) => avoidElements.includes(el))) score -= 10;
 
+  score += getDayMasterModifier(dayMasterElement, "wealth");
   return clampScore(score);
 }
 
@@ -140,23 +181,52 @@ function calculateRelationshipScore({
   usefulGodV3,
   elementBalanceV3,
   annualElements = [],
+  dayMasterElement,
 }) {
-  let score = 62;
+  let score = 60;
 
   const water = getElementPercent(elementBalanceV3, "Water");
   const fire = getElementPercent(elementBalanceV3, "Fire");
+  const wood = getElementPercent(elementBalanceV3, "Wood");
+  const metal = getElementPercent(elementBalanceV3, "Metal");
+  const earth = getElementPercent(elementBalanceV3, "Earth");
+
   const supportElements = getSupportElements(usefulGodV3);
   const avoidElements = usefulGodV3?.avoidElements || [];
 
-  if (water >= 18) score += 8;
-  if (fire >= 25) score -= 5;
+  // Emotional flow / softness support
+  if (water >= 22) score += 10;
+  else if (water >= 15) score += 5;
+  else if (water <= 8) score -= 8;
 
-  if (hasElement(annualElements, "Wood")) score += 5;
+  // Warmth / visibility support, but too much can become pressure
+  if (fire >= 18 && fire <= 28) score += 6;
+  if (fire > 32) score -= 8;
+
+  // Growth / communication
+  if (wood >= 18) score += 5;
+  if (wood > 32) score -= 5;
+
+  // Boundaries / standards
+  if (metal >= 20 && metal <= 30) score += 4;
+  if (metal > 35) score -= 7;
+
+  // Stability, but too much Earth can feel emotionally heavy
+  if (earth >= 18 && earth <= 28) score += 4;
+  if (earth > 35) score -= 8;
+
+  // Annual element influence
+  if (hasElement(annualElements, "Water")) score += 8;
+  if (hasElement(annualElements, "Wood")) score += 6;
   if (hasElement(annualElements, "Fire")) score += 3;
+  if (hasElement(annualElements, "Metal")) score -= 3;
+  if (hasElement(annualElements, "Earth")) score -= 2;
 
-  if (annualElements.some((el) => supportElements.includes(el))) score += 6;
-  if (annualElements.some((el) => avoidElements.includes(el))) score -= 6;
+  // Useful / avoid element modifier
+  if (annualElements.some((el) => supportElements.includes(el))) score += 8;
+  if (annualElements.some((el) => avoidElements.includes(el))) score -= 8;
 
+  score += getDayMasterModifier(dayMasterElement, "relationship");
   return clampScore(score);
 }
 
@@ -165,6 +235,7 @@ function calculateWellnessScore({
   usefulGodV3,
   elementBalanceV3,
   annualElements = [],
+  dayMasterElement,
 }) {
   let score = 65;
 
@@ -184,6 +255,7 @@ function calculateWellnessScore({
 
   if (annualElements.some((el) => avoidElements.includes(el))) score -= 6;
 
+  score += getDayMasterModifier(dayMasterElement, "wellness");
   return clampScore(score);
 }
 
@@ -197,6 +269,7 @@ export function buildAnnualOverlayV3({
 }) {
   const normalizedPillars = normalizePillars(pillars);
   const dayElement = normalizedPillars?.day?.stemElement;
+  const dayMasterElement = dayElement;
 
   const annualStemElement =
     annualPillar?.stem?.element ||
@@ -274,11 +347,12 @@ export function buildAnnualOverlayV3({
   }
 
   const scoringInput = {
-    dayMasterStrengthV3,
-    usefulGodV3,
-    elementBalanceV3,
-    annualElements,
-  };
+  dayMasterStrengthV3,
+  usefulGodV3,
+  elementBalanceV3,
+  annualElements,
+  dayMasterElement,
+};
 
   return {
     selectedYear: selectedYear || null,

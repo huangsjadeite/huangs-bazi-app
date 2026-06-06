@@ -1,7 +1,9 @@
+import { buildArchetypeOverlayV4 } from "./ArchetypeOverlayV4.js";
+import { buildPracticalGuidanceV5 } from "./practicalGuidanceV5.js";
 import { buildStoneRecommendationsV3 }
-  from "./stoneRecommendationsV3";
+  from "./stoneRecommendationsV3.js";
 import { buildPracticalGuidanceV4 } from "./practicalGuidanceV4.js";
-import { buildArchetypeOverlayV3 } from "./ArchetypeOverlayV3";
+import { buildArchetypeOverlayV3 } from "./ArchetypeOverlayV3.js";
 import { buildAnnualOverlayV3 } from "./annualOverlayV3.js";
 import { calculateElementBalanceV3 } from "./elementBalanceV3.js";
 import { calculateUsefulGodV3 } from "./usefulGodV3.js";
@@ -81,7 +83,7 @@ const archetypes = calculateArchetypeScores({
   archetypeDefinitions: ARCHETYPES,
 });
 
-const archetypeOverlayV3 = buildArchetypeOverlayV3({
+const archetypeOverlayV3 = buildArchetypeOverlayV4({
   archetypes,
   annualOverlayV3,
 });
@@ -99,7 +101,7 @@ const practicalGuidance = buildPracticalGuidance({
   elementBalance,
 });
 
-const practicalGuidanceV3 = buildPracticalGuidanceV4({
+const practicalGuidanceV3 = buildPracticalGuidanceV5({
   dayMasterStrengthV3,
   usefulGodV3,
   elementBalanceV3,

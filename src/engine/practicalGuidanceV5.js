@@ -1,4 +1,4 @@
-// /engine/practicalGuidanceV4.js
+// /engine/practicalGuidanceV5.js
 
 function getPrimarySupportElement(chart = {}) {
   return (
@@ -34,6 +34,16 @@ function describeElement(element, fallback) {
   return descriptions[element] || fallback;
 }
 
+function getScore(chart = {}, area) {
+  return Number(chart?.annualOverlayV3?.[area]?.score ?? 60);
+}
+
+function getScoreBand(score) {
+  if (score >= 80) return "strong";
+  if (score >= 65) return "steady";
+  return "sensitive";
+}
+
 function buildArea(title, summary, guidance, watchOut, action) {
   return {
     focus: title,
@@ -54,7 +64,7 @@ function buildArea(title, summary, guidance, watchOut, action) {
   };
 }
 
-export function buildPracticalGuidanceV4(chart = {}) {
+export function buildPracticalGuidanceV5(chart = {}) {
   const support = getPrimarySupportElement(chart);
   const caution = getCautionElement(chart);
 
@@ -68,10 +78,47 @@ const cautionText = describeElement(
   "overextended energy"
 );
 
+const careerScore = getScore(chart, "career");
+const wealthScore = getScore(chart, "wealth");
+const relationshipScore = getScore(chart, "relationship");
+const wellnessScore = getScore(chart, "wellness");
+
+const careerBand = getScoreBand(careerScore);
+const wealthBand = getScoreBand(wealthScore);
+const relationshipBand = getScoreBand(relationshipScore);
+const wellnessBand = getScoreBand(wellnessScore);
+
+function scoreTone(area, band) {
+  const tones = {
+    career: {
+      strong: "This is a stronger year for visibility, career movement, and showing what you can do.",
+      steady: "This is a steady year for career refinement, consistency, and building trust over time.",
+      sensitive: "This is a year to avoid forcing career moves too quickly. Focus on positioning, skill-building, and reducing unnecessary pressure.",
+    },
+    wealth: {
+      strong: "Financial opportunities may be easier to notice this year, especially when you build from existing strengths.",
+      steady: "Wealth growth is possible through patience, structure, and practical decision-making.",
+      sensitive: "Be more selective with financial risks this year. Avoid rushed spending, emotional investing, or chasing too many opportunities.",
+    },
+    relationship: {
+      strong: "This year supports more openness, warmth, and meaningful emotional connection.",
+      steady: "Relationship growth is possible through consistency, patience, and clearer communication.",
+      sensitive: "This year may reveal emotional sensitivity or unclear expectations, so move slowly and observe actions carefully.",
+    },
+    wellness: {
+      strong: "Your recovery rhythm may feel more supported this year, making it easier to maintain healthier routines.",
+      steady: "Wellness improves through consistency, sleep, hydration, movement, and emotional pacing.",
+      sensitive: "Your energy may be easier to drain this year, so protect your rest, nervous system, and emotional bandwidth.",
+    },
+  };
+
+  return tones?.[area]?.[band] || "";
+}
+
     const career = buildArea(
   "Career Direction",
   `Your career grows best when you lean into ${supportText}.`,
-  "Choose work that helps you feel more regulated, focused, and naturally useful instead of forcing constant output.",
+  scoreTone("career", careerBand),
   `Be careful of environments that trigger too much ${cautionText}, as this may make you feel drained or reactive.`,
   "Prioritise roles, projects, or content directions where your natural strengths can be expressed consistently."
 );
@@ -79,7 +126,7 @@ const cautionText = describeElement(
 const wealth = buildArea(
   "Wealth Strategy",
   `Your wealth path improves when your decisions are guided by ${supportText}, not pressure.`,
-  "Focus on steady accumulation, clear positioning, and value creation rather than chasing every opportunity.",
+  scoreTone("wealth", wealthBand),
   `Avoid making money decisions when ${cautionText} is activated, especially if you feel rushed, anxious, or overly excited.`,
   "Build wealth through repeatable systems, client trust, and offers that feel aligned with your energy."
 );
@@ -87,7 +134,7 @@ const wealth = buildArea(
 const relationship = buildArea(
   "Relationship Pattern",
   `You feel safest in relationships that bring out your ${supportText} side.`,
-  "The right connections should help you feel emotionally steadier, softer, and more honest with yourself.",
+  scoreTone("relationship", relationshipBand),
   `Be mindful of people or dynamics that amplify ${cautionText}, especially if you feel you must prove, chase, or defend yourself.`,
   "Choose relationships where consistency, emotional safety, and mutual respect are present."
 );
@@ -95,13 +142,13 @@ const relationship = buildArea(
 const wellness = buildArea(
   "Wellness Focus",
   `Your body and emotions benefit from strengthening ${supportText}.`,
-  "Support your daily rhythm with habits that calm your nervous system and reduce unnecessary intensity.",
+  scoreTone("wellness", wellnessBand),
   `Too much ${cautionText} may show up as restlessness, tension, emotional overload, or difficulty slowing down.`,
   "Use sleep, hydration, movement, and quiet routines as your foundation before adding more productivity."
 );
 
 return {
-  version: "practical-guidance-v4",
+  version: "practical-guidance-v5",
 
   career,
   wealth,

@@ -109,8 +109,8 @@ export function calculateDayPillar(normalizedInput) {
   const dayOffset = Math.floor((currentUtc - referenceUtc) / 86400000);
 
   return buildPillar({
-    stemKey: HEAVENLY_STEMS[cycleMod(dayOffset, 10)].key,
-    branchKey: EARTHLY_BRANCHES[cycleMod(dayOffset, 12)].key,
+    stemKey: HEAVENLY_STEMS[cycleMod(dayOffset + 2, 10)].key,
+    branchKey: EARTHLY_BRANCHES[cycleMod(dayOffset + 2, 12)].key,
   });
 }
 
