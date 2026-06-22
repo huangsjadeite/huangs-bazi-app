@@ -4,19 +4,59 @@ import { normalizePillars } from "./normalizePillars.js";
 import { calculateTenGods } from "./tenGodCalculator.js";
 
 const STEM_ELEMENT = {
-  甲: "Wood", 乙: "Wood", 丙: "Fire", 丁: "Fire", 戊: "Earth",
-  己: "Earth", 庚: "Metal", 辛: "Metal", 壬: "Water", 癸: "Water",
+  甲: "Wood",
+  乙: "Wood",
+  丙: "Fire",
+  丁: "Fire",
+  戊: "Earth",
+  己: "Earth",
+  庚: "Metal",
+  辛: "Metal",
+  壬: "Water",
+  癸: "Water",
 };
 
 const STEM_POLARITY = {
-  甲: "Yang", 乙: "Yin", 丙: "Yang", 丁: "Yin", 戊: "Yang",
-  己: "Yin", 庚: "Yang", 辛: "Yin", 壬: "Yang", 癸: "Yin",
+  甲: "Yang",
+  乙: "Yin",
+  丙: "Yang",
+  丁: "Yin",
+  戊: "Yang",
+  己: "Yin",
+  庚: "Yang",
+  辛: "Yin",
+  壬: "Yang",
+  癸: "Yin",
 };
 
 const BRANCH_ELEMENT = {
-  子: "Water", 丑: "Earth", 寅: "Wood", 卯: "Wood",
-  辰: "Earth", 巳: "Fire", 午: "Fire", 未: "Earth",
-  申: "Metal", 酉: "Metal", 戌: "Earth", 亥: "Water",
+  子: "Water",
+  丑: "Earth",
+  寅: "Wood",
+  卯: "Wood",
+  辰: "Earth",
+  巳: "Fire",
+  午: "Fire",
+  未: "Earth",
+  申: "Metal",
+  酉: "Metal",
+  戌: "Earth",
+  亥: "Water",
+};
+
+const BRANCH_HIDDEN_ELEMENTS = {
+  子: ["Water"],
+  丑: ["Earth", "Water", "Metal"],
+  寅: ["Wood", "Fire", "Earth"],
+  卯: ["Wood"],
+  辰: ["Earth", "Wood", "Water"],
+  巳: ["Fire", "Earth", "Metal"],
+  午: ["Fire", "Earth"],
+  未: ["Earth", "Fire", "Wood"],
+  申: ["Metal", "Water", "Earth"],
+  酉: ["Metal"],
+  戌: ["Earth", "Metal", "Fire"],
+  亥: ["Water", "Wood"],
 };
 
 const ELEMENT_GENERATES = {
@@ -88,6 +128,34 @@ function getSupportElements(usefulGodV3) {
     usefulGodV3?.primaryUsefulElement,
     usefulGodV3?.secondaryUsefulElement,
   ]);
+}
+
+function buildAnnualElementScores({ stem, branch }) {
+  const scores = {
+    Wood: 0,
+    Fire: 0,
+    Earth: 0,
+    Metal: 0,
+    Water: 0,
+  };
+
+  const stemElement = STEM_ELEMENT[stem];
+  const branchElement = BRANCH_ELEMENT[branch];
+  const hiddenElements = BRANCH_HIDDEN_ELEMENTS[branch] || [];
+
+  if (stemElement) {
+    scores[stemElement] += 1;
+  }
+
+  if (branchElement) {
+    scores[branchElement] += 1;
+  }
+
+  hiddenElements.forEach((element) => {
+    scores[element] += 0.5;
+  });
+
+  return scores;
 }
 
 function getDayMasterModifier(dayMasterElement, area) {
@@ -194,35 +262,28 @@ function calculateRelationshipScore({
   const supportElements = getSupportElements(usefulGodV3);
   const avoidElements = usefulGodV3?.avoidElements || [];
 
-  // Emotional flow / softness support
   if (water >= 22) score += 10;
   else if (water >= 15) score += 5;
   else if (water <= 8) score -= 8;
 
-  // Warmth / visibility support, but too much can become pressure
   if (fire >= 18 && fire <= 28) score += 6;
   if (fire > 32) score -= 8;
 
-  // Growth / communication
   if (wood >= 18) score += 5;
   if (wood > 32) score -= 5;
 
-  // Boundaries / standards
   if (metal >= 20 && metal <= 30) score += 4;
   if (metal > 35) score -= 7;
 
-  // Stability, but too much Earth can feel emotionally heavy
   if (earth >= 18 && earth <= 28) score += 4;
   if (earth > 35) score -= 8;
 
-  // Annual element influence
   if (hasElement(annualElements, "Water")) score += 8;
   if (hasElement(annualElements, "Wood")) score += 6;
   if (hasElement(annualElements, "Fire")) score += 3;
   if (hasElement(annualElements, "Metal")) score -= 3;
   if (hasElement(annualElements, "Earth")) score -= 2;
 
-  // Useful / avoid element modifier
   if (annualElements.some((el) => supportElements.includes(el))) score += 8;
   if (annualElements.some((el) => avoidElements.includes(el))) score -= 8;
 
@@ -271,22 +332,44 @@ export function buildAnnualOverlayV3({
   const dayElement = normalizedPillars?.day?.stemElement;
   const dayMasterElement = dayElement;
 
+  const annualStemKey =
+    annualPillar?.stem?.key ||
+    annualPillar?.stem?.name ||
+    annualPillar?.stem;
+
+  const annualBranchKey =
+    annualPillar?.branch?.key ||
+    annualPillar?.branch?.name ||
+    annualPillar?.branch?.label ||
+    annualPillar?.branch;
+
   const annualStemElement =
     annualPillar?.stem?.element ||
-    STEM_ELEMENT[annualPillar?.stem] ||
+    STEM_ELEMENT[annualStemKey] ||
     null;
 
   const annualBranchElement =
     annualPillar?.branch?.element ||
-    BRANCH_ELEMENT[annualPillar?.branch] ||
+    BRANCH_ELEMENT[annualBranchKey] ||
     null;
+
+  const annualElementScores = buildAnnualElementScores({
+    stem: annualStemKey,
+    branch: annualBranchKey,
+  });
 
   const resourceElement = getProducingElement(dayElement);
   const outputElement = ELEMENT_GENERATES[dayElement];
   const wealthElement = getControlledElement(dayElement);
   const officerElement = getControllingElement(dayElement);
 
-  const annualElements = unique([annualStemElement, annualBranchElement]);
+  const annualElements = unique([
+    annualStemElement,
+    annualBranchElement,
+    ...Object.entries(annualElementScores)
+      .filter(([, score]) => score > 0)
+      .map(([element]) => element),
+  ]);
 
   const amplifiedElements = unique([
     ...(elementBalanceV3?.dominantElement?.element
@@ -308,15 +391,15 @@ export function buildAnnualOverlayV3({
 
   const normalizedAnnualPillar = {
     stem: {
-      key: annualPillar?.stem || null,
+      key: annualStemKey || null,
       element: annualStemElement,
-      polarity: STEM_POLARITY[annualPillar?.stem] || null,
+      polarity: STEM_POLARITY[annualStemKey] || null,
     },
     branch: {
-      key: annualPillar?.branch || null,
-      label: annualPillar?.branch || null,
+      key: annualBranchKey || null,
+      label: annualBranchKey || null,
       element: annualBranchElement,
-      hiddenStems: [],
+      hiddenStems: BRANCH_HIDDEN_ELEMENTS[annualBranchKey] || [],
     },
   };
 
@@ -347,20 +430,27 @@ export function buildAnnualOverlayV3({
   }
 
   const scoringInput = {
-  dayMasterStrengthV3,
-  usefulGodV3,
-  elementBalanceV3,
-  annualElements,
-  dayMasterElement,
-};
+    dayMasterStrengthV3,
+    usefulGodV3,
+    elementBalanceV3,
+    annualElements,
+    dayMasterElement,
+  };
 
   return {
     selectedYear: selectedYear || null,
     dayElement,
+
     annualPillar,
+    normalizedAnnualPillar,
+
     annualStemElement,
     annualBranchElement,
+
     annualElements,
+    annualElementScores,
+    elementScores: annualElementScores,
+
     amplifiedElements,
     supportiveAnnualElements,
     challengingAnnualElements,
