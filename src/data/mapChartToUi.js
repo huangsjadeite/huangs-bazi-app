@@ -599,16 +599,21 @@ export const mapChartToUi = (chart, selectedYear) => {
     annual?.dominantElement ||
     personalEnergy.seasonalDominantElement ||
     "",
-  supportiveElements: uniqueArray([
-    ...(chart?.usefulGodV4?.usefulElements || []),
-    ...(chart?.usefulGodV4?.favourableElements || []),
-    ...(chart?.usefulGodV4?.secondaryFavourableElements || []),
-    ...(personalEnergy.supportiveElements || []),
-  ]),
-  cautionElements: uniqueArray([
-    ...(chart?.usefulGodV4?.cautionElements || []),
-    ...(personalEnergy.cautionElements || []),
-  ]),
+  // usefulGodV4 is the authoritative strength-first source (see
+  // engine README). The older usefulGodSuggestion module is an explicitly
+  // labelled prototype with a different, percentage-only methodology that
+  // can disagree with V4 on the same element - mixing the two here is what
+  // previously put the same element in both supportive and caution lists.
+  // Only fall back to the legacy module when V4 didn't run.
+  supportiveElements: chart?.usefulGodV4
+    ? uniqueArray([
+        ...(chart.usefulGodV4.favourableElements || []),
+        ...(chart.usefulGodV4.secondaryFavourableElements || []),
+      ])
+    : uniqueArray(personalEnergy.supportiveElements || []),
+  cautionElements: chart?.usefulGodV4
+    ? uniqueArray(chart.usefulGodV4.cautionElements || [])
+    : uniqueArray(personalEnergy.cautionElements || []),
   explanation: safeText(
     chart?.usefulGodV4?.explanation || personalEnergy.explanation,
     "Your chart benefits from using supportive elements with balance, rather than simply adding more of what is already strong."

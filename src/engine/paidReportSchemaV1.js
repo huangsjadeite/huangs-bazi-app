@@ -29,6 +29,9 @@ export function buildPaidReportSchemaV1(chart) {
         chart?.narrativePersonalizationV1 || null,
       archetypes: chart?.archetypes || [],
       adjustedArchetypes: chart?.adjustedArchetypes || [],
+      topStrengths: chart?.topStrengthsV1 || [],
+      blindSpots: chart?.blindSpotsV1 || null,
+      focusRanking: chart?.focusRankingV1 || [],
     },
 
     usefulGodAndElements: {
@@ -59,9 +62,13 @@ export function buildPaidReportSchemaV1(chart) {
     lifeAreas: {
       career: chart?.careerEngineV1 || null,
       wealth: chart?.wealthEngineV1 || null,
+      wealthArchetype: chart?.wealthArchetypeV1 || null,
       relationship: chart?.relationshipEngineV2 || null,
+      relationshipArchetype: chart?.relationshipArchetypeV1 || null,
+      relationshipPattern: chart?.relationshipPatternV1 || null,
       health: chart?.healthEngineV1 || null,
       lifeThemes: chart?.lifeThemesV1 || null,
+      growthAdvice: chart?.growthAdviceV1 || null,
     },
 
     interpretationLayers: {
@@ -80,6 +87,7 @@ export function buildPaidReportSchemaV1(chart) {
         chart?.stoneRecommendationsV4 ||
         chart?.stoneRecommendationsV3 ||
         null,
+      products: chart?.productRecommendationsV1 || null,
     },
 
     narrative: chart?.pdfReportSchema || chart?.pdfReportSchemaV1 || null,

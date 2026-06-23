@@ -1441,21 +1441,6 @@ function RelationshipPatternSection({ relationshipPattern }) {
         </div>
       )}
 
-      {relationshipPattern.supportiveEnergy && (
-        <div className="mt-6 rounded-2xl border border-yellow-100 bg-yellow-50 p-6">
-          <h3 className="text-xl font-bold text-yellow-900">
-            🌿 Supportive Energy
-          </h3>
-
-          <p className="mt-4 text-yellow-800">
-            {typeof relationshipPattern.supportiveEnergy === "string"
-              ? relationshipPattern.supportiveEnergy
-              : relationshipPattern.supportiveEnergy?.primaryUsefulGod ||
-                relationshipPattern.primaryUsefulGod ||
-                "Balance"}
-          </p>
-        </div>
-      )}
     </section>
   );
 }
@@ -1863,31 +1848,418 @@ function FinalReflectionSection() {
   );
 }
 
-function PremiumInsights({ report, isAdmin = false, fullReport = null }) {
+function AdminBulletList({ items, render }) {
+  if (!Array.isArray(items) || !items.length) {
+    return <p className="mt-3 text-sm italic text-stone-400">No data.</p>;
+  }
+
+  return (
+    <ul className="mt-3 space-y-2 text-base leading-7 text-stone-700">
+      {items.map((item, i) => (
+        <li key={i} className="flex gap-3">
+          <span className="mt-1 text-orange-600">•</span>
+          <span>
+            {render
+              ? render(item)
+              : typeof item === "string"
+              ? item
+              : item?.title || item?.text || JSON.stringify(item)}
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function AdminReportSection({ icon, title, children }) {
+  return (
+    <div className="mt-10 border-t border-amber-100 pt-8">
+      <h3 className="text-2xl font-bold text-slate-950">
+        {icon} {title}
+      </h3>
+      {children}
+    </div>
+  );
+}
+
+function AdminStrengthRiskGrid({ strengths, risks, strengthLabel = "Strengths", riskLabel = "Risks" }) {
+  if (!strengths?.length && !risks?.length) return null;
+
+  return (
+    <div className="mt-5 grid gap-5 md:grid-cols-2">
+      <div>
+        <p className="text-sm font-bold uppercase tracking-[0.18em] text-green-700">
+          {strengthLabel}
+        </p>
+        <AdminBulletList items={strengths} />
+      </div>
+      <div>
+        <p className="text-sm font-bold uppercase tracking-[0.18em] text-red-700">
+          {riskLabel}
+        </p>
+        <AdminBulletList items={risks} />
+      </div>
+    </div>
+  );
+}
+
+function AdminFullReport({ report, clientName }) {
+  if (!report) {
+    return (
+      <p className="mt-6 text-sm italic text-stone-400">
+        Full report data is not available for this chart.
+      </p>
+    );
+  }
+
+  const narrative = report.narrative || {};
+  const personality = report.personalityAndStructure || {};
+  const usefulGod = report.usefulGodAndElements || {};
+  const lifeAreas = report.lifeAreas || {};
+  const stones = report.practicalSupport?.stones || {};
+
+  const rankedProfiles = personality.tenProfileScoring?.rankedProfiles || [];
+  const career = lifeAreas.career || {};
+  const wealth = lifeAreas.wealth || {};
+  const wealthArchetype = lifeAreas.wealthArchetype || {};
+  const relationship = lifeAreas.relationship || {};
+  const relationshipArchetype = lifeAreas.relationshipArchetype || {};
+  const relationshipPattern = lifeAreas.relationshipPattern || {};
+  const health = lifeAreas.health || {};
+  const blindSpots = personality.blindSpots || {};
+  const lifeThemes = lifeAreas.lifeThemes || {};
+  const growthAdvice = lifeAreas.growthAdvice || {};
+
+  return (
+    <div>
+      <div className="mt-7 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-5">
+        <div>
+          <p className="text-sm font-bold text-slate-700">
+            {report.chartFoundation?.dayMasterStrength?.status || "-"} Day Master
+            {personality.structureScoring?.mainStructure?.name
+              ? ` · ${personality.structureScoring.mainStructure.name} structure`
+              : ""}
+          </p>
+          <p className="mt-1 text-xs text-stone-500">
+            Primary Useful God: {usefulGod.primaryUsefulGod || "-"} · Secondary:{" "}
+            {usefulGod.secondaryUsefulGod || "-"}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          data-html2canvas-ignore="true"
+          onClick={() => exportAdminReportToPdf(clientName)}
+          className="rounded-xl bg-amber-700 px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-amber-600"
+        >
+          Export as PDF
+        </button>
+      </div>
+
+      {narrative.executiveSummary && (
+        <div className="mt-8">
+          <h3 className="text-xl font-bold text-slate-950">Executive Summary</h3>
+          <p className="mt-3 whitespace-pre-line text-base leading-8 text-stone-700">
+            {narrative.executiveSummary}
+          </p>
+        </div>
+      )}
+
+      {!!rankedProfiles.length && (
+        <div className="mt-8">
+          <h3 className="text-xl font-bold text-slate-950">Personality Profile Breakdown</h3>
+          <p className="mt-3 text-sm text-stone-500">
+            Full ten-god profile ranking, strongest to most dormant.
+          </p>
+          <AdminBulletList
+            items={[...rankedProfiles].sort((a, b) => b.percentage - a.percentage)}
+            render={(item) => (
+              <>
+                <strong>{item.profile}</strong> — {item.percentage}%
+              </>
+            )}
+          />
+        </div>
+      )}
+
+      <AdminReportSection icon="💼" title="Career Timing & Direction">
+        {career.careerStyle && (
+          <p className="mt-3 text-base text-stone-700">
+            <strong>{career.careerStyle}</strong>
+            {career.leadershipStyle ? ` · ${career.leadershipStyle}` : ""}
+          </p>
+        )}
+        {career.idealWorkEnvironment && (
+          <p className="mt-2 text-base leading-7 text-stone-700">
+            {career.idealWorkEnvironment}
+          </p>
+        )}
+        {narrative.careerFocus && (
+          <p className="mt-3 text-base leading-7 text-stone-700">{narrative.careerFocus}</p>
+        )}
+        <AdminStrengthRiskGrid
+          strengths={career.careerStrengths}
+          risks={career.careerRisks}
+          strengthLabel="Career Strengths"
+          riskLabel="Career Risks"
+        />
+        {!!career.recommendedDirections?.length && (
+          <div className="mt-5">
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-700">
+              Recommended Directions
+            </p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {career.recommendedDirections.map((item) => (
+                <span
+                  key={item}
+                  className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800"
+                >
+                  {item}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+      </AdminReportSection>
+
+      <AdminReportSection icon="💰" title="Wealth Opportunities">
+        {wealthArchetype.wealthArchetype && (
+          <p className="mt-3 text-base text-stone-700">
+            <strong>{wealthArchetype.wealthArchetype}</strong>
+            {wealth.incomeStyle ? ` · ${wealth.incomeStyle}` : ""}
+          </p>
+        )}
+        {narrative.wealthFocus && (
+          <p className="mt-3 text-base leading-7 text-stone-700">{narrative.wealthFocus}</p>
+        )}
+        {wealth.wealthStrategy && (
+          <p className="mt-3 text-base leading-7 text-stone-700">{wealth.wealthStrategy}</p>
+        )}
+        <AdminStrengthRiskGrid
+          strengths={wealth.wealthStrengths || wealthArchetype.moneyStrengths}
+          risks={wealth.wealthRisks || wealthArchetype.moneyBlindSpots}
+          strengthLabel="Wealth Strengths"
+          riskLabel="Wealth Blind Spots"
+        />
+        {!!wealthArchetype.idealIncomeModels?.length && (
+          <div className="mt-5">
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-700">
+              Ideal Income Models
+            </p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {wealthArchetype.idealIncomeModels.map((item) => (
+                <span
+                  key={item}
+                  className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800"
+                >
+                  {item}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+      </AdminReportSection>
+
+      <AdminReportSection icon="❤️" title="Relationship Dynamics">
+        {relationshipArchetype.name && (
+          <p className="mt-3 text-base text-stone-700">
+            <strong>{relationshipArchetype.name}</strong>
+            {relationshipPattern.relationshipStyle
+              ? ` · ${relationshipPattern.relationshipStyle}`
+              : ""}
+          </p>
+        )}
+        {narrative.relationshipFocus && (
+          <p className="mt-3 text-base leading-7 text-stone-700">
+            {narrative.relationshipFocus}
+          </p>
+        )}
+        {relationship.spouseStar?.interpretation && (
+          <p className="mt-3 text-base leading-7 text-stone-700">
+            {relationship.spouseStar.interpretation}
+          </p>
+        )}
+        <AdminStrengthRiskGrid
+          strengths={relationshipArchetype.strengths || relationshipPattern.relationshipStrengths}
+          risks={relationshipArchetype.blindSpots || relationshipPattern.relationshipBlindSpots}
+          strengthLabel="Relationship Strengths"
+          riskLabel="Relationship Blind Spots"
+        />
+        {!!relationshipArchetype.partnerNeeds?.length && (
+          <div className="mt-5">
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-700">
+              What This Chart Needs In A Partner
+            </p>
+            <AdminBulletList items={relationshipArchetype.partnerNeeds} />
+          </div>
+        )}
+      </AdminReportSection>
+
+      <AdminReportSection icon="🌿" title="Wellness & Energy Balance">
+        {health.vitalityLevel && (
+          <p className="mt-3 text-base text-stone-700">
+            <strong>{health.vitalityLevel}</strong>
+            {health.stressPattern ? ` · ${health.stressPattern}` : ""}
+          </p>
+        )}
+        {narrative.wellnessFocus && (
+          <p className="mt-3 text-base leading-7 text-stone-700">{narrative.wellnessFocus}</p>
+        )}
+        {health.healthStrategy && (
+          <p className="mt-3 text-base leading-7 text-stone-700">{health.healthStrategy}</p>
+        )}
+        <AdminStrengthRiskGrid
+          strengths={health.wellnessStrengths}
+          risks={health.wellnessRisks}
+          strengthLabel="Wellness Strengths"
+          riskLabel="Wellness Risks"
+        />
+      </AdminReportSection>
+
+      <AdminReportSection icon="✨" title="Hidden Strengths">
+        <AdminBulletList
+          items={personality.topStrengths}
+          render={(item) => (
+            <>
+              <strong>{item.title}</strong> — {item.description}
+            </>
+          )}
+        />
+      </AdminReportSection>
+
+      <AdminReportSection icon="⚠️" title="Personal Blind Spots">
+        {blindSpots.summary && (
+          <p className="mt-3 text-base leading-7 text-stone-700">{blindSpots.summary}</p>
+        )}
+        <AdminBulletList items={blindSpots.blindSpots} />
+        {blindSpots.growthAdvice && (
+          <p className="mt-4 text-base leading-7 text-stone-700">
+            <strong>Growth advice:</strong> {blindSpots.growthAdvice}
+          </p>
+        )}
+      </AdminReportSection>
+
+      <AdminReportSection icon="💎" title="Supportive Elements & Stones">
+        <p className="mt-3 text-base text-stone-700">
+          Favourable: {(usefulGod.favourableElements || []).join(", ") || "-"} · Use carefully:{" "}
+          {(usefulGod.cautionElements || []).join(", ") || "-"}
+        </p>
+        {!!stones.primaryRecommendations?.length && (
+          <div className="mt-4">
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-700">
+              Primary Stones ({stones.primaryRecommendations[0]?.element})
+            </p>
+            <AdminBulletList
+              items={stones.primaryRecommendations[0]?.stones}
+              render={(item) => (
+                <>
+                  <strong>{item.name}</strong> — {item.customerMessage}
+                </>
+              )}
+            />
+          </div>
+        )}
+        {!!stones.secondaryRecommendations?.length && (
+          <div className="mt-4">
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-700">
+              Secondary Stones ({stones.secondaryRecommendations[0]?.element})
+            </p>
+            <AdminBulletList
+              items={stones.secondaryRecommendations[0]?.stones}
+              render={(item) => (
+                <>
+                  <strong>{item.name}</strong> — {item.customerMessage}
+                </>
+              )}
+            />
+          </div>
+        )}
+      </AdminReportSection>
+
+      <AdminReportSection icon="🧭" title="Long-Term Life Direction">
+        {!!lifeThemes.primaryThemes?.length && (
+          <p className="mt-3 text-base text-stone-700">
+            <strong>Primary themes:</strong> {lifeThemes.primaryThemes.join(" · ")}
+          </p>
+        )}
+        {!!lifeThemes.supportingThemes?.length && (
+          <p className="mt-2 text-base text-stone-700">
+            <strong>Supporting themes:</strong> {lifeThemes.supportingThemes.join(" · ")}
+          </p>
+        )}
+        {growthAdvice.summary && (
+          <p className="mt-3 text-base leading-7 text-stone-700">{growthAdvice.summary}</p>
+        )}
+        {!!growthAdvice.nextLevelActions?.length && (
+          <div className="mt-4">
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-700">
+              Next Level Actions
+            </p>
+            <AdminBulletList items={growthAdvice.nextLevelActions} />
+          </div>
+        )}
+      </AdminReportSection>
+
+      <details
+        data-html2canvas-ignore="true"
+        className="mt-10 rounded-2xl border border-slate-200 bg-slate-50 p-5"
+      >
+        <summary className="cursor-pointer text-sm font-bold text-slate-700">
+          Raw report data (debug)
+        </summary>
+        <pre className="mt-3 overflow-x-auto text-xs leading-5 text-slate-600">
+          {JSON.stringify(report, null, 2)}
+        </pre>
+      </details>
+    </div>
+  );
+}
+
+function exportAdminReportToPdf(clientName) {
+  const element = document.getElementById("admin-full-report");
+  if (!element) return;
+
+  // html2canvas-pro (not plain html2canvas) is required here: Tailwind v4
+  // generates oklch() colors, which the unmaintained-for-this stock
+  // html2canvas can't parse and silently fails on.
+  Promise.all([import("html2canvas-pro"), import("jspdf")]).then(
+    ([{ default: html2canvas }, { jsPDF }]) => {
+      html2canvas(element, { scale: 2, useCORS: true }).then((canvas) => {
+        const imgData = canvas.toDataURL("image/jpeg", 0.95);
+        const pdf = new jsPDF({ unit: "pt", format: "letter" });
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        const imgWidth = pageWidth;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+        let heightLeft = imgHeight;
+        let position = 0;
+
+        pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+
+        while (heightLeft > 0) {
+          position = heightLeft - imgHeight;
+          pdf.addPage();
+          pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
+          heightLeft -= pageHeight;
+        }
+
+        pdf.save(`${clientName || "client"}-bazi-paid-report.pdf`);
+      });
+    }
+  );
+}
+
+function PremiumInsights({ report, isAdmin = false, fullReport = null, clientName = "" }) {
   if (!report) return null;
 
   if (isAdmin) {
-    const r = fullReport || report;
-    const renderList = (items) =>
-      Array.isArray(items) && items.length ? (
-        <ul className="mt-3 space-y-2 text-base leading-7 text-stone-700">
-          {items.map((item, i) => (
-            <li key={i} className="flex gap-3">
-              <span className="mt-1 text-orange-600">•</span>
-              <span>
-                {typeof item === "string"
-                  ? item
-                  : item?.title || item?.text || JSON.stringify(item)}
-              </span>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="mt-3 text-sm italic text-stone-400">No data.</p>
-      );
-
     return (
-      <section className="rounded-[36px] border border-amber-300 bg-white px-8 py-10 shadow-lg md:px-10">
+      <section
+        id="admin-full-report"
+        className="rounded-[36px] border border-amber-300 bg-white px-8 py-10 shadow-lg md:px-10"
+      >
         <p className="inline-flex rounded-full bg-amber-100 px-4 py-2 text-xs font-bold uppercase tracking-[0.28em] text-amber-800">
           🔓 Full Report (Admin)
         </p>
@@ -1895,42 +2267,7 @@ function PremiumInsights({ report, isAdmin = false, fullReport = null }) {
           Complete Paid Reading
         </h2>
 
-        {r.executiveSummary && (
-          <div className="mt-7">
-            <h3 className="text-xl font-bold text-slate-950">Executive Summary</h3>
-            <p className="mt-3 whitespace-pre-line text-base leading-8 text-stone-700">
-              {r.executiveSummary}
-            </p>
-          </div>
-        )}
-
-        <div className="mt-7 grid gap-6 md:grid-cols-2">
-          <div>
-            <h3 className="text-xl font-bold text-slate-950">Strengths</h3>
-            {renderList(r.strengths)}
-          </div>
-          <div>
-            <h3 className="text-xl font-bold text-slate-950">Blind Spots</h3>
-            {renderList(r.blindSpots)}
-          </div>
-          <div>
-            <h3 className="text-xl font-bold text-slate-950">Growth Advice</h3>
-            {renderList(r.growthAdvice)}
-          </div>
-          <div>
-            <h3 className="text-xl font-bold text-slate-950">Life Themes</h3>
-            {renderList(r.lifeThemes || r.primaryThemes)}
-          </div>
-        </div>
-
-        <details className="mt-8 rounded-2xl border border-slate-200 bg-slate-50 p-5">
-          <summary className="cursor-pointer text-sm font-bold text-slate-700">
-            Raw report data (debug)
-          </summary>
-          <pre className="mt-3 overflow-x-auto text-xs leading-5 text-slate-600">
-            {JSON.stringify(r, null, 2)}
-          </pre>
-        </details>
+        <AdminFullReport report={fullReport} clientName={clientName} />
       </section>
     );
   }
@@ -2880,11 +3217,8 @@ export default function HuangsBaZiUIFrontend() {
             <PremiumInsights
               report={previewReport}
               isAdmin={isAdmin}
-              fullReport={
-                chart?.pdfReportSchemaV2 ||
-                chart?.pdfReportSchemaV1 ||
-                chart?.pdfReportSchema
-              }
+              fullReport={chart?.paidReportSchemaV1}
+              clientName={submittedInput?.name}
             />
 
             <CTASection />
