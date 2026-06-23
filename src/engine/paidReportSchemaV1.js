@@ -1,3 +1,61 @@
+const ELEMENT_ROLE_LABELS = {
+  self: { role: "Self", text: "core identity, personal will and how directly you assert yourself" },
+  resource: { role: "Resource", text: "support, learning, recovery and where you draw replenishment from" },
+  output: { role: "Output", text: "expression, communication, creativity and visibility" },
+  wealth: { role: "Wealth", text: "opportunity recognition, resource management and how money flows" },
+  officer: { role: "Officer", text: "structure, responsibility, discipline and authority" },
+};
+
+function buildElementalBalanceWithAnnual(chart) {
+  const natalWeighted = chart?.elementBalance?.weighted || {};
+  const percentages = chart?.elementBalance?.percentages || {};
+  const relationshipElements =
+    chart?.usefulGodSuggestion?.relationshipElements || {};
+
+  const annualElementPoints =
+    chart?.annualOverlayV4?.annualElements ||
+    chart?.annualOverlay?.annualElements ||
+    chart?.annualOverlayV3?.elementScores ||
+    {};
+
+  const combinedWeighted = Object.fromEntries(
+    Object.keys(percentages).map((name) => [
+      name,
+      Number(natalWeighted[name] || 0) + Number(annualElementPoints[name] || 0),
+    ])
+  );
+  const combinedTotal = Object.values(combinedWeighted).reduce(
+    (sum, value) => sum + value,
+    0
+  );
+
+  const elementToRoleKey = {
+    [relationshipElements.selfElement]: "self",
+    [relationshipElements.resourceElement]: "resource",
+    [relationshipElements.outputElement]: "output",
+    [relationshipElements.wealthElement]: "wealth",
+    [relationshipElements.officerElement]: "officer",
+  };
+
+  return Object.entries(percentages)
+    .map(([name, natalPercentage]) => {
+      const roleKey = elementToRoleKey[name] || null;
+      const roleInfo = roleKey ? ELEMENT_ROLE_LABELS[roleKey] : null;
+
+      return {
+        name,
+        natalPercentage,
+        annualPercentage:
+          combinedTotal > 0
+            ? Number(((combinedWeighted[name] / combinedTotal) * 100).toFixed(1))
+            : Number(natalPercentage || 0),
+        role: roleInfo?.role || "",
+        roleDescription: roleInfo?.text || "",
+      };
+    })
+    .sort((a, b) => b.natalPercentage - a.natalPercentage);
+}
+
 export function buildPaidReportSchemaV1(chart) {
   return {
     version: "PaidReportSchemaV1",
@@ -16,10 +74,12 @@ export function buildPaidReportSchemaV1(chart) {
       pillars: chart?.pillars || null,
       birthZodiac: chart?.birthZodiac || null,
       elementBalance: chart?.elementBalanceV3 || chart?.elementBalance || null,
+      elementalBalance: buildElementalBalanceWithAnnual(chart),
       dayMasterStrength:
         chart?.dayMasterStrengthV4 ||
         chart?.dayMasterStrengthV3 ||
         null,
+      dayMasterElement: chart?.usefulGodSuggestion?.relationshipElements?.selfElement || "",
     },
 
     personalityAndStructure: {

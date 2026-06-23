@@ -1918,7 +1918,11 @@ function AdminFullReport({ report, clientName }) {
   const lifeAreas = report.lifeAreas || {};
   const stones = report.practicalSupport?.stones || {};
 
-  const rankedProfiles = personality.tenProfileScoring?.rankedProfiles || [];
+  const rankedProfiles = [...(personality.tenProfileScoring?.rankedProfiles || [])].sort(
+    (a, b) => b.percentage - a.percentage
+  );
+  const findProfilePct = (name) =>
+    rankedProfiles.find((p) => p.profile === name)?.percentage;
   const career = lifeAreas.career || {};
   const wealth = lifeAreas.wealth || {};
   const wealthArchetype = lifeAreas.wealthArchetype || {};
@@ -1929,22 +1933,17 @@ function AdminFullReport({ report, clientName }) {
   const blindSpots = personality.blindSpots || {};
   const lifeThemes = lifeAreas.lifeThemes || {};
   const growthAdvice = lifeAreas.growthAdvice || {};
+  const elementalBalance = report.chartFoundation?.elementalBalance || [];
+  const strongerElements = elementalBalance.slice(0, 2).map((e) => e.name);
+  const weakerElements = [...elementalBalance].slice(-2).map((e) => e.name);
+
+  const directWealthPct = findProfilePct("Direct Wealth");
+  const indirectWealthPct = findProfilePct("Indirect Wealth");
 
   return (
     <div>
       <div className="mt-7 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-5">
-        <div>
-          <p className="text-sm font-bold text-slate-700">
-            {report.chartFoundation?.dayMasterStrength?.status || "-"} Day Master
-            {personality.structureScoring?.mainStructure?.name
-              ? ` · ${personality.structureScoring.mainStructure.name} structure`
-              : ""}
-          </p>
-          <p className="mt-1 text-xs text-stone-500">
-            Primary Useful God: {usefulGod.primaryUsefulGod || "-"} · Secondary:{" "}
-            {usefulGod.secondaryUsefulGod || "-"}
-          </p>
-        </div>
+        <p className="text-sm font-bold text-slate-700">Client Profile</p>
 
         <button
           type="button"
@@ -1956,12 +1955,68 @@ function AdminFullReport({ report, clientName }) {
         </button>
       </div>
 
-      {narrative.executiveSummary && (
+      <table className="mt-4 w-full overflow-hidden rounded-2xl border border-slate-200 text-sm">
+        <tbody>
+          {[
+            ["Name", clientName || "-"],
+            [
+              "Day Master",
+              report.chartFoundation?.dayMasterElement
+                ? `${report.chartFoundation.dayMasterElement} (${
+                    report.chartFoundation?.dayMasterStrength?.status || "-"
+                  })`
+                : report.chartFoundation?.dayMasterStrength?.status || "-",
+            ],
+            ["Stronger Elements", strongerElements.join(", ") || "-"],
+            ["Weaker Elements", weakerElements.join(", ") || "-"],
+            ["Structure", personality.structureScoring?.mainStructure?.name || "-"],
+            [
+              "Useful God",
+              `${usefulGod.primaryUsefulGod || "-"} (primary) · ${
+                usefulGod.secondaryUsefulGod || "-"
+              } (secondary)`,
+            ],
+          ].map(([label, value]) => (
+            <tr key={label} className="border-b border-slate-100 last:border-0">
+              <td className="bg-slate-50 px-4 py-2.5 font-semibold text-slate-700">
+                {label}
+              </td>
+              <td className="px-4 py-2.5 text-stone-700">{value}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {!!elementalBalance.length && (
         <div className="mt-8">
-          <h3 className="text-xl font-bold text-slate-950">Executive Summary</h3>
-          <p className="mt-3 whitespace-pre-line text-base leading-8 text-stone-700">
-            {narrative.executiveSummary}
+          <h3 className="text-xl font-bold text-slate-950">5 Elements Balance</h3>
+          <p className="mt-2 text-sm text-stone-500">
+            Natal Chart vs. {report.annualEnergy?.selectedYear || "this year"}'s Annual
+            Energy, and what each element represents for this Day Master.
           </p>
+          <div className="mt-4 space-y-3">
+            {elementalBalance.map((item) => (
+              <div
+                key={item.name}
+                className="rounded-xl border border-slate-200 p-4"
+              >
+                <p className="text-base font-bold text-slate-950">
+                  {item.name} — Natal {item.natalPercentage}% · Annual{" "}
+                  {item.annualPercentage}%
+                  {item.role && (
+                    <span className="ml-2 rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700">
+                      {item.role}
+                    </span>
+                  )}
+                </p>
+                {item.roleDescription && (
+                  <p className="mt-1 text-sm text-stone-600">
+                    For this Day Master, {item.name} governs {item.roleDescription}.
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
@@ -1972,7 +2027,7 @@ function AdminFullReport({ report, clientName }) {
             Full ten-god profile ranking, strongest to most dormant.
           </p>
           <AdminBulletList
-            items={[...rankedProfiles].sort((a, b) => b.percentage - a.percentage)}
+            items={rankedProfiles}
             render={(item) => (
               <>
                 <strong>{item.profile}</strong> — {item.percentage}%
@@ -1981,6 +2036,10 @@ function AdminFullReport({ report, clientName }) {
           />
         </div>
       )}
+
+      <p className="mt-10 text-xs font-bold uppercase tracking-[0.3em] text-amber-700">
+        The Four Key Areas
+      </p>
 
       <AdminReportSection icon="💼" title="Career Timing & Direction">
         {career.careerStyle && (
@@ -2023,6 +2082,13 @@ function AdminFullReport({ report, clientName }) {
       </AdminReportSection>
 
       <AdminReportSection icon="💰" title="Wealth Opportunities">
+        {(directWealthPct != null || indirectWealthPct != null) && (
+          <p className="mt-3 text-sm font-semibold text-amber-700">
+            {indirectWealthPct != null && `Indirect Wealth ${indirectWealthPct}%`}
+            {indirectWealthPct != null && directWealthPct != null && " · "}
+            {directWealthPct != null && `Direct Wealth ${directWealthPct}%`}
+          </p>
+        )}
         {wealthArchetype.wealthArchetype && (
           <p className="mt-3 text-base text-stone-700">
             <strong>{wealthArchetype.wealthArchetype}</strong>
@@ -2115,6 +2181,10 @@ function AdminFullReport({ report, clientName }) {
           riskLabel="Wellness Risks"
         />
       </AdminReportSection>
+
+      <p className="mt-10 text-xs font-bold uppercase tracking-[0.3em] text-amber-700">
+        Additional Reference
+      </p>
 
       <AdminReportSection icon="✨" title="Hidden Strengths">
         <AdminBulletList
