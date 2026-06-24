@@ -1926,6 +1926,23 @@ function AdminFullReport({ report, clientName }) {
   const directWealthPct = findProfilePct("Direct Wealth");
   const indirectWealthPct = findProfilePct("Indirect Wealth");
 
+  // Only surface a career-relevant profile's % if it's actually prominent
+  // in this chart (top 4) - forcing it into every report regardless of
+  // rank would misrepresent charts where it's dormant.
+  const findTopProfilePct = (names, topN = 4) => {
+    for (const name of names) {
+      const idx = rankedProfiles.findIndex((p) => p.profile === name);
+      if (idx !== -1 && idx < topN) {
+        return { name: rankedProfiles[idx].profile, percentage: rankedProfiles[idx].percentage };
+      }
+    }
+    return null;
+  };
+  const careerAuthorityProfile = findTopProfilePct(["Direct Officer", "Seven Killings"]);
+  const careerOutputProfile = findTopProfilePct(["Hurting Officer", "Eating God"]);
+
+  const weakestElement = elementalBalance[elementalBalance.length - 1];
+
   return (
     <div>
       <div className="mt-7 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-5">
@@ -2044,6 +2061,15 @@ function AdminFullReport({ report, clientName }) {
       </p>
 
       <AdminReportSection icon="💼" title="Career Timing & Direction">
+        {(careerAuthorityProfile || careerOutputProfile) && (
+          <p className="mt-3 text-sm font-semibold text-amber-700">
+            {careerAuthorityProfile &&
+              `${careerAuthorityProfile.name} ${careerAuthorityProfile.percentage}%`}
+            {careerAuthorityProfile && careerOutputProfile && " · "}
+            {careerOutputProfile &&
+              `${careerOutputProfile.name} ${careerOutputProfile.percentage}%`}
+          </p>
+        )}
         {career.careerStyle && (
           <p className="mt-3 text-base text-stone-700">
             <strong>{career.careerStyle}</strong>
@@ -2147,23 +2173,57 @@ function AdminFullReport({ report, clientName }) {
             {relationship.spouseStar.interpretation}
           </p>
         )}
+        {!!relationship.partnerDynamics?.potentialChallenges?.length && (
+          <p className="mt-3 text-base leading-7 text-stone-700">
+            {relationship.partnerDynamics.potentialChallenges.join(" ")}
+          </p>
+        )}
+        {relationship.timingNotes?.annualInfluence && (
+          <p className="mt-3 rounded-xl bg-amber-50 p-4 text-sm leading-6 text-amber-800">
+            <strong>{report.annualEnergy?.selectedYear || "This year"}:</strong>{" "}
+            {relationship.timingNotes.annualInfluence}{" "}
+            {relationship.timingNotes.caution}
+          </p>
+        )}
         <AdminStrengthRiskGrid
           strengths={relationshipArchetype.strengths || relationshipPattern.relationshipStrengths}
           risks={relationshipArchetype.blindSpots || relationshipPattern.relationshipBlindSpots}
           strengthLabel="Relationship Strengths"
           riskLabel="Relationship Blind Spots"
         />
-        {!!relationshipArchetype.partnerNeeds?.length && (
+        {!!relationshipPattern.emotionalNeeds?.length && (
+          <div className="mt-5">
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-700">
+              Emotional Needs
+            </p>
+            <AdminBulletList items={relationshipPattern.emotionalNeeds} />
+          </div>
+        )}
+        {!!(relationshipArchetype.partnerNeeds?.length || relationshipPattern.idealPartnerTraits?.length) && (
           <div className="mt-5">
             <p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-700">
               What This Chart Needs In A Partner
             </p>
-            <AdminBulletList items={relationshipArchetype.partnerNeeds} />
+            <AdminBulletList
+              items={[
+                ...new Set([
+                  ...(relationshipArchetype.partnerNeeds || []),
+                  ...(relationshipPattern.idealPartnerTraits || []),
+                ]),
+              ]}
+            />
           </div>
         )}
       </AdminReportSection>
 
       <AdminReportSection icon="🌿" title="Wellness & Energy Balance">
+        {report.chartFoundation?.dayMasterStrength?.status && (
+          <p className="mt-3 text-sm font-semibold text-amber-700">
+            Day Master: {report.chartFoundation.dayMasterStrength.status}
+            {report.chartFoundation.dayMasterStrength.strengthScore != null &&
+              ` (${Number(report.chartFoundation.dayMasterStrength.strengthScore).toFixed(1)}/100)`}
+          </p>
+        )}
         {health.vitalityLevel && (
           <p className="mt-3 text-base text-stone-700">
             <strong>{health.vitalityLevel}</strong>
@@ -2175,6 +2235,16 @@ function AdminFullReport({ report, clientName }) {
         )}
         {health.healthStrategy && (
           <p className="mt-3 text-base leading-7 text-stone-700">{health.healthStrategy}</p>
+        )}
+        {weakestElement && (
+          <p className="mt-3 rounded-xl bg-amber-50 p-4 text-sm leading-6 text-amber-800">
+            <strong>
+              {weakestElement.name} is your weakest element at {weakestElement.natalPercentage}%
+              natally
+            </strong>
+            {weakestElement.roleDescription &&
+              ` — for this Day Master, ${weakestElement.name} governs ${weakestElement.roleDescription}, so this is worth conscious support.`}
+          </p>
         )}
         <AdminStrengthRiskGrid
           strengths={health.wellnessStrengths}
