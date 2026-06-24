@@ -100,6 +100,8 @@ export function buildPaidReportSchemaV1(chart) {
         chart?.usefulGodV4?.favourableElements ||
         chart?.usefulGod?.favourableElements ||
         [],
+      secondaryFavourableElements:
+        chart?.usefulGodV4?.secondaryFavourableElements || [],
       cautionElements:
         chart?.usefulGodV4?.cautionElements ||
         chart?.usefulGod?.cautionElements ||

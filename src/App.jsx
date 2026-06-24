@@ -1868,6 +1868,23 @@ function AdminReportSection({ icon, title, children }) {
   );
 }
 
+function AdminMonthCallout({ label, months, tone = "good" }) {
+  if (!months?.length) return null;
+
+  const toneClass =
+    tone === "good"
+      ? "bg-green-50 text-green-700"
+      : "bg-red-50 text-red-700";
+
+  return (
+    <p className="mt-3 text-sm">
+      <span className={`rounded-full px-2.5 py-0.5 font-bold ${toneClass}`}>
+        {label}: {months.join(", ")}
+      </span>
+    </p>
+  );
+}
+
 function AdminStrengthRiskGrid({ strengths, risks, strengthLabel = "Strengths", riskLabel = "Risks" }) {
   if (!strengths?.length && !risks?.length) return null;
 
@@ -1943,6 +1960,42 @@ function AdminFullReport({ report, clientName }) {
   const careerOutputProfile = findTopProfilePct(["Hurting Officer", "Eating God"]);
 
   const weakestElement = elementalBalance[elementalBalance.length - 1];
+
+  // Which element plays which Ten-God role for this Day Master (Self/
+  // Resource/Output/Wealth/Officer) - structural fact, independent of
+  // favourability.
+  const elementForRole = (roleName) =>
+    elementalBalance.find((e) => e.role === roleName)?.name;
+  const officerElement = elementForRole("Officer");
+  const outputElement = elementForRole("Output");
+  const wealthElement = elementForRole("Wealth");
+
+  // A role being structurally relevant to an area (e.g. Officer -> Career)
+  // doesn't mean it's good for THIS chart - that depends on the Day Master's
+  // strength band. Intersect with what's actually favourable here so a weak
+  // Day Master chart (where Officer drains rather than helps) doesn't get a
+  // false "strong career month" callout.
+  const favourableSet = new Set([
+    ...(usefulGod.favourableElements || []),
+    ...(usefulGod.secondaryFavourableElements || []),
+  ]);
+
+  const monthNamesWhere = (predicate) =>
+    monthlyOutlook.filter(predicate).map((m) => m.monthName);
+
+  const careerStrongMonths = monthNamesWhere(
+    (m) =>
+      favourableSet.has(m.dominantElement) &&
+      (m.dominantElement === officerElement || m.dominantElement === outputElement)
+  );
+  const wealthStrongMonths = monthNamesWhere(
+    (m) => favourableSet.has(m.dominantElement) && m.dominantElement === wealthElement
+  );
+  const relationshipCautionMonths = monthNamesWhere((m) =>
+    (relationship.timingNotes?.activatedBy || []).includes(m.dominantElement)
+  );
+  const wellnessEasierMonths = monthNamesWhere((m) => m.read === "Good");
+  const wellnessCautionMonths = monthNamesWhere((m) => m.read === "Caution");
 
   return (
     <div>
@@ -2120,6 +2173,7 @@ function AdminFullReport({ report, clientName }) {
               `${careerOutputProfile.name} ${careerOutputProfile.percentage}%`}
           </p>
         )}
+        <AdminMonthCallout label="Strongest months" months={careerStrongMonths} tone="good" />
         {career.careerStyle && (
           <p className="mt-3 text-base text-stone-700">
             <strong>{career.careerStyle}</strong>
@@ -2167,6 +2221,7 @@ function AdminFullReport({ report, clientName }) {
             {directWealthPct != null && `Direct Wealth ${directWealthPct}%`}
           </p>
         )}
+        <AdminMonthCallout label="Strongest months" months={wealthStrongMonths} tone="good" />
         {wealthArchetype.wealthArchetype && (
           <p className="mt-3 text-base text-stone-700">
             <strong>{wealthArchetype.wealthArchetype}</strong>
@@ -2213,6 +2268,11 @@ function AdminFullReport({ report, clientName }) {
               : ""}
           </p>
         )}
+        <AdminMonthCallout
+          label="Extra grounding needed"
+          months={relationshipCautionMonths}
+          tone="caution"
+        />
         {narrative.relationshipFocus && (
           <p className="mt-3 text-base leading-7 text-stone-700">
             {narrative.relationshipFocus}
@@ -2274,6 +2334,8 @@ function AdminFullReport({ report, clientName }) {
               ` (${Number(report.chartFoundation.dayMasterStrength.strengthScore).toFixed(1)}/100)`}
           </p>
         )}
+        <AdminMonthCallout label="Easier months" months={wellnessEasierMonths} tone="good" />
+        <AdminMonthCallout label="Pace yourself" months={wellnessCautionMonths} tone="caution" />
         {health.vitalityLevel && (
           <p className="mt-3 text-base text-stone-700">
             <strong>{health.vitalityLevel}</strong>
