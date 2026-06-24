@@ -2,6 +2,19 @@
 
 const VERSION = "wealth-engine-v1";
 
+// Ten-God control cycle: the element the Day Master CONTROLS is its Wealth
+// element. This is a fixed structural relationship and must not be confused
+// with usefulGodV4.primaryUsefulGod, which is the strength-balancing Useful
+// God (用神) - a different concept that can resolve to Output, Officer, etc.
+// depending on the Day Master's strength band.
+const CONTROLS = {
+  Wood: "Earth",
+  Fire: "Metal",
+  Earth: "Water",
+  Metal: "Wood",
+  Water: "Fire",
+};
+
 function safeName(value) {
   if (!value) return null;
   if (typeof value === "string") return value;
@@ -137,7 +150,7 @@ const DOMINANT_PROFILE_WEALTH_MODIFIER = {
   "Indirect Resource": "Because Indirect Resource energy is active, wealth tends to grow through intuition, pattern recognition and seeing what others overlook.",
 };
 
-function getWealthStrategy(mainStructure, primaryUsefulGod, dominantProfile) {
+function getWealthStrategy(mainStructure, wealthElement, dominantProfile) {
   const structureStrategy = {
     Connectors:
       "Build wealth through relationships, visibility, trust and disciplined follow-through.",
@@ -151,22 +164,22 @@ function getWealthStrategy(mainStructure, primaryUsefulGod, dominantProfile) {
       "Build wealth through structure, discipline, planning and practical execution.",
   };
 
-  const usefulGodModifier = {
-    Wood: "Growth improves when wealth decisions support learning, planning and long-term development.",
-    Fire: "Growth improves when visibility, confidence and market presence are used wisely.",
+  const wealthElementModifier = {
+    Wood: "Your Wealth element is Wood, so opportunities tend to grow through expansion, planning and long-term development.",
+    Fire: "Your Wealth element is Fire, so opportunities tend to grow through visibility, confidence and market presence.",
     Earth:
-      "Growth improves when financial decisions are grounded, practical and stability-focused.",
+      "Your Wealth element is Earth, so opportunities tend to grow through grounded, practical, stability-focused decisions.",
     Metal:
-      "Growth improves when discipline, refinement, standards and financial structure are strengthened.",
+      "Your Wealth element is Metal, so opportunities tend to grow through discipline, refinement and financial structure.",
     Water:
-      "Growth improves when adaptability, communication, movement and strategic flow are used well.",
+      "Your Wealth element is Water, so opportunities tend to grow through adaptability, communication and strategic flow.",
   };
 
   const base =
     structureStrategy[mainStructure] ||
     "Build wealth by matching personal strengths with practical, sustainable financial strategy.";
 
-  const modifier = usefulGodModifier[primaryUsefulGod];
+  const modifier = wealthElementModifier[wealthElement];
   const profileModifier = DOMINANT_PROFILE_WEALTH_MODIFIER[dominantProfile];
 
   return [base, modifier, profileModifier].filter(Boolean).join(" ");
@@ -183,6 +196,8 @@ export function buildWealthEngineV1({
   const dayStatus = dayMasterStrengthV4?.status || null;
   const primaryUsefulGod = usefulGodV4?.primaryUsefulGod || null;
   const secondaryUsefulGod = usefulGodV4?.secondaryUsefulGod || null;
+  const dayMasterElement = usefulGodV4?.dayMasterElement || null;
+  const wealthElement = CONTROLS[dayMasterElement] || null;
 
   return {
     version: VERSION,
@@ -193,12 +208,15 @@ export function buildWealthEngineV1({
 
     wealthStrengths: getWealthStrengths(mainStructure),
     wealthRisks: getWealthRisks(mainStructure, dayStatus),
-    wealthStrategy: getWealthStrategy(mainStructure, primaryUsefulGod, dominantProfile),
+    wealthStrategy: getWealthStrategy(mainStructure, wealthElement, dominantProfile),
+    wealthElement,
 
     debug: {
       mainStructure,
       dominantProfile,
       dayStatus,
+      dayMasterElement,
+      wealthElement,
       primaryUsefulGod,
       secondaryUsefulGod,
       note:
