@@ -5,7 +5,7 @@ const VERSION = "career-engine-v1";
 function safeName(value) {
   if (!value) return null;
   if (typeof value === "string") return value;
-  return value?.name || value?.label || value?.type || null;
+  return value?.name || value?.label || value?.type || value?.profile || null;
 }
 
 function getCareerStyle(mainStructure, dominantProfile) {
@@ -187,6 +187,24 @@ function getRecommendedDirections(mainStructure, primaryUsefulGod) {
   return [...new Set(directions)].slice(0, 5);
 }
 
+const DOMINANT_PROFILE_CAREER_MODIFIER = {
+  Friend: "Because Friend energy is active, career growth often comes through trusted teams and long-standing professional relationships.",
+  "Rob Wealth": "Because Rob Wealth energy is active, career growth often comes through independent action and a willingness to challenge existing structures.",
+  "Eating God": "Because Eating God energy is active, career growth often comes through demonstrated expertise and a reputation for quality work.",
+  "Hurting Officer": "Because Hurting Officer energy is active, career growth often comes through original thinking and a willingness to say what others won't.",
+  "Direct Wealth": "Because Direct Wealth energy is active, career growth often comes through consistency, reliability and measurable results.",
+  "Indirect Wealth": "Because Indirect Wealth energy is active, career growth often comes through timing, adaptability and spotting opportunities early.",
+  "Direct Officer": "Because Direct Officer energy is active, career growth often comes through accountability, structure and earning trust as a dependable leader.",
+  "Seven Killings": "Because Seven Killings energy is active, career growth often comes through decisive action under pressure and a willingness to lead when others hesitate.",
+  "Direct Resource": "Because Direct Resource energy is active, career growth often comes through preparation, deep knowledge and thoughtful decision-making.",
+  "Indirect Resource": "Because Indirect Resource energy is active, career growth often comes through original insight and seeing patterns others miss.",
+};
+
+function getCareerStrategy(idealWorkEnvironment, dominantProfile) {
+  const modifier = DOMINANT_PROFILE_CAREER_MODIFIER[dominantProfile];
+  return [idealWorkEnvironment, modifier].filter(Boolean).join(" ");
+}
+
 export function buildCareerEngineV1({
   dayMasterStrengthV4 = {},
   tenProfileScoringV2 = {},
@@ -206,6 +224,7 @@ export function buildCareerEngineV1({
     dominantProfile,
     dayStatus
   );
+  const careerStrategy = getCareerStrategy(idealWorkEnvironment, dominantProfile);
 
   return {
     version: VERSION,
@@ -213,6 +232,7 @@ export function buildCareerEngineV1({
     careerStyle,
     idealWorkEnvironment,
     leadershipStyle,
+    careerStrategy,
 
     careerStrengths: getCareerStrengths(mainStructure),
     careerRisks: getCareerRisks(mainStructure, dayStatus),

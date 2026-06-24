@@ -5,7 +5,7 @@ const VERSION = "wealth-engine-v1";
 function safeName(value) {
   if (!value) return null;
   if (typeof value === "string") return value;
-  return value?.name || value?.label || value?.type || null;
+  return value?.name || value?.label || value?.type || value?.profile || null;
 }
 
 function getWealthBehaviour(mainStructure, dominantProfile) {
@@ -124,7 +124,20 @@ function getWealthRisks(mainStructure, dayStatus) {
   return risks.slice(0, 3);
 }
 
-function getWealthStrategy(mainStructure, primaryUsefulGod) {
+const DOMINANT_PROFILE_WEALTH_MODIFIER = {
+  Friend: "Because Friend energy is active, wealth tends to grow through trusted circles and mutual support rather than competing alone.",
+  "Rob Wealth": "Because Rob Wealth energy is active, wealth tends to grow through independent, bold moves rather than waiting for consensus.",
+  "Eating God": "Because Eating God energy is active, wealth tends to grow through expertise, quality and a reputation for genuine skill.",
+  "Hurting Officer": "Because Hurting Officer energy is active, wealth tends to grow through original ideas and a willingness to challenge the conventional approach.",
+  "Direct Wealth": "Because Direct Wealth energy is active, wealth tends to grow through consistency, discipline and steady, measurable progress.",
+  "Indirect Wealth": "Because Indirect Wealth energy is active, wealth tends to grow through timing, flexibility and recognising opportunities others miss.",
+  "Direct Officer": "Because Direct Officer energy is active, wealth tends to grow through responsibility, structure and a reputation for doing things properly.",
+  "Seven Killings": "Because Seven Killings energy is active, wealth tends to grow through decisive action taken at the right moment, more than slow accumulation.",
+  "Direct Resource": "Because Direct Resource energy is active, wealth tends to grow through preparation, research and well-considered decisions.",
+  "Indirect Resource": "Because Indirect Resource energy is active, wealth tends to grow through intuition, pattern recognition and seeing what others overlook.",
+};
+
+function getWealthStrategy(mainStructure, primaryUsefulGod, dominantProfile) {
   const structureStrategy = {
     Connectors:
       "Build wealth through relationships, visibility, trust and disciplined follow-through.",
@@ -154,8 +167,9 @@ function getWealthStrategy(mainStructure, primaryUsefulGod) {
     "Build wealth by matching personal strengths with practical, sustainable financial strategy.";
 
   const modifier = usefulGodModifier[primaryUsefulGod];
+  const profileModifier = DOMINANT_PROFILE_WEALTH_MODIFIER[dominantProfile];
 
-  return modifier ? `${base} ${modifier}` : base;
+  return [base, modifier, profileModifier].filter(Boolean).join(" ");
 }
 
 export function buildWealthEngineV1({
@@ -179,7 +193,7 @@ export function buildWealthEngineV1({
 
     wealthStrengths: getWealthStrengths(mainStructure),
     wealthRisks: getWealthRisks(mainStructure, dayStatus),
-    wealthStrategy: getWealthStrategy(mainStructure, primaryUsefulGod),
+    wealthStrategy: getWealthStrategy(mainStructure, primaryUsefulGod, dominantProfile),
 
     debug: {
       mainStructure,

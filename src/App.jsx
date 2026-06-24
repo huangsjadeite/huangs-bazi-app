@@ -1985,13 +1985,31 @@ function AdminFullReport({ report, clientName }) {
   const monthNamesWhere = (predicate) =>
     monthlyOutlook.filter(predicate).map((m) => m.monthName);
 
+  const cautionSet = new Set(usefulGod.cautionElements || []);
+  const partnerStarElement = relationship.spouseStar?.element || null;
+
   const careerStrongMonths = monthNamesWhere(
     (m) =>
       favourableSet.has(m.dominantElement) &&
       (m.dominantElement === officerElement || m.dominantElement === outputElement)
   );
+  const careerCautionMonths = monthNamesWhere(
+    (m) =>
+      cautionSet.has(m.dominantElement) &&
+      (m.dominantElement === officerElement || m.dominantElement === outputElement)
+  );
   const wealthStrongMonths = monthNamesWhere(
     (m) => favourableSet.has(m.dominantElement) && m.dominantElement === wealthElement
+  );
+  const wealthCautionMonths = monthNamesWhere(
+    (m) => cautionSet.has(m.dominantElement) && m.dominantElement === wealthElement
+  );
+  // "Good" relationship months are anchored to the partner star element
+  // (the chart's own structural relationship signal) rather than the
+  // general favourable set, mirroring how Career/Wealth use their own
+  // role element rather than a generic favourable/caution split.
+  const relationshipGoodMonths = monthNamesWhere(
+    (m) => favourableSet.has(m.dominantElement) && m.dominantElement === partnerStarElement
   );
   const relationshipCautionMonths = monthNamesWhere((m) =>
     (relationship.timingNotes?.activatedBy || []).includes(m.dominantElement)
@@ -2176,15 +2194,16 @@ function AdminFullReport({ report, clientName }) {
           </p>
         )}
         <AdminMonthCallout label="Strongest months" months={careerStrongMonths} tone="good" />
+        <AdminMonthCallout label="Pace yourself" months={careerCautionMonths} tone="caution" />
         {career.careerStyle && (
           <p className="mt-3 text-base text-stone-700">
             <strong>{career.careerStyle}</strong>
             {career.leadershipStyle ? ` · ${career.leadershipStyle}` : ""}
           </p>
         )}
-        {career.idealWorkEnvironment && (
+        {(career.careerStrategy || career.idealWorkEnvironment) && (
           <p className="mt-2 text-base leading-7 text-stone-700">
-            {career.idealWorkEnvironment}
+            {career.careerStrategy || career.idealWorkEnvironment}
           </p>
         )}
         {narrative.careerFocus && (
@@ -2224,6 +2243,7 @@ function AdminFullReport({ report, clientName }) {
           </p>
         )}
         <AdminMonthCallout label="Strongest months" months={wealthStrongMonths} tone="good" />
+        <AdminMonthCallout label="Pace yourself" months={wealthCautionMonths} tone="caution" />
         {wealthArchetype.wealthArchetype && (
           <p className="mt-3 text-base text-stone-700">
             <strong>{wealthArchetype.wealthArchetype}</strong>
@@ -2270,6 +2290,7 @@ function AdminFullReport({ report, clientName }) {
               : ""}
           </p>
         )}
+        <AdminMonthCallout label="Good months" months={relationshipGoodMonths} tone="good" />
         <AdminMonthCallout
           label="Extra grounding needed"
           months={relationshipCautionMonths}
@@ -2283,6 +2304,14 @@ function AdminFullReport({ report, clientName }) {
         {relationship.spouseStar?.interpretation && (
           <p className="mt-3 text-base leading-7 text-stone-700">
             {relationship.spouseStar.interpretation}
+          </p>
+        )}
+        {!!favourableSet.size && (
+          <p className="mt-3 text-base leading-7 text-stone-700">
+            Partners whose own chart leans toward {[...favourableSet].join(", ")} -
+            this chart's own supportive elements - tend to reinforce rather than
+            drain this person's energy, since those are the same elements this
+            Day Master already benefits from.
           </p>
         )}
         {!!relationship.partnerDynamics?.potentialChallenges?.length && (
@@ -2358,6 +2387,8 @@ function AdminFullReport({ report, clientName }) {
             </strong>
             {weakestElement.roleDescription &&
               ` — for this Day Master, ${weakestElement.name} governs ${weakestElement.roleDescription}, so this is worth conscious support.`}
+            {weakestElement.bodySystem &&
+              ` In classical Five-Element wellness, ${weakestElement.name} is also associated with ${weakestElement.bodySystem} — worth keeping in mind as a lifestyle/energy focus, not a medical diagnosis.`}
           </p>
         )}
         <AdminStrengthRiskGrid

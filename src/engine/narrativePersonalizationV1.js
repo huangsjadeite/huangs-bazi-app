@@ -7,7 +7,7 @@ function safeName(value) {
     return value;
   }
 
-  return value?.name || value?.label || value?.type || "";
+  return value?.name || value?.label || value?.type || value?.profile || "";
 }
 
 export function buildNarrativePersonalizationV1({
@@ -114,7 +114,75 @@ export function buildNarrativePersonalizationV1({
     },
   };
 
+  // Profile-only fallback, used when this exact Structure+Profile combination
+  // isn't one of the hand-tuned entries above. Covers all ten profiles so
+  // every chart gets real profile-specific flavour, not just the ones the
+  // structure map happens to include.
+  const profileOnlyFlavor = {
+    Friend: {
+      personalityFlavor: "Steady Companion",
+      careerFlavor: "Team Trust",
+      wealthFlavor: "Collaborative Growth",
+      relationshipFlavor: "Loyalty",
+    },
+    "Rob Wealth": {
+      personalityFlavor: "Independent Challenger",
+      careerFlavor: "Self-Driven Action",
+      wealthFlavor: "Bold Opportunity",
+      relationshipFlavor: "Need For Autonomy",
+    },
+    "Eating God": {
+      personalityFlavor: "Quiet Creator",
+      careerFlavor: "Expertise",
+      wealthFlavor: "Specialisation",
+      relationshipFlavor: "Comfort and Ease",
+    },
+    "Hurting Officer": {
+      personalityFlavor: "Outspoken Innovator",
+      careerFlavor: "Original Thinking",
+      wealthFlavor: "Communication-Led Growth",
+      relationshipFlavor: "Direct Honesty",
+    },
+    "Direct Wealth": {
+      personalityFlavor: "Resource Manager",
+      careerFlavor: "Execution",
+      wealthFlavor: "Practical Growth",
+      relationshipFlavor: "Dependability",
+    },
+    "Indirect Wealth": {
+      personalityFlavor: "Opportunity Builder",
+      careerFlavor: "Visibility",
+      wealthFlavor: "Networks",
+      relationshipFlavor: "Shared Experiences",
+    },
+    "Direct Officer": {
+      personalityFlavor: "Principled Authority",
+      careerFlavor: "Structure and Accountability",
+      wealthFlavor: "Steady Foundations",
+      relationshipFlavor: "Commitment",
+    },
+    "Direct Resource": {
+      personalityFlavor: "Wisdom Builder",
+      careerFlavor: "Research",
+      wealthFlavor: "Knowledge Assets",
+      relationshipFlavor: "Trust Through Understanding",
+    },
+    "Indirect Resource": {
+      personalityFlavor: "Reflective Guide",
+      careerFlavor: "Insight",
+      wealthFlavor: "Ideas and Perspective",
+      relationshipFlavor: "Emotional Safety",
+    },
+    "Seven Killings": {
+      personalityFlavor: "Decisive Warrior",
+      careerFlavor: "Courage Under Pressure",
+      wealthFlavor: "Bold Action",
+      relationshipFlavor: "Protective Loyalty",
+    },
+  };
+
   const matched = map?.[structure]?.[profile];
+  const profileFallback = profileOnlyFlavor[profile];
 
   return {
     version: VERSION,
@@ -125,21 +193,25 @@ export function buildNarrativePersonalizationV1({
 
     personalityFlavor:
       matched?.personalityFlavor ||
+      profileFallback?.personalityFlavor ||
       structure ||
       "Balanced Individual",
 
     careerFlavor:
       matched?.careerFlavor ||
+      profileFallback?.careerFlavor ||
       structure ||
       "Natural Strengths",
 
     wealthFlavor:
       matched?.wealthFlavor ||
+      profileFallback?.wealthFlavor ||
       primaryUsefulGod ||
       "Long-Term Growth",
 
     relationshipFlavor:
       matched?.relationshipFlavor ||
+      profileFallback?.relationshipFlavor ||
       structure ||
       "Mutual Support",
 

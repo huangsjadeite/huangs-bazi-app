@@ -5,7 +5,7 @@ const VERSION = "life-themes-v1";
 function safeName(value) {
   if (!value) return null;
   if (typeof value === "string") return value;
-  return value?.name || value?.label || value?.type || null;
+  return value?.name || value?.label || value?.type || value?.profile || null;
 }
 
 function normalizeStatus(status) {

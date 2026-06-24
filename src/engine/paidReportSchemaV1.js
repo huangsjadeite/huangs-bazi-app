@@ -6,6 +6,17 @@ const ELEMENT_ROLE_LABELS = {
   officer: { role: "Officer", text: "structure, responsibility, discipline and authority" },
 };
 
+// Classical Five-Element body-system associations. Lifestyle/energy framing
+// only, not a diagnostic claim - same boundary healthEngineV1 already states
+// ("does not diagnose, treat or predict medical conditions").
+const ELEMENT_BODY_SYSTEM = {
+  Wood: "liver, gallbladder, tendons and ligaments",
+  Fire: "heart, circulation and blood flow",
+  Earth: "digestion, stomach and spleen function",
+  Metal: "lungs, skin and the respiratory system",
+  Water: "kidneys, bladder, bones and reproductive health",
+};
+
 function buildElementalBalanceWithAnnual(chart) {
   const natalWeighted = chart?.elementBalance?.weighted || {};
   const percentages = chart?.elementBalance?.percentages || {};
@@ -51,6 +62,7 @@ function buildElementalBalanceWithAnnual(chart) {
             : Number(natalPercentage || 0),
         role: roleInfo?.role || "",
         roleDescription: roleInfo?.text || "",
+        bodySystem: ELEMENT_BODY_SYSTEM[name] || "",
       };
     })
     .sort((a, b) => b.natalPercentage - a.natalPercentage);
