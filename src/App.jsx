@@ -1434,6 +1434,7 @@ function AdminFullReport({ report, clientName }) {
         <tbody>
           {[
             ["Name", clientName || "-"],
+            ["Gender", report.client?.gender || "-"],
             [
               "Day Master",
               report.chartFoundation?.dayMasterElement
