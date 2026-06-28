@@ -726,25 +726,47 @@ function RelationshipArchetypeSection({ relationshipArchetype }) {
 function WealthTeaserSection({ wealth }) {
   if (!wealth) return null;
 
-  const teaserText =
+  const hasContent =
+    wealth.wealthArchetype ||
     wealth.wealthStyle ||
     wealth.incomePath ||
-    wealth.summary ||
-    "This shows the natural way your chart tends to create value, attract opportunities and build financial direction.";
+    wealth.summary;
+
+  if (!hasContent) return null;
 
   return (
-    <section className="rounded-[28px] border border-emerald-200 bg-gradient-to-br from-white via-[#FFFDF8] to-emerald-50 px-8 py-7 shadow-md">
-      <p className="text-xs font-bold uppercase tracking-[0.28em] text-emerald-700">
+    <section className="rounded-[36px] border border-emerald-200 bg-gradient-to-br from-white via-[#FFFDF8] to-emerald-50 px-8 py-10 shadow-lg md:px-10">
+      <p className="inline-flex rounded-full bg-emerald-100 px-4 py-2 text-xs font-bold uppercase tracking-[0.28em] text-emerald-700">
         💰 Wealth Archetype
       </p>
 
-      <h2 className="mt-3 text-3xl font-bold text-slate-950">
+      <h2 className="mt-5 text-3xl font-bold tracking-tight text-slate-950 md:text-4xl">
         {wealth.wealthArchetype || "Your Wealth Style"}
       </h2>
 
-      <p className="mt-4 max-w-4xl text-base leading-7 text-stone-600">
-        {teaserText}
+      <p className="mt-5 max-w-5xl text-lg leading-8 text-stone-600">
+        {wealth.wealthStyle ||
+          "This shows the natural way your chart tends to create value, attract opportunities and build financial direction."}
       </p>
+
+      {(wealth.incomePath || wealth.summary) && (
+        <div className="mt-7 rounded-[28px] border border-emerald-100 bg-white p-7 shadow-sm">
+          <h3 className="text-xl font-bold text-emerald-900">
+            How wealth tends to grow for you
+          </h3>
+
+          <p className="mt-4 text-base leading-7 text-stone-600">
+            {wealth.incomePath || wealth.summary}
+          </p>
+        </div>
+      )}
+
+      <div className="mt-7 rounded-[28px] border border-emerald-100 bg-emerald-50 p-7">
+        <p className="text-base leading-7 text-emerald-800">
+          Your full reading covers your ideal income models, money mindset,
+          supportive elements, wealth strengths and financial blind spots.
+        </p>
+      </div>
     </section>
   );
 }
@@ -1181,28 +1203,6 @@ function EmotionalEnergyBalance({ elements }) {
   );
 }
 
-function UsefulGodSection({ balance }) {
-  if (!balance) return null;
-
-  return (
-    <section className="rounded-[28px] border border-slate-200 bg-white px-8 py-8 shadow-md">
-      <p className="text-xs font-bold uppercase tracking-[0.28em] text-orange-700">
-        ✨ Energy Guidance
-      </p>
-
-      <h2 className="mt-3 text-3xl font-bold text-slate-950">
-        Personal Energy Balance
-      </h2>
-
-      <p className="mt-4 max-w-4xl text-base leading-7 text-stone-600">
-        Your chart has specific elements that support you and others that need
-        more care — knowing exactly which ones helps you make better decisions
-        in daily life. This is one of the deeper insights covered in your full reading.
-      </p>
-    </section>
-  );
-}
-
 function getFreePreviewReport(report) {
   if (!report) return null;
 
@@ -1223,27 +1223,6 @@ function getFirstParagraph(text) {
     .filter(Boolean)
     .slice(0, 2)
     .join("\n\n");
-}
-
-function FinalReflectionSection() {
-  return (
-    <section className="rounded-[36px] border border-slate-200 bg-white px-8 py-10 shadow-md md:px-10">
-      <p className="inline-flex rounded-full bg-slate-100 px-4 py-2 text-xs font-bold uppercase tracking-[0.28em] text-slate-600">
-        Final Reflection
-      </p>
-
-      <h2 className="mt-5 text-3xl font-bold tracking-tight text-slate-950 md:text-4xl">
-        Your chart is a guide, not a fixed destiny.
-      </h2>
-
-      <p className="mt-5 max-w-5xl text-lg leading-8 text-stone-600">
-        Your Bazi profile reflects your natural strengths, recurring patterns
-        and the energies that support your growth. Use it as a guide for making
-        more conscious choices in your career, wealth, relationships and
-        wellbeing.
-      </p>
-    </section>
-  );
 }
 
 function AdminBulletList({ items, render }) {
@@ -2649,8 +2628,6 @@ export default function HuangsBaZiUIFrontend() {
 
             <EmotionalEnergyBalance elements={uiChart?.elements} />
 
-            <UsefulGodSection balance={uiChart?.personalEnergyBalance} />
-
             <RelationshipArchetypeSection
               relationshipArchetype={relationshipArchetype}
             />
@@ -2681,8 +2658,6 @@ export default function HuangsBaZiUIFrontend() {
                 chart?.practicalSupport?.products
               }
             />
-
-                        <FinalReflectionSection />
 
             <PremiumInsights
               report={previewReport}
