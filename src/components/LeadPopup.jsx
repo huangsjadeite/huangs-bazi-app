@@ -76,8 +76,9 @@ export default function LeadPopup({ open, setOpen }) {
             </form>
 
             <p className="mt-5 text-center text-xs leading-6 text-slate-500">
-              One-time use only. Exclusions apply. No spam — just BaZi insights,
-              offers, and Huangs Jadeite and Jewelry updates.
+              One-time use only. Exclusions apply. By submitting your email,
+              you agree to receive marketing emails from Huangs Jadeite and
+              Jewelry. Unsubscribe anytime.
             </p>
           </>
         ) : (
