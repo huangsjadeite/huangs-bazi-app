@@ -46,7 +46,8 @@ async function upsertShopifyCustomer(email) {
   );
 
   if (!searchResponse.ok) {
-    throw new Error(`Shopify customer search failed: ${searchResponse.status}`);
+    const errBody = await searchResponse.text();
+    throw new Error(`Shopify customer search failed: ${searchResponse.status} ${errBody}`);
   }
 
   const searchData = await searchResponse.json();
