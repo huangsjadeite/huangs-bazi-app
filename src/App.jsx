@@ -1250,10 +1250,11 @@ function AdminBulletList({ items, render }) {
 
 function AdminReportSection({ icon, title, children }) {
   return (
-    <div className="mt-10 border-t border-amber-100 pt-8">
-      <h3 className="text-2xl font-bold text-slate-950">
-        {icon} {title}
+    <div className="mt-10 border-t border-amber-100 pt-8 print:border-[#8B1A1A] print:mt-8 print:pt-6">
+      <h3 className="text-2xl font-bold text-slate-950 print:text-[#8B1A1A]">
+        {icon && <span className="print:hidden">{icon} </span>}{title}
       </h3>
+      <div className="hidden print:block print:border-b print:border-[#8B1A1A] print:mt-1 print:mb-4" />
       {children}
     </div>
   );
@@ -1415,22 +1416,62 @@ function AdminFullReport({ report, clientName }) {
   const wellnessEasierMonths = monthNamesWhere((m) => m.read === "Good");
   const wellnessCautionMonths = monthNamesWhere((m) => m.read === "Caution");
 
+  const annualZodiacName = annualZodiac?.displayName || "";
+  const coverYearLabel = `${report.annualEnergy?.selectedYear || new Date().getFullYear()}${annualZodiacName ? ` ${annualZodiacName}` : ""} Year`;
+
+  const dziBeadMap = {
+    "Direct Wealth":   { label: "3-Eye Dzi Bead",       url: "https://www.huangsjadeiteandjewelry.com/search?q=3+eye+dzi+bead",           why: "Activates the wealth star to attract financial opportunities and abundance" },
+    "Indirect Wealth": { label: "3-Eye Dzi Bead",       url: "https://www.huangsjadeiteandjewelry.com/search?q=3+eye+dzi+bead",           why: "Enhances opportunity recognition and accelerates unconventional wealth flow" },
+    "Direct Officer":  { label: "9-Eye Dzi Bead",       url: "https://www.huangsjadeiteandjewelry.com/search?q=9+eye+dzi+bead",           why: "Strengthens authority, career structure and disciplined achievement" },
+    "Seven Killings":  { label: "Tiger Tooth Dzi Bead", url: "https://www.huangsjadeiteandjewelry.com/search?q=tiger+tooth+dzi+bead",     why: "Channels assertive and competitive energy into purposeful leadership" },
+    "Direct Resource": { label: "1-Eye Dzi Bead",       url: "https://www.huangsjadeiteandjewelry.com/search?q=1+eye+dzi+bead",           why: "Sharpens wisdom, clarity and protective learning energy" },
+    "Indirect Resource":{ label: "1-Eye Dzi Bead",      url: "https://www.huangsjadeiteandjewelry.com/search?q=1+eye+dzi+bead",           why: "Enhances intuitive insight and unconventional strategic thinking" },
+    "Eating God":      { label: "7-Eye Dzi Bead",       url: "https://www.huangsjadeiteandjewelry.com/search?q=7+eye+dzi+bead",           why: "Amplifies creative mastery, recognition and refined self-expression" },
+    "Hurting Officer": { label: "7-Eye Dzi Bead",       url: "https://www.huangsjadeiteandjewelry.com/search?q=7+eye+dzi+bead",           why: "Boosts communication influence, originality and professional visibility" },
+    "Friend":          { label: "2-Eye Dzi Bead",       url: "https://www.huangsjadeiteandjewelry.com/search?q=2+eye+dzi+bead",           why: "Deepens partnership harmony and strengthens relationship-based opportunities" },
+    "Rob Wealth":      { label: "5-Eye Dzi Bead",       url: "https://www.huangsjadeiteandjewelry.com/search?q=5+eye+dzi+bead",           why: "Balances competitive independence with all-round luck from five directions" },
+  };
+
+  const primaryDzi = dziBeadMap[usefulGod.primaryUsefulGod] || null;
+  const secondaryDziRaw = dziBeadMap[usefulGod.secondaryUsefulGod] || null;
+  const secondaryDzi = secondaryDziRaw?.label !== primaryDzi?.label ? secondaryDziRaw : null;
+
   return (
     <div>
-      <div className="mt-7 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-5">
-        <p className="text-sm font-bold text-slate-700">Client Profile</p>
+      {/* Print-only cover page */}
+      <div className="print-cover hidden print:flex print:flex-col print:items-center print:justify-center print:min-h-screen print:text-center">
+        <img src={huangsLogo} alt="Huangs Jadeite and Jewelry" className="h-16 w-auto mb-6" />
+        <p className="text-sm font-bold tracking-widest uppercase mb-4" style={{color:"#8B1A1A"}}>HUANGS JADEITE &amp; JEWELRY</p>
+        <h1 className="text-4xl font-bold mb-6 leading-tight" style={{color:"#8B1A1A"}}>
+          Personal Feng Shui Energy Analysis<br/>for {coverYearLabel}
+        </h1>
+        <div className="max-w-md text-sm text-gray-600 leading-relaxed text-left mt-4">
+          <p>This personalized Bazi report is designed to help you better understand your elemental balance, natural strengths, emotional tendencies and life direction.</p>
+          <p className="mt-3">The purpose of this analysis is to provide guidance and self-awareness in areas such as career, wealth, relationships and health.</p>
+        </div>
+      </div>
 
+      {/* Print footer — shows on every page via CSS */}
+      <div className="print-footer hidden">
+        Bazi Analysis generated by huangsjadeiteandjewelry.com.
+      </div>
+
+      <div className="mt-7 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-5 print-no-export">
+        <p className="text-sm font-bold text-slate-700">Client Profile</p>
         <button
           type="button"
-          data-html2canvas-ignore="true"
-          onClick={() => exportAdminReportToPdf(clientName)}
+          onClick={() => exportAdminReportToPdf()}
           className="rounded-xl bg-amber-700 px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-amber-600"
         >
-          Export as PDF
+          Export Client PDF
         </button>
       </div>
 
-      <table className="mt-4 w-full overflow-hidden rounded-2xl border border-slate-200 text-sm">
+      {/* Client Profile heading for print */}
+      <h2 className="hidden print:block mt-4 text-3xl font-bold" style={{color:"#8B1A1A"}}>Client Profile</h2>
+      <div className="hidden print:block border-b mt-1 mb-4" style={{borderColor:"#8B1A1A"}} />
+
+      <table className="mt-4 w-full overflow-hidden rounded-2xl border border-slate-200 text-sm print:rounded-none print:border-[#8B1A1A]">
         <tbody>
           {[
             ["Name", clientName || "-"],
@@ -1453,11 +1494,11 @@ function AdminFullReport({ report, clientName }) {
               } (secondary)`,
             ],
           ].map(([label, value]) => (
-            <tr key={label} className="border-b border-slate-100 last:border-0">
-              <td className="bg-slate-50 px-4 py-2.5 font-semibold text-slate-700">
+            <tr key={label} className="border-b border-slate-100 last:border-0 print:border-[#e5d5c0]">
+              <td className="bg-slate-50 px-4 py-2.5 font-semibold text-slate-700 print:bg-[#8B1A1A] print:text-white print:w-40">
                 {label}
               </td>
-              <td className="px-4 py-2.5 text-stone-700">{value}</td>
+              <td className="px-4 py-2.5 text-stone-700 print:bg-[#FAE5D3]">{value}</td>
             </tr>
           ))}
         </tbody>
@@ -1656,10 +1697,10 @@ function AdminFullReport({ report, clientName }) {
             Each month's energy read against this chart's favourable and
             caution elements.
           </p>
-          <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200">
+          <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200 print:rounded-none print:border-[#8B1A1A]">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-slate-50 text-left text-xs font-bold uppercase tracking-[0.12em] text-slate-600">
+                <tr className="bg-slate-50 text-left text-xs font-bold uppercase tracking-[0.12em] text-slate-600 print:bg-[#8B1A1A] print:text-white">
                   <th className="px-4 py-2.5">Month</th>
                   <th className="px-4 py-2.5">Read</th>
                   <th className="px-4 py-2.5">Note</th>
@@ -1669,7 +1710,7 @@ function AdminFullReport({ report, clientName }) {
                 {monthlyOutlook.map((item) => (
                   <tr
                     key={item.month}
-                    className="border-t border-slate-100 align-top"
+                    className="border-t border-slate-100 align-top print:border-[#e5d5c0] odd:print:bg-white even:print:bg-[#FAE5D3]"
                   >
                     <td className="px-4 py-2.5 font-semibold text-slate-800">
                       {item.monthName}
@@ -1980,6 +2021,42 @@ function AdminFullReport({ report, clientName }) {
         )}
       </AdminReportSection>
 
+      {(primaryDzi || secondaryDzi) && (
+        <AdminReportSection icon="🪬" title="Recommended Dzi Beads">
+          <p className="mt-3 text-sm text-stone-500">
+            Tibetan amulet recommendations based on this chart's Useful God and energy needs.
+          </p>
+          <div className="mt-4 space-y-4">
+            {primaryDzi && (
+              <div className="rounded-xl border border-slate-200 p-4 print:border-[#8B1A1A] print:bg-[#FAE5D3]">
+                <p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-700 print:text-[#8B1A1A]">
+                  Primary — {usefulGod.primaryUsefulGod}
+                </p>
+                <p className="mt-1 text-base font-semibold text-slate-900">
+                  <a href={primaryDzi.url} target="_blank" rel="noreferrer" className="hover:underline print:no-underline print:text-slate-900">
+                    {primaryDzi.label}
+                  </a>
+                </p>
+                <p className="mt-1 text-sm text-stone-600">{primaryDzi.why}</p>
+              </div>
+            )}
+            {secondaryDzi && (
+              <div className="rounded-xl border border-slate-200 p-4 print:border-[#8B1A1A] print:bg-[#FAE5D3]">
+                <p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-700 print:text-[#8B1A1A]">
+                  Secondary — {usefulGod.secondaryUsefulGod}
+                </p>
+                <p className="mt-1 text-base font-semibold text-slate-900">
+                  <a href={secondaryDzi.url} target="_blank" rel="noreferrer" className="hover:underline print:no-underline print:text-slate-900">
+                    {secondaryDzi.label}
+                  </a>
+                </p>
+                <p className="mt-1 text-sm text-stone-600">{secondaryDzi.why}</p>
+              </div>
+            )}
+          </div>
+        </AdminReportSection>
+      )}
+
       <AdminReportSection icon="🧭" title="Long-Term Life Direction">
         {!!lifeThemes.primaryThemes?.length && (
           <div className="mt-3 space-y-3">
@@ -2124,10 +2201,10 @@ function AdminFullReport({ report, clientName }) {
             {luckPillars.direction === "forward" ? "forward" : "in reverse"}{" "}
             through the cycle from the month pillar.
           </p>
-          <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200">
+          <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200 print:rounded-none print:border-[#8B1A1A]">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-slate-50 text-left text-xs font-bold uppercase tracking-[0.12em] text-slate-600">
+                <tr className="bg-slate-50 text-left text-xs font-bold uppercase tracking-[0.12em] text-slate-600 print:bg-[#8B1A1A] print:text-white">
                   <th className="px-4 py-2.5">Age</th>
                   <th className="px-4 py-2.5">Pillar</th>
                   <th className="px-4 py-2.5">Element</th>
@@ -2157,8 +2234,7 @@ function AdminFullReport({ report, clientName }) {
       )}
 
       <details
-        data-html2canvas-ignore="true"
-        className="mt-10 rounded-2xl border border-slate-200 bg-slate-50 p-5"
+        className="mt-10 rounded-2xl border border-slate-200 bg-slate-50 p-5 print-no-export"
       >
         <summary className="cursor-pointer text-sm font-bold text-slate-700">
           Raw report data (debug)
@@ -2171,40 +2247,28 @@ function AdminFullReport({ report, clientName }) {
   );
 }
 
-function exportAdminReportToPdf(clientName) {
-  const element = document.getElementById("admin-full-report");
-  if (!element) return;
-
-  // html2canvas-pro (not plain html2canvas) is required here: Tailwind v4
-  // generates oklch() colors, which the unmaintained-for-this stock
-  // html2canvas can't parse and silently fails on.
-  Promise.all([import("html2canvas-pro"), import("jspdf")]).then(
-    ([{ default: html2canvas }, { jsPDF }]) => {
-      html2canvas(element, { scale: 2, useCORS: true }).then((canvas) => {
-        const imgData = canvas.toDataURL("image/jpeg", 0.95);
-        const pdf = new jsPDF({ unit: "pt", format: "letter" });
-        const pageWidth = pdf.internal.pageSize.getWidth();
-        const pageHeight = pdf.internal.pageSize.getHeight();
-        const imgWidth = pageWidth;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-        let heightLeft = imgHeight;
-        let position = 0;
-
-        pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-
-        while (heightLeft > 0) {
-          position = heightLeft - imgHeight;
-          pdf.addPage();
-          pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
-          heightLeft -= pageHeight;
-        }
-
-        pdf.save(`${clientName || "client"}-bazi-paid-report.pdf`);
-      });
+function exportAdminReportToPdf() {
+  const style = document.createElement("style");
+  style.id = "huangs-print-style";
+  style.textContent = `
+    @media print {
+      @page { margin: 1.5cm; size: A4; }
+      body * { visibility: hidden !important; }
+      #admin-full-report, #admin-full-report * { visibility: visible !important; }
+      #admin-full-report { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; border: none !important; box-shadow: none !important; border-radius: 0 !important; padding: 0 !important; }
+      .print-no-export { display: none !important; }
+      .print-footer { visibility: visible !important; position: fixed; bottom: 0.5cm; left: 1.5cm; right: 1.5cm; text-align: center; font-size: 9pt; color: #666; border-top: 1px solid #ddd; padding-top: 4px; }
+      .print-cover { page-break-after: always; }
+      table { border-collapse: collapse; width: 100%; }
+      .print-break-before { page-break-before: always; }
     }
-  );
+  `;
+  document.head.appendChild(style);
+  window.print();
+  setTimeout(() => {
+    const existing = document.getElementById("huangs-print-style");
+    if (existing) existing.remove();
+  }, 1500);
 }
 
 function PremiumInsights({ report, isAdmin = false, fullReport = null, clientName = "" }) {
