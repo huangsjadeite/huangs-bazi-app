@@ -1419,27 +1419,166 @@ function AdminFullReport({ report, clientName }) {
   const annualZodiacName = annualZodiac?.displayName || "";
   const coverYearLabel = `${report.annualEnergy?.selectedYear || new Date().getFullYear()}${annualZodiacName ? ` ${annualZodiacName}` : ""} Year`;
 
+  function expandMonthlyNote(item) {
+    const elementInfo = elementalBalance?.find((e) => e.name === item.dominantElement);
+    const roleDesc = elementInfo?.roleDescription;
+    const { chinese, branchAnimal, dominantElement, read } = item;
+    const roleText = roleDesc
+      ? ` For this chart, ${dominantElement} energy governs ${roleDesc}.`
+      : "";
+    const goodActionMap = {
+      Metal: "express ideas, build visibility and pursue creative or communication-led opportunities",
+      Water: "attract resources, pursue wealth goals and strengthen key relationships",
+      Wood: "build structure, take on responsibilities and establish long-term commitments",
+      Fire: "seek support, invest in learning and draw on mentors or helpful people",
+      Earth: "ground decisions, consolidate progress and build on what you already have",
+    };
+    const cautionNoteMap = {
+      Earth: "adds to what is already being managed in this chart, which can amplify heaviness or a sense of overcommitment",
+      Fire: "adds warmth that this chart needs to process carefully, which may stir emotional intensity or scattered energy",
+      Wood: "can intensify structure and obligation demands already present in this chart",
+      Metal: "may feel draining or overly cutting when the chart is already under pressure",
+      Water: "adds flow that can feel unsteady or emotionally heavy during a demanding period",
+    };
+    if (read === "Good") {
+      const action = goodActionMap[dominantElement] || "act on plans and take meaningful steps forward";
+      return `${chinese} (${branchAnimal}) brings ${dominantElement} energy this month.${roleText} This is a supportive window — a good time to ${action}. Use this month's momentum to take action on goals you have been building toward, and lean into opportunities that feel aligned rather than holding back.`;
+    }
+    if (read === "Caution") {
+      const cautionNote = cautionNoteMap[dominantElement] || "may create added demands on your energy";
+      return `${chinese} (${branchAnimal}) brings ${dominantElement} energy this month.${roleText} This energy ${cautionNote}. Pace yourself carefully — focus on maintaining what is already in place rather than starting new initiatives. Give yourself room to rest and recover, and avoid making major commitments from a place of pressure or urgency.`;
+    }
+    return `${chinese} (${branchAnimal}) brings ${dominantElement} energy this month.${roleText} This is a relatively neutral period for this chart — a steady time to maintain momentum without major push or pull in either direction. Use the quieter energy to consolidate, reflect and prepare for upcoming active windows.`;
+  }
+
+  // primaryUsefulGod from usefulGodV4 is an element name ("Metal", "Water", etc.)
   const dziBeadMap = {
-    "Direct Wealth":   { label: "3-Eye Dzi Bead",       url: "https://www.huangsjadeiteandjewelry.com/search?q=3+eye+dzi+bead",           why: "Activates the wealth star to attract financial opportunities and abundance" },
-    "Indirect Wealth": { label: "3-Eye Dzi Bead",       url: "https://www.huangsjadeiteandjewelry.com/search?q=3+eye+dzi+bead",           why: "Enhances opportunity recognition and accelerates unconventional wealth flow" },
-    "Direct Officer":  { label: "9-Eye Dzi Bead",       url: "https://www.huangsjadeiteandjewelry.com/search?q=9+eye+dzi+bead",           why: "Strengthens authority, career structure and disciplined achievement" },
-    "Seven Killings":  { label: "Tiger Tooth Dzi Bead", url: "https://www.huangsjadeiteandjewelry.com/search?q=tiger+tooth+dzi+bead",     why: "Channels assertive and competitive energy into purposeful leadership" },
-    "Direct Resource": { label: "1-Eye Dzi Bead",       url: "https://www.huangsjadeiteandjewelry.com/search?q=1+eye+dzi+bead",           why: "Sharpens wisdom, clarity and protective learning energy" },
-    "Indirect Resource":{ label: "1-Eye Dzi Bead",      url: "https://www.huangsjadeiteandjewelry.com/search?q=1+eye+dzi+bead",           why: "Enhances intuitive insight and unconventional strategic thinking" },
-    "Eating God":      { label: "7-Eye Dzi Bead",       url: "https://www.huangsjadeiteandjewelry.com/search?q=7+eye+dzi+bead",           why: "Amplifies creative mastery, recognition and refined self-expression" },
-    "Hurting Officer": { label: "7-Eye Dzi Bead",       url: "https://www.huangsjadeiteandjewelry.com/search?q=7+eye+dzi+bead",           why: "Boosts communication influence, originality and professional visibility" },
-    "Friend":          { label: "2-Eye Dzi Bead",       url: "https://www.huangsjadeiteandjewelry.com/search?q=2+eye+dzi+bead",           why: "Deepens partnership harmony and strengthens relationship-based opportunities" },
-    "Rob Wealth":      { label: "5-Eye Dzi Bead",       url: "https://www.huangsjadeiteandjewelry.com/search?q=5+eye+dzi+bead",           why: "Balances competitive independence with all-round luck from five directions" },
+    "Metal": { label: "7-Eye Dzi Bead",       url: "https://www.huangsjadeiteandjewelry.com/search?q=7+eye+dzi+bead",           why: "Amplifies expression, communication, creativity and professional visibility" },
+    "Water": { label: "3-Eye Dzi Bead",       url: "https://www.huangsjadeiteandjewelry.com/search?q=3+eye+dzi+bead",           why: "Activates wealth flow, opportunity recognition and financial abundance" },
+    "Wood":  { label: "9-Eye Dzi Bead",       url: "https://www.huangsjadeiteandjewelry.com/search?q=9+eye+dzi+bead",           why: "Strengthens authority, career structure and disciplined achievement" },
+    "Fire":  { label: "1-Eye Dzi Bead",       url: "https://www.huangsjadeiteandjewelry.com/search?q=1+eye+dzi+bead",           why: "Sharpens wisdom, clarity, protective learning and intuitive support" },
+    "Earth": { label: "5-Eye Dzi Bead",       url: "https://www.huangsjadeiteandjewelry.com/search?q=5+eye+dzi+bead",           why: "Grounds and balances energy, bringing stability and all-round luck from five directions" },
   };
 
   const primaryDzi = dziBeadMap[usefulGod.primaryUsefulGod] || null;
   const secondaryDziRaw = dziBeadMap[usefulGod.secondaryUsefulGod] || null;
   const secondaryDzi = secondaryDziRaw?.label !== primaryDzi?.label ? secondaryDziRaw : null;
 
+  function exportReadingAsJson() {
+    const dayPillar = natalPillars?.day?.stem;
+    const data = {
+      meta: {
+        exportedAt: new Date().toISOString().slice(0, 10),
+        year: report.annualEnergy?.selectedYear || new Date().getFullYear(),
+        annualPillar: annualZodiacName || null,
+      },
+      client: {
+        name: clientName || null,
+        gender: report.client?.gender || null,
+      },
+      dayMaster: {
+        zh: dayPillar?.zh || null,
+        stem: dayPillar?.name || null,
+        element: dayPillar?.element || null,
+        strength: report.chartFoundation?.dayMasterStrength?.status || null,
+        strengthScore: report.chartFoundation?.dayMasterStrength?.strengthScore ?? null,
+      },
+      elementsBalance: elementalBalance.map((e) => ({
+        element: e.name,
+        role: e.role || null,
+        roleDescription: e.roleDescription || null,
+        natalPct: Math.round(e.natalPercentage),
+        annualPct: Math.round(e.annualPercentage),
+      })),
+      usefulGod: {
+        primary: usefulGod.primaryUsefulGod || null,
+        secondary: usefulGod.secondaryUsefulGod || null,
+        favourableElements: usefulGod.favourableElements || [],
+        secondaryFavourableElements: usefulGod.secondaryFavourableElements || [],
+        cautionElements: usefulGod.cautionElements || [],
+      },
+      personalityProfiles: rankedProfiles.map((p) => ({
+        profile: p.profile,
+        percentage: Math.round(p.percentage),
+      })),
+      monthlyOutlook: monthlyOutlook.map((m) => ({
+        month: m.monthName,
+        pillar: m.chinese,
+        animal: m.branchAnimal,
+        dominantElement: m.dominantElement,
+        read: m.read,
+        note: expandMonthlyNote(m),
+      })),
+      career: report.lifeAreas?.career || null,
+      wealth: {
+        ...(report.lifeAreas?.wealth || {}),
+        ...(report.lifeAreas?.wealthArchetype || {}),
+      },
+      relationship: {
+        ...(report.lifeAreas?.relationship || {}),
+        ...(report.lifeAreas?.relationshipArchetype || {}),
+      },
+      wellness: report.lifeAreas?.health || null,
+      blindSpots: report.personality?.blindSpots || null,
+      hiddenStrengths: report.personality?.topStrengths || null,
+      lifeThemes: report.lifeThemes || null,
+      stones: report.stones || null,
+      dziBeads: {
+        primary: primaryDzi ? { element: usefulGod.primaryUsefulGod, ...primaryDzi } : null,
+        secondary: secondaryDzi ? { element: usefulGod.secondaryUsefulGod, ...secondaryDzi } : null,
+      },
+      eightMansions: eightMansions || null,
+      lifePalace: lifePalace
+        ? {
+            pillar: `${lifePalace.pillar.stem.zh}${lifePalace.pillar.branch.zh}`,
+            stem: lifePalace.pillar.stem.name,
+            element: lifePalace.pillar.stem.element,
+            animal: lifePalace.pillar.branch.animal,
+          }
+        : null,
+      conceptionPalace: conceptionPalace
+        ? {
+            pillar: `${conceptionPalace.pillar.stem.zh}${conceptionPalace.pillar.branch.zh}`,
+            stem: conceptionPalace.pillar.stem.name,
+            element: conceptionPalace.pillar.stem.element,
+            animal: conceptionPalace.pillar.branch.animal,
+          }
+        : null,
+      shenSha: shenSha.map((s) => ({
+        name: s.name,
+        zh: s.zh,
+        active: s.active || false,
+        theme: s.theme || null,
+        caution: s.caution || null,
+      })),
+      luckPillars: luckPillars
+        ? {
+            startingAge: luckPillars.startingAge,
+            direction: luckPillars.direction,
+            pillars: luckPillars.pillars.map((p) => ({
+              ageRange: p.ageRange,
+              pillar: p.pillarLabel,
+              element: p.element,
+              tenGod: p.tenGod,
+            })),
+          }
+        : null,
+    };
+
+    const filename = `${(clientName || "client").toLowerCase().replace(/\s+/g, "-")}-bazi-${data.meta.year}.json`;
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <div>
       {/* Print-only cover page */}
-      <div className="print-cover hidden print:flex print:flex-col print:items-center print:justify-center print:min-h-screen print:text-center">
+      <div className="print-cover hidden print:flex print:flex-col print:items-center print:justify-center print:py-24 print:text-center">
         <img src={huangsLogo} alt="Huangs Jadeite and Jewelry" className="h-16 w-auto mb-6" />
         <p className="text-sm font-bold tracking-widest uppercase mb-4" style={{color:"#8B1A1A"}}>HUANGS JADEITE &amp; JEWELRY</p>
         <h1 className="text-4xl font-bold mb-6 leading-tight" style={{color:"#8B1A1A"}}>
@@ -1458,13 +1597,22 @@ function AdminFullReport({ report, clientName }) {
 
       <div className="mt-7 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-5 print-no-export">
         <p className="text-sm font-bold text-slate-700">Client Profile</p>
-        <button
-          type="button"
-          onClick={() => exportAdminReportToPdf()}
-          className="rounded-xl bg-amber-700 px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-amber-600"
-        >
-          Export Client PDF
-        </button>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => exportReadingAsJson()}
+            className="rounded-xl bg-slate-700 px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-slate-600"
+          >
+            Export JSON
+          </button>
+          <button
+            type="button"
+            onClick={() => exportAdminReportToPdf()}
+            className="rounded-xl bg-amber-700 px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-amber-600"
+          >
+            Export Client PDF
+          </button>
+        </div>
       </div>
 
       {/* Client Profile heading for print */}
@@ -1478,11 +1626,9 @@ function AdminFullReport({ report, clientName }) {
             ["Gender", report.client?.gender || "-"],
             [
               "Day Master",
-              report.chartFoundation?.dayMasterElement
-                ? `${report.chartFoundation.dayMasterElement} (${
-                    report.chartFoundation?.dayMasterStrength?.status || "-"
-                  })`
-                : report.chartFoundation?.dayMasterStrength?.status || "-",
+              natalPillars?.day?.stem
+                ? `${natalPillars.day.stem.zh} ${natalPillars.day.stem.name} ${natalPillars.day.stem.element}`
+                : report.chartFoundation?.dayMasterElement || "-",
             ],
             ["Stronger Elements", strongerElements.join(", ") || "-"],
             ["Weaker Elements", weakerElements.join(", ") || "-"],
@@ -1636,8 +1782,8 @@ function AdminFullReport({ report, clientName }) {
                 className="rounded-xl border border-slate-200 p-4"
               >
                 <p className="text-base font-bold text-slate-950">
-                  {item.name} — Natal {item.natalPercentage}% · Annual{" "}
-                  {item.annualPercentage}%
+                  {item.name} — Natal {Math.round(item.natalPercentage)}% · Annual{" "}
+                  {Math.round(item.annualPercentage)}%
                   {item.role && (
                     <span className="ml-2 rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700">
                       {item.role}
@@ -1670,7 +1816,7 @@ function AdminFullReport({ report, clientName }) {
                   className="rounded-xl border border-slate-200 p-4"
                 >
                   <p className="text-base font-bold text-slate-950">
-                    {display.icon} {item.percentage}% {item.profile}
+                    {display.icon} {Math.round(item.percentage)}% {item.profile}
                     {display.name ? ` — ${display.name}` : ""}
                   </p>
                   {display.subtitle && (
@@ -1728,7 +1874,7 @@ function AdminFullReport({ report, clientName }) {
                         {item.read}
                       </span>
                     </td>
-                    <td className="px-4 py-2.5 text-stone-600">{item.note}</td>
+                    <td className="px-4 py-2.5 text-stone-600 leading-6">{expandMonthlyNote(item)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -1745,10 +1891,10 @@ function AdminFullReport({ report, clientName }) {
         {(careerAuthorityProfile || careerOutputProfile) && (
           <p className="mt-3 text-sm font-semibold text-amber-700">
             {careerAuthorityProfile &&
-              `${careerAuthorityProfile.name} ${careerAuthorityProfile.percentage}%`}
+              `${careerAuthorityProfile.name} ${Math.round(careerAuthorityProfile.percentage)}%`}
             {careerAuthorityProfile && careerOutputProfile && " · "}
             {careerOutputProfile &&
-              `${careerOutputProfile.name} ${careerOutputProfile.percentage}%`}
+              `${careerOutputProfile.name} ${Math.round(careerOutputProfile.percentage)}%`}
           </p>
         )}
         <AdminMonthCallout label="Strongest months" months={careerStrongMonths} tone="good" />
@@ -1795,9 +1941,9 @@ function AdminFullReport({ report, clientName }) {
       <AdminReportSection icon="💰" title="Wealth Opportunities">
         {(directWealthPct != null || indirectWealthPct != null) && (
           <p className="mt-3 text-sm font-semibold text-amber-700">
-            {indirectWealthPct != null && `Indirect Wealth ${indirectWealthPct}%`}
+            {indirectWealthPct != null && `Indirect Wealth ${Math.round(indirectWealthPct)}%`}
             {indirectWealthPct != null && directWealthPct != null && " · "}
-            {directWealthPct != null && `Direct Wealth ${directWealthPct}%`}
+            {directWealthPct != null && `Direct Wealth ${Math.round(directWealthPct)}%`}
           </p>
         )}
         <AdminMonthCallout label="Strongest months" months={wealthStrongMonths} tone="good" />
@@ -1920,7 +2066,7 @@ function AdminFullReport({ report, clientName }) {
           <p className="mt-3 text-sm font-semibold text-amber-700">
             Day Master: {report.chartFoundation.dayMasterStrength.status}
             {report.chartFoundation.dayMasterStrength.strengthScore != null &&
-              ` (${Number(report.chartFoundation.dayMasterStrength.strengthScore).toFixed(1)}/100)`}
+              ` (${Math.round(Number(report.chartFoundation.dayMasterStrength.strengthScore))}/100)`}
           </p>
         )}
         <AdminMonthCallout label="Easier months" months={wellnessEasierMonths} tone="good" />
@@ -1940,7 +2086,7 @@ function AdminFullReport({ report, clientName }) {
         {weakestElement && (
           <p className="mt-3 rounded-xl bg-amber-50 p-4 text-sm leading-6 text-amber-800">
             <strong>
-              {weakestElement.name} is your weakest element at {weakestElement.natalPercentage}%
+              {weakestElement.name} is your weakest element at {Math.round(weakestElement.natalPercentage)}%
               natally
             </strong>
             {weakestElement.roleDescription &&
@@ -2103,6 +2249,9 @@ function AdminFullReport({ report, clientName }) {
 
       {eightMansions && (
         <AdminReportSection icon="🧭" title="Personal Directions (Eight Mansions)">
+          <p className="mt-3 text-base leading-7 text-stone-600">
+            Based on your birth year, Eight Mansions assigns you a Kua number that determines which compass directions support or drain your energy. Use your favourable directions for your desk, bed headboard and where you sit during important conversations or decisions. Avoiding unfavourable directions for sleep and major commitments helps reduce unnecessary friction over time.
+          </p>
           <p className="mt-3 text-base text-stone-700">
             <strong>
               {eightMansions.lifeStar} ({eightMansions.trigram}, {eightMansions.element})
@@ -2144,7 +2293,10 @@ function AdminFullReport({ report, clientName }) {
 
       {(lifePalace || conceptionPalace) && (
         <AdminReportSection icon="🔮" title="Life Palace & Conception Palace">
-          <div className="mt-3 grid gap-5 md:grid-cols-2 text-base text-stone-700">
+          <p className="mt-3 text-base leading-7 text-stone-600">
+            These two pillars reveal your soul-level purpose and the energy of your arrival into this life. The <strong>Life Palace</strong> reflects your innate potential and natural life path — the deeper mission your chart is oriented toward beyond day-to-day circumstances. The <strong>Conception Palace</strong> shows the energetic conditions surrounding your earliest formation, offering insight into inherited tendencies and what you came into this life already carrying. Together they provide a wider lens on who you came here to be.
+          </p>
+          <div className="mt-4 grid gap-5 md:grid-cols-2 text-base text-stone-700">
             {lifePalace && (
               <p>
                 <strong>Life Palace (命宮):</strong>{" "}
@@ -2167,37 +2319,44 @@ function AdminFullReport({ report, clientName }) {
 
       {!!shenSha.length && (
         <AdminReportSection icon="🌸" title="Personal Stars (Shen Sha)">
-          <AdminBulletList
-            items={shenSha}
-            render={(item) => {
-              const target = item.branches
-                ? item.branches.map((b) => `${b.zh} ${b.animal}`).join(" / ")
-                : item.branch
-                ? `${item.branch.zh} ${item.branch.animal}`
-                : item.stem
-                ? `${item.stem.zh} ${item.stem.name}`
-                : "";
-              return (
-                <>
-                  <strong>
-                    {item.name} ({item.zh})
-                  </strong>{" "}
-                  — {target}
-                  {item.active ? " · active in this chart" : ""}.{" "}
-                  {item.theme}
-                  {item.caution ? ` ${item.caution}` : ""}
-                </>
-              );
-            }}
-          />
+          <p className="mt-3 text-base leading-7 text-stone-600">
+            Shen Sha are auxiliary stars derived from your natal chart that highlight specific recurring themes in your life — from romance and travel to learning, protection and hidden obstacles. They are not dominant forces like your Day Master or Useful God, but they colour how certain energies show up in your experiences. Stars marked <em>active in this chart</em> have a stronger and more consistent influence on your daily patterns.
+          </p>
+          <div className="mt-3">
+            <AdminBulletList
+              items={shenSha}
+              render={(item) => {
+                const target = item.branches
+                  ? item.branches.map((b) => `${b.zh} ${b.animal}`).join(" / ")
+                  : item.branch
+                  ? `${item.branch.zh} ${item.branch.animal}`
+                  : item.stem
+                  ? `${item.stem.zh} ${item.stem.name}`
+                  : "";
+                return (
+                  <>
+                    <strong>
+                      {item.name} ({item.zh})
+                    </strong>{" "}
+                    — {target}
+                    {item.active ? " · active in this chart" : ""}.{" "}
+                    {item.theme}
+                    {item.caution ? ` ${item.caution}` : ""}
+                  </>
+                );
+              }}
+            />
+          </div>
         </AdminReportSection>
       )}
 
       {!!luckPillars?.pillars?.length && (
         <AdminReportSection icon="📈" title="Luck Pillars (大運)">
-          <p className="mt-2 text-sm text-stone-500">
-            10-year cycles from age {luckPillars.startingAge.years}y
-            {luckPillars.startingAge.months}m, stepping{" "}
+          <p className="mt-3 text-base leading-7 text-stone-600">
+            Luck Pillars are 10-year energy cycles that map the broader seasons of your life. Each pillar brings a different elemental emphasis that colours your career, relationships, wealth and personal growth during that period. Knowing which pillar you are currently in helps you work with the energy of your season rather than against it — some pillars accelerate growth, others call for consolidation, and understanding the difference allows you to pace yourself wisely.
+          </p>
+          <p className="mt-2 text-sm text-stone-400">
+            Cycles begin from age {luckPillars.startingAge.years}y{luckPillars.startingAge.months}m, stepping{" "}
             {luckPillars.direction === "forward" ? "forward" : "in reverse"}{" "}
             through the cycle from the month pillar.
           </p>
@@ -2280,10 +2439,10 @@ function PremiumInsights({ report, isAdmin = false, fullReport = null, clientNam
         id="admin-full-report"
         className="rounded-[36px] border border-amber-300 bg-white px-8 py-10 shadow-lg md:px-10"
       >
-        <p className="inline-flex rounded-full bg-amber-100 px-4 py-2 text-xs font-bold uppercase tracking-[0.28em] text-amber-800">
+        <p className="inline-flex rounded-full bg-amber-100 px-4 py-2 text-xs font-bold uppercase tracking-[0.28em] text-amber-800 print:hidden">
           🔓 Full Report (Admin)
         </p>
-        <h2 className="mt-5 text-3xl font-bold tracking-tight text-slate-950 md:text-4xl">
+        <h2 className="mt-5 text-3xl font-bold tracking-tight text-slate-950 md:text-4xl print:hidden">
           Complete Paid Reading
         </h2>
 
