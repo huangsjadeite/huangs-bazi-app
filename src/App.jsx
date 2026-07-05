@@ -1581,7 +1581,7 @@ function AdminFullReport({ report, clientName }) {
       <div className="print-cover hidden print:flex print:flex-col print:items-center print:justify-center print:py-24 print:text-center">
         <img src={huangsLogo} alt="Huangs Jadeite and Jewelry" className="h-16 w-auto mb-6" />
         <p className="text-sm font-bold tracking-widest uppercase mb-4" style={{color:"#8B1A1A"}}>HUANGS JADEITE &amp; JEWELRY</p>
-        <h1 className="text-4xl font-bold mb-6 leading-tight" style={{color:"#8B1A1A"}}>
+        <h1 className="text-2xl font-bold mb-6 leading-snug" style={{color:"#8B1A1A"}}>
           Personal Feng Shui Energy Analysis<br/>for {coverYearLabel}
         </h1>
         <div className="max-w-md text-sm text-gray-600 leading-relaxed text-left mt-4">
@@ -1632,7 +1632,6 @@ function AdminFullReport({ report, clientName }) {
             ],
             ["Stronger Elements", strongerElements.join(", ") || "-"],
             ["Weaker Elements", weakerElements.join(", ") || "-"],
-            ["Structure", personality.structureScoring?.mainStructure?.name || "-"],
             [
               "Useful God",
               `${usefulGod.primaryUsefulGod || "-"} (primary) · ${
@@ -1784,15 +1783,10 @@ function AdminFullReport({ report, clientName }) {
                 <p className="text-base font-bold text-slate-950">
                   {item.name} — Natal {Math.round(item.natalPercentage)}% · Annual{" "}
                   {Math.round(item.annualPercentage)}%
-                  {item.role && (
-                    <span className="ml-2 rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700">
-                      {item.role}
-                    </span>
-                  )}
                 </p>
                 {item.roleDescription && (
                   <p className="mt-1 text-sm text-stone-600">
-                    For this Day Master, {item.name} governs {item.roleDescription}.
+                    {item.name} governs {item.roleDescription}.
                   </p>
                 )}
               </div>
@@ -1805,7 +1799,7 @@ function AdminFullReport({ report, clientName }) {
         <div className="mt-8">
           <h3 className="text-xl font-bold text-slate-950">Personality Profile Breakdown</h3>
           <p className="mt-3 text-sm text-stone-500">
-            Full ten-god profile ranking, strongest to most dormant.
+            Your personality is shaped by ten archetypal energy patterns derived from your natal chart. Each pattern influences how you think, make decisions, respond under pressure and connect with others. The percentage shows how strongly each pattern is wired into your natural behaviour — a higher score means that energy is dominant and shows up consistently, while a lower score indicates a dormant pattern that may emerge in specific situations or can be consciously developed over time.
           </p>
           <div className="mt-4 space-y-3">
             {rankedProfiles.map((item) => {
@@ -1840,8 +1834,7 @@ function AdminFullReport({ report, clientName }) {
             🗓️ Monthly Outlook — {report.annualEnergy?.selectedYear || ""}
           </h3>
           <p className="mt-2 text-sm text-stone-500">
-            Each month's energy read against this chart's favourable and
-            caution elements.
+            Each month's energy is read against this chart's favourable and caution elements. In the Chinese calendar, each month carries its own pillar — a heavenly stem and earthly branch pair — so every month has a different zodiac animal (the month's branch). This follows the classical BaZi methodology and is not related to the Western zodiac.
           </p>
           <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200 print:rounded-none print:border-[#8B1A1A]">
             <table className="w-full text-sm">
@@ -2090,7 +2083,7 @@ function AdminFullReport({ report, clientName }) {
               natally
             </strong>
             {weakestElement.roleDescription &&
-              ` — for this Day Master, ${weakestElement.name} governs ${weakestElement.roleDescription}, so this is worth conscious support.`}
+              ` — ${weakestElement.name} governs ${weakestElement.roleDescription}, so this is worth conscious support.`}
             {weakestElement.bodySystem &&
               ` In classical Five-Element wellness, ${weakestElement.name} is also associated with ${weakestElement.bodySystem} — worth keeping in mind as a lifestyle/energy focus, not a medical diagnosis.`}
           </p>
@@ -2176,7 +2169,7 @@ function AdminFullReport({ report, clientName }) {
             {primaryDzi && (
               <div className="rounded-xl border border-slate-200 p-4 print:border-[#8B1A1A] print:bg-[#FAE5D3]">
                 <p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-700 print:text-[#8B1A1A]">
-                  Primary — {usefulGod.primaryUsefulGod}
+                  Supporting your {usefulGod.primaryUsefulGod} energy · Primary Useful God
                 </p>
                 <p className="mt-1 text-base font-semibold text-slate-900">
                   <a href={primaryDzi.url} target="_blank" rel="noreferrer" className="hover:underline print:no-underline print:text-slate-900">
@@ -2189,7 +2182,7 @@ function AdminFullReport({ report, clientName }) {
             {secondaryDzi && (
               <div className="rounded-xl border border-slate-200 p-4 print:border-[#8B1A1A] print:bg-[#FAE5D3]">
                 <p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-700 print:text-[#8B1A1A]">
-                  Secondary — {usefulGod.secondaryUsefulGod}
+                  Supporting your {usefulGod.secondaryUsefulGod} energy · Secondary Useful God
                 </p>
                 <p className="mt-1 text-base font-semibold text-slate-900">
                   <a href={secondaryDzi.url} target="_blank" rel="noreferrer" className="hover:underline print:no-underline print:text-slate-900">
@@ -2291,31 +2284,79 @@ function AdminFullReport({ report, clientName }) {
         </AdminReportSection>
       )}
 
-      {(lifePalace || conceptionPalace) && (
-        <AdminReportSection icon="🔮" title="Life Palace & Conception Palace">
-          <p className="mt-3 text-base leading-7 text-stone-600">
-            These two pillars reveal your soul-level purpose and the energy of your arrival into this life. The <strong>Life Palace</strong> reflects your innate potential and natural life path — the deeper mission your chart is oriented toward beyond day-to-day circumstances. The <strong>Conception Palace</strong> shows the energetic conditions surrounding your earliest formation, offering insight into inherited tendencies and what you came into this life already carrying. Together they provide a wider lens on who you came here to be.
-          </p>
-          <div className="mt-4 grid gap-5 md:grid-cols-2 text-base text-stone-700">
-            {lifePalace && (
-              <p>
-                <strong>Life Palace (命宮):</strong>{" "}
-                {lifePalace.pillar.stem.zh}
-                {lifePalace.pillar.branch.zh} ({lifePalace.pillar.stem.element}{" "}
-                {lifePalace.pillar.branch.animal})
-              </p>
-            )}
-            {conceptionPalace && (
-              <p>
-                <strong>Conception Palace (胎元):</strong>{" "}
-                {conceptionPalace.pillar.stem.zh}
-                {conceptionPalace.pillar.branch.zh} ({conceptionPalace.pillar.stem.element}{" "}
-                {conceptionPalace.pillar.branch.animal})
-              </p>
-            )}
-          </div>
-        </AdminReportSection>
-      )}
+      {(lifePalace || conceptionPalace) && (() => {
+        const palaceStemMeaning = {
+          Metal: "the life path is oriented around clarity, precision and building things of lasting value",
+          Water: "the life path is oriented around wisdom, adaptability and the accumulation of deep inner knowing",
+          Wood: "the life path is oriented around growth, initiation and laying foundations that others can build on",
+          Fire: "the life path is oriented around vision, recognition and bringing people together through inspiration and warmth",
+          Earth: "the life path is oriented around stability, service and building structures that stand the test of time",
+        };
+        const palaceBranchFlavour = {
+          Rat: "resourcefulness and social intelligence",
+          Ox: "perseverance and patient accumulation",
+          Tiger: "boldness and forward momentum",
+          Rabbit: "diplomacy and creative refinement",
+          Dragon: "ambition and transformative scale",
+          Snake: "depth, strategy and quiet power",
+          Horse: "freedom, movement and dynamic energy",
+          Goat: "compassion, creativity and collaborative flow",
+          Monkey: "adaptability, wit and versatile execution",
+          Rooster: "precision, discernment and high standards",
+          Dog: "loyalty, duty and principled commitment",
+          Pig: "abundance-mindedness, generosity and natural ease",
+        };
+        const conceptionStemMeaning = {
+          Metal: "arrived with a natural inclination toward precision, discernment and structural thinking",
+          Water: "arrived with heightened intuition, emotional depth and an innate capacity for reading situations",
+          Wood: "arrived with an instinctive drive toward growth, ambition and forward momentum",
+          Fire: "arrived with a natural warmth, expressiveness and an innate awareness of how things are perceived",
+          Earth: "arrived with an instinctive groundedness, practicality and a deep orientation toward service and stability",
+        };
+        return (
+          <AdminReportSection icon="🔮" title="Life Palace & Conception Palace">
+            <p className="mt-3 text-base leading-7 text-stone-600">
+              These two pillars reveal your soul-level purpose and the energy of your arrival into this life. The <strong>Life Palace</strong> reflects your innate potential and natural life path — the deeper mission your chart is oriented toward beyond day-to-day circumstances. The <strong>Conception Palace</strong> shows the energetic conditions surrounding your earliest formation, offering insight into inherited tendencies and what you came into this life already carrying. Together they provide a wider lens on who you came here to be.
+            </p>
+            <div className="mt-4 grid gap-5 md:grid-cols-2">
+              {lifePalace && (
+                <div className="rounded-xl border border-slate-200 p-4 print:border-[#8B1A1A] print:bg-[#FAE5D3]">
+                  <p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-700 print:text-[#8B1A1A]">Life Palace 命宮</p>
+                  <p className="mt-1 text-base font-semibold text-slate-900">
+                    {lifePalace.pillar.stem.zh}{lifePalace.pillar.branch.zh}{" "}
+                    ({lifePalace.pillar.stem.element} {lifePalace.pillar.branch.animal})
+                  </p>
+                  {palaceStemMeaning[lifePalace.pillar.stem.element] && (
+                    <p className="mt-2 text-sm text-stone-600">
+                      With a {lifePalace.pillar.stem.element} Life Palace, {palaceStemMeaning[lifePalace.pillar.stem.element]}
+                      {palaceBranchFlavour[lifePalace.pillar.branch.animal]
+                        ? `, expressed through the ${lifePalace.pillar.branch.animal}'s quality of ${palaceBranchFlavour[lifePalace.pillar.branch.animal]}.`
+                        : "."}
+                    </p>
+                  )}
+                </div>
+              )}
+              {conceptionPalace && (
+                <div className="rounded-xl border border-slate-200 p-4 print:border-[#8B1A1A] print:bg-[#FAE5D3]">
+                  <p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-700 print:text-[#8B1A1A]">Conception Palace 胎元</p>
+                  <p className="mt-1 text-base font-semibold text-slate-900">
+                    {conceptionPalace.pillar.stem.zh}{conceptionPalace.pillar.branch.zh}{" "}
+                    ({conceptionPalace.pillar.stem.element} {conceptionPalace.pillar.branch.animal})
+                  </p>
+                  {conceptionStemMeaning[conceptionPalace.pillar.stem.element] && (
+                    <p className="mt-2 text-sm text-stone-600">
+                      This person {conceptionStemMeaning[conceptionPalace.pillar.stem.element]}
+                      {palaceBranchFlavour[conceptionPalace.pillar.branch.animal]
+                        ? `, coloured by the ${conceptionPalace.pillar.branch.animal}'s energy of ${palaceBranchFlavour[conceptionPalace.pillar.branch.animal]}.`
+                        : "."}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          </AdminReportSection>
+        );
+      })()}
 
       {!!shenSha.length && (
         <AdminReportSection icon="🌸" title="Personal Stars (Shen Sha)">
