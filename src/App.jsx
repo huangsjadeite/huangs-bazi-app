@@ -1597,7 +1597,7 @@ function AdminFullReport({ report, clientName }) {
         <h1 className="text-2xl font-bold mb-6 leading-snug" style={{color:"#8B1A1A"}}>
           Personal Feng Shui Energy Analysis<br/>for {coverYearLabel}
         </h1>
-        <div className="max-w-md text-sm text-gray-600 leading-relaxed text-left mt-4">
+        <div className="print-cover-body max-w-md text-sm text-gray-600 leading-relaxed text-left mt-4">
           <p>This personalized Bazi report is designed to help you better understand your elemental balance, natural strengths, emotional tendencies and life direction.</p>
           <p className="mt-3">The purpose of this analysis is to provide guidance and self-awareness in areas such as career, wealth, relationships and health.</p>
         </div>
@@ -2612,7 +2612,33 @@ function exportAdminReportToPdf() {
       #admin-full-report { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; border: none !important; box-shadow: none !important; border-radius: 0 !important; padding: 0 !important; }
       .print-no-export { display: none !important; }
       .print-footer { display: none !important; }
-      .print-cover { page-break-after: always; }
+      .print-cover {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center !important;
+        min-height: 85vh;
+        padding: 5cm 2cm 3cm 2cm !important;
+        page-break-after: always;
+      }
+      .print-cover img {
+        display: block !important;
+        margin: 0 auto 1.5rem auto !important;
+        max-width: 200px !important;
+        width: auto !important;
+        height: auto !important;
+      }
+      .print-cover > h1,
+      .print-cover > p {
+        text-align: center !important;
+        width: 100% !important;
+      }
+      .print-cover-body {
+        text-align: left !important;
+        max-width: 480px !important;
+        margin: 1rem auto 0 auto !important;
+      }
       table { border-collapse: collapse; width: 100%; }
       .print-break-before { page-break-before: always; }
     }
