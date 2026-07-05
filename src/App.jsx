@@ -1889,10 +1889,10 @@ function AdminFullReport({ report, clientName }) {
         {(careerAuthorityProfile || careerOutputProfile) && (
           <p className="mt-3 text-sm font-semibold text-amber-700">
             {careerAuthorityProfile &&
-              `${careerAuthorityProfile.name} ${Math.round(careerAuthorityProfile.percentage)}%`}
+              `${careerAuthorityProfile.name} · ${getProfileDisplay(careerAuthorityProfile.name).name || ""} — ${Math.round(careerAuthorityProfile.percentage)}%`}
             {careerAuthorityProfile && careerOutputProfile && " · "}
             {careerOutputProfile &&
-              `${careerOutputProfile.name} ${Math.round(careerOutputProfile.percentage)}%`}
+              `${careerOutputProfile.name} · ${getProfileDisplay(careerOutputProfile.name).name || ""} — ${Math.round(careerOutputProfile.percentage)}%`}
           </p>
         )}
         <AdminMonthCallout label="Strongest months" months={careerStrongMonths} tone="good" />
@@ -1939,9 +1939,9 @@ function AdminFullReport({ report, clientName }) {
       <AdminReportSection icon="💰" title="Wealth Opportunities">
         {(directWealthPct != null || indirectWealthPct != null) && (
           <p className="mt-3 text-sm font-semibold text-amber-700">
-            {indirectWealthPct != null && `Indirect Wealth ${Math.round(indirectWealthPct)}%`}
+            {indirectWealthPct != null && `Indirect Wealth · ${getProfileDisplay("Indirect Wealth").name || ""} ${Math.round(indirectWealthPct)}%`}
             {indirectWealthPct != null && directWealthPct != null && " · "}
-            {directWealthPct != null && `Direct Wealth ${Math.round(directWealthPct)}%`}
+            {directWealthPct != null && `Direct Wealth · ${getProfileDisplay("Direct Wealth").name || ""} ${Math.round(directWealthPct)}%`}
           </p>
         )}
         <AdminMonthCallout label="Strongest months" months={wealthStrongMonths} tone="good" />
@@ -2013,7 +2013,7 @@ function AdminFullReport({ report, clientName }) {
             Partners whose own chart leans toward {[...favourableSet].join(", ")} -
             this chart's own supportive elements - tend to reinforce rather than
             drain this person's energy, since those are the same elements this
-            Day Master already benefits from.
+            chart already benefits from.
           </p>
         )}
         {!!relationship.partnerDynamics?.potentialChallenges?.length && (
@@ -2062,7 +2062,7 @@ function AdminFullReport({ report, clientName }) {
       <AdminReportSection icon="🌿" title="Wellness & Energy Balance">
         {report.chartFoundation?.dayMasterStrength?.status && (
           <p className="mt-3 text-sm font-semibold text-amber-700">
-            Day Master: {report.chartFoundation.dayMasterStrength.status}
+            Chart Strength: {report.chartFoundation.dayMasterStrength.status}
             {report.chartFoundation.dayMasterStrength.strengthScore != null &&
               ` (${Math.round(Number(report.chartFoundation.dayMasterStrength.strengthScore))}/100)`}
           </p>
@@ -2496,7 +2496,7 @@ function AdminFullReport({ report, clientName }) {
                             ({p.pillar.stem.name} {p.pillar.branch.animal})
                           </span>
                           <br />
-                          <span className="text-xs text-stone-400">{p.pillar.stem.element} · {p.tenGod}</span>
+                          <span className="text-xs text-stone-400">{p.pillar.stem.element} · {p.tenGod}{getProfileDisplay(p.tenGod)?.name ? ` · ${getProfileDisplay(p.tenGod).name}` : ""}</span>
                         </td>
                         <td className="px-4 py-3">
                           <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${rs.badge}`}>
@@ -2515,6 +2515,43 @@ function AdminFullReport({ report, clientName }) {
           </AdminReportSection>
         );
       })()}
+
+      <AdminReportSection icon="📖" title="Bazi Reference — The 10 Energy Archetypes">
+        <p className="mt-3 text-sm text-stone-500">
+          Each personality pattern in this report is derived from one of ten classical Bazi archetypes. Use this table as a quick reference when explaining any term that appears in the chart above.
+        </p>
+        <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200 print:rounded-none print:border-[#8B1A1A]">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-slate-50 text-left text-xs font-bold uppercase tracking-[0.12em] text-slate-600 print:bg-[#8B1A1A] print:text-white">
+                <th className="px-4 py-2.5">Bazi Term</th>
+                <th className="px-4 py-2.5">Also Called</th>
+                <th className="px-4 py-2.5">In Simple Terms</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                ["Friend",           "The Companion",   "Loyalty, peer support, building through relationships"],
+                ["Rob Wealth",       "The Challenger",  "Drive, ambition, bold self-assertion and healthy competition"],
+                ["Eating God",       "The Creator",     "Creative expression, skill-building and personal output"],
+                ["Hurting Officer",  "The Rebel Voice", "Independence, innovation and questioning the status quo"],
+                ["Direct Wealth",    "The Builder",     "Stability, discipline and steady, structured results"],
+                ["Indirect Wealth",  "The Opportunist", "Spotting opportunities, flexibility and network-driven gains"],
+                ["Direct Officer",   "The Guardian",    "Responsibility, reputation and doing what is right"],
+                ["Seven Killings",   "The Warrior",     "Pressure, decisiveness and breakthrough intensity"],
+                ["Direct Resource",  "The Nurturer",    "Support, mentorship and investing in knowledge"],
+                ["Indirect Resource","The Mystic",      "Intuition, reflection and unconventional insight"],
+              ].map(([term, name, desc], i) => (
+                <tr key={term} className="border-t border-slate-100 align-top print:border-[#e5d5c0] odd:print:bg-white even:print:bg-[#FAE5D3]">
+                  <td className="px-4 py-2.5 font-semibold text-slate-800 whitespace-nowrap">{term}</td>
+                  <td className="px-4 py-2.5 font-semibold text-amber-800 whitespace-nowrap">{name}</td>
+                  <td className="px-4 py-2.5 text-stone-600">{desc}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </AdminReportSection>
 
       <details
         className="mt-10 rounded-2xl border border-slate-200 bg-slate-50 p-5 print-no-export"

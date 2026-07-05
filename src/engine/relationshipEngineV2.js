@@ -278,7 +278,7 @@ function buildPartnerDynamics({ spouseStar, primaryUsefulGod }) {
     spouseStar.element !== primaryUsefulGod
   ) {
     potentialChallenges.push(
-      `The partner star is ${spouseStar.element}, while the current useful element is ${primaryUsefulGod}. This may show attraction to relationship patterns that need to be balanced with the person’s growth needs.`
+      `In this chart, ${spouseStar.element} energy is the partner star — the element that naturally represents relationship and spouse energy. Because ${primaryUsefulGod} — not ${spouseStar.element} — is what supports this person’s own growth, relationships can sometimes feel like they pull in a slightly different direction from personal ambitions. This is healthy self-awareness: the right partner brings complementary energy, not identical energy.`
     );
   }
 
