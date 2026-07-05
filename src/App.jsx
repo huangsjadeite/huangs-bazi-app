@@ -2498,12 +2498,19 @@ function AdminFullReport({ report, clientName }) {
               through the cycle from the month pillar.
               {currentAge !== null && ` Current age: ${currentAge}.`}
             </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {elementalBalance.map((e) => (
+                <span key={e.name} className="rounded-lg bg-slate-50 px-3 py-1.5 text-xs text-stone-600 border border-slate-200 print:bg-[#FAE5D3] print:border-[#e5d5c0]">
+                  <strong className="text-stone-800">{e.name}</strong> — {e.roleDescription}
+                </span>
+              ))}
+            </div>
             <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200 print:rounded-none print:border-[#8B1A1A]">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-slate-50 text-left text-xs font-bold uppercase tracking-[0.12em] text-slate-600 print:bg-[#8B1A1A] print:text-white">
                     <th className="px-4 py-2.5">Age</th>
-                    <th className="px-4 py-2.5">Pillar</th>
+                    <th className="px-4 py-2.5">Decade Energy</th>
                     <th className="px-4 py-2.5">Read</th>
                     <th className="px-4 py-2.5">Decade Theme</th>
                   </tr>
@@ -2530,14 +2537,10 @@ function AdminFullReport({ report, clientName }) {
                           )}
                         </td>
                         <td className="px-4 py-3">
-                          <span className="font-semibold">
-                            {p.pillar.stem.zh}{p.pillar.branch.zh}
-                          </span>{" "}
-                          <span className="text-stone-500">
-                            ({p.pillar.stem.name} {p.pillar.branch.animal})
-                          </span>
-                          <br />
-                          <span className="text-xs text-stone-400">{p.pillar.stem.element} · {p.tenGod}{getProfileDisplay(p.tenGod)?.name ? ` · ${getProfileDisplay(p.tenGod).name}` : ""}</span>
+                          <span className="font-semibold text-stone-800">{p.pillar.stem.element}</span>
+                          {getProfileDisplay(p.tenGod)?.name && (
+                            <span className="text-stone-500"> · {getProfileDisplay(p.tenGod).name}</span>
+                          )}
                         </td>
                         <td className="px-4 py-3">
                           <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${rs.badge}`}>
