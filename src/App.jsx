@@ -2387,38 +2387,57 @@ function AdminFullReport({ report, clientName }) {
         );
       })()}
 
-      {!!shenSha.length && (
-        <AdminReportSection icon="🌸" title="Personal Stars (Shen Sha)">
-          <p className="mt-3 text-base leading-7 text-stone-600">
-            Shen Sha are auxiliary stars derived from your natal chart that highlight specific recurring themes in your life — from romance and travel to learning, protection and hidden obstacles. They are not dominant forces like your Day Master or Useful God, but they colour how certain energies show up in your experiences. Stars marked <em>active in this chart</em> have a stronger and more consistent influence on your daily patterns.
-          </p>
-          <div className="mt-3">
-            <AdminBulletList
-              items={shenSha}
-              render={(item) => {
-                const target = item.branches
-                  ? item.branches.map((b) => `${b.zh} ${b.animal}`).join(" / ")
-                  : item.branch
-                  ? `${item.branch.zh} ${item.branch.animal}`
-                  : item.stem
-                  ? `${item.stem.zh} ${item.stem.name}`
-                  : "";
-                return (
-                  <>
-                    <strong>
-                      {item.name} ({item.zh})
-                    </strong>{" "}
-                    — {target}
-                    {item.active ? " · active in this chart" : ""}.{" "}
-                    {item.theme}
-                    {item.caution ? ` ${item.caution}` : ""}
-                  </>
-                );
-              }}
-            />
-          </div>
-        </AdminReportSection>
-      )}
+      {!!shenSha.length && (() => {
+        const activeStars = shenSha.filter((s) => s.active);
+        const referenceStars = shenSha.filter((s) => !s.active);
+        const starTarget = (item) =>
+          item.branches
+            ? item.branches.map((b) => `${b.zh} ${b.animal}`).join(" / ")
+            : item.branch
+            ? `${item.branch.zh} ${item.branch.animal}`
+            : item.stem
+            ? `${item.stem.zh} ${item.stem.name}`
+            : "";
+        return (
+          <AdminReportSection icon="🌸" title="Personal Stars (Shen Sha)">
+            <p className="mt-3 text-base leading-7 text-stone-600">
+              Shen Sha are auxiliary stars derived from your natal chart that highlight specific recurring themes in your life — from romance and travel to learning, protection and hidden obstacles. They are not dominant forces like your Day Master or Useful God, but they colour how certain energies show up in your experiences.
+            </p>
+            {activeStars.length > 0 && (
+              <>
+                <p className="mt-4 text-xs font-bold uppercase tracking-widest text-stone-400">Active in your chart</p>
+                <AdminBulletList
+                  items={activeStars}
+                  render={(item) => (
+                    <>
+                      <strong>{item.name} ({item.zh})</strong> — {item.theme}
+                      {item.caution ? ` ${item.caution}` : ""}
+                    </>
+                  )}
+                />
+              </>
+            )}
+            {referenceStars.length > 0 && (
+              <>
+                <p className="mt-5 text-xs font-bold uppercase tracking-widest text-stone-400">Other classical stars</p>
+                <AdminBulletList
+                  items={referenceStars}
+                  render={(item) => {
+                    const target = starTarget(item);
+                    return (
+                      <>
+                        <strong>{item.name} ({item.zh})</strong>
+                        {target ? ` — ${target}` : ""}. {item.theme}
+                        {item.caution ? ` ${item.caution}` : ""}
+                      </>
+                    );
+                  }}
+                />
+              </>
+            )}
+          </AdminReportSection>
+        );
+      })()}
 
       {!!luckPillars?.pillars?.length && (() => {
         // Compute client's current age to highlight the active pillar
