@@ -1624,6 +1624,7 @@ function AdminFullReport({ report, clientName }) {
           {[
             ["Name", clientName || "-"],
             ["Gender", report.client?.gender || "-"],
+            ["Birth Country", report.client?.birthCountry || "-"],
             [
               "Day Master",
               natalPillars?.day?.stem
@@ -1663,6 +1664,13 @@ function AdminFullReport({ report, clientName }) {
             )}
           </div>
 
+          <div className="mt-3 grid grid-cols-2 gap-x-6 gap-y-1 text-xs text-stone-500 md:grid-cols-4">
+            <p><span className="font-semibold text-slate-700">Year —</span> ancestral energy, family background and relationship with society. Governs early life (0–16).</p>
+            <p><span className="font-semibold text-slate-700">Month —</span> career, parents and productive adult years (17–40). Primary pillar for professional life.</p>
+            <p><span className="font-semibold text-slate-700">Day —</span> the self. The Day Heavenly Stem is the Day Master — the chart's core identity. The Day Branch represents the inner self and partner energy.</p>
+            <p><span className="font-semibold text-slate-700">Hour —</span> aspirations, children and the later years of life (40+). Reflects what the person is building toward.</p>
+          </div>
+
           <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200">
             <table className="w-full text-sm">
               <thead>
@@ -1682,7 +1690,6 @@ function AdminFullReport({ report, clientName }) {
                   </td>
                   {["hour", "day", "month", "year"].map((key) => {
                     const pillar = natalPillars[key];
-                    const tenGod = tenGodByPillar?.[key]?.stem;
                     return (
                       <td key={key} className="px-4 py-2.5">
                         {pillar?.stem ? (
@@ -1693,11 +1700,6 @@ function AdminFullReport({ report, clientName }) {
                             <span className="text-stone-500">
                               {pillar.stem.name} {pillar.stem.element}
                             </span>
-                            {tenGod && (
-                              <p className="mt-1 text-xs font-semibold uppercase tracking-[0.1em] text-amber-700">
-                                {tenGod}
-                              </p>
-                            )}
                           </>
                         ) : (
                           <span className="text-stone-400">—</span>
@@ -1772,7 +1774,7 @@ function AdminFullReport({ report, clientName }) {
           <h3 className="text-xl font-bold text-slate-950">5 Elements Balance</h3>
           <p className="mt-2 text-sm text-stone-500">
             Natal Chart vs. {report.annualEnergy?.selectedYear || "this year"}'s Annual
-            Energy, and what each element represents for this Day Master.
+            Energy, and what each element represents in this chart.
           </p>
           <div className="mt-4 space-y-3">
             {elementalBalance.map((item) => (
@@ -1834,7 +1836,10 @@ function AdminFullReport({ report, clientName }) {
             🗓️ Monthly Outlook — {report.annualEnergy?.selectedYear || ""}
           </h3>
           <p className="mt-2 text-sm text-stone-500">
-            Each month's energy is read against this chart's favourable and caution elements. In the Chinese calendar, each month carries its own pillar — a heavenly stem and earthly branch pair — so every month has a different zodiac animal (the month's branch). This follows the classical BaZi methodology and is not related to the Western zodiac.
+            Each month's energy is read against this chart's favourable and caution elements. In the Chinese calendar, each month carries its own pillar — a heavenly stem and earthly branch pair — so every month has a different zodiac animal (the month's branch). This follows the classical Bazi methodology and is not related to the Western zodiac.
+          </p>
+          <p className="mt-1 text-xs text-stone-400">
+            Why a different animal each month: the 12 earthly branches are permanently mapped to the 12 Chinese months — Tiger is always the first month of spring, Rabbit the second, Dragon the third, and so on. Each calendar month corresponds to one of these branches, so the animal naturally changes every month.
           </p>
           <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200 print:rounded-none print:border-[#8B1A1A]">
             <table className="w-full text-sm">
@@ -2391,47 +2396,125 @@ function AdminFullReport({ report, clientName }) {
         </AdminReportSection>
       )}
 
-      {!!luckPillars?.pillars?.length && (
-        <AdminReportSection icon="📈" title="Luck Pillars (大運)">
-          <p className="mt-3 text-base leading-7 text-stone-600">
-            Luck Pillars are 10-year energy cycles that map the broader seasons of your life. Each pillar brings a different elemental emphasis that colours your career, relationships, wealth and personal growth during that period. Knowing which pillar you are currently in helps you work with the energy of your season rather than against it — some pillars accelerate growth, others call for consolidation, and understanding the difference allows you to pace yourself wisely.
-          </p>
-          <p className="mt-2 text-sm text-stone-400">
-            Cycles begin from age {luckPillars.startingAge.years}y{luckPillars.startingAge.months}m, stepping{" "}
-            {luckPillars.direction === "forward" ? "forward" : "in reverse"}{" "}
-            through the cycle from the month pillar.
-          </p>
-          <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200 print:rounded-none print:border-[#8B1A1A]">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-slate-50 text-left text-xs font-bold uppercase tracking-[0.12em] text-slate-600 print:bg-[#8B1A1A] print:text-white">
-                  <th className="px-4 py-2.5">Age</th>
-                  <th className="px-4 py-2.5">Pillar</th>
-                  <th className="px-4 py-2.5">Element</th>
-                  <th className="px-4 py-2.5">Ten God</th>
-                </tr>
-              </thead>
-              <tbody>
-                {luckPillars.pillars.map((p, i) => (
-                  <tr key={i} className="border-t border-slate-100 align-top">
-                    <td className="px-4 py-2.5 font-semibold text-slate-800">
-                      {p.startAge.years}y{p.startAge.months}m–{p.endAge.years}y
-                      {p.endAge.months}m
-                    </td>
-                    <td className="px-4 py-2.5">
-                      {p.pillar.stem.zh}
-                      {p.pillar.branch.zh} ({p.pillar.stem.name}{" "}
-                      {p.pillar.branch.animal})
-                    </td>
-                    <td className="px-4 py-2.5">{p.pillar.stem.element}</td>
-                    <td className="px-4 py-2.5">{p.tenGod}</td>
+      {!!luckPillars?.pillars?.length && (() => {
+        // Compute client's current age to highlight the active pillar
+        const birthYear = report.client?.birthDate
+          ? Number(report.client.birthDate.split("-")[0])
+          : null;
+        const birthMonth = report.client?.birthDate
+          ? Number(report.client.birthDate.split("-")[1])
+          : null;
+        const now = new Date();
+        const currentAge = birthYear
+          ? now.getFullYear() - birthYear - (now.getMonth() + 1 < birthMonth ? 1 : 0)
+          : null;
+
+        const tenGodTheme = {
+          "Friend":           "A decade of peer connection, mutual support and building through relationships. Collaborative energy — shared goals and alliances matter most.",
+          "Rob Wealth":       "A decade of competition, ambition and fighting for position. Drive is high but so is rivalry — stay focused on long-term strategy over short-term wins.",
+          "Eating God":       "A decade of creative expression, skill-building and personal output. A productive window to develop expertise and share your work with the world.",
+          "Hurting Officer":  "A decade of independence, innovation and breaking with convention. Strong drive to do things your own way — powerful if channelled, disruptive if unchecked.",
+          "Direct Wealth":    "A decade oriented toward building tangible assets, financial discipline and steady, structured growth. Hard work pays off reliably during this period.",
+          "Indirect Wealth":  "A decade of opportunity, opportunistic gains and wealth through non-traditional routes. Flexible thinking and timing matter more than routine effort.",
+          "Direct Officer":   "A decade of responsibility, reputation and institutional advancement. Status and career structure are prominent — authority is earned through discipline.",
+          "Seven Killings":   "A decade of pressure, intensity and ambition. Challenges are sharper here, but so is the drive to overcome them — breakthrough potential is high for those who persevere.",
+          "Direct Resource":  "A decade of support, mentorship and learning. A nurturing period — help arrives from others, and investing in knowledge or credentials pays long-term dividends.",
+          "Indirect Resource":"A decade of intuition, spiritual insight and unconventional wisdom. Less structured support, more inner-guided clarity — trust gut instinct over outside opinion.",
+        };
+
+        const primaryEl = usefulGod.primaryUsefulGod;
+        const secondaryEl = usefulGod.secondaryUsefulGod;
+
+        function pillarRead(stemElement) {
+          if (stemElement === primaryEl) return "favourable";
+          if (stemElement === secondaryEl) return "supported";
+          // Elements that produce or are produced by the useful god are broadly neutral;
+          // elements that clash or drain it lean caution. Keep it simple: anything
+          // that isn't a useful-god element is caution if it's in the top-2 strongest
+          // natal elements (already excess in the chart).
+          const strongEls = elementalBalance
+            .slice(0, 2)
+            .map((e) => e.name);
+          if (strongEls.includes(stemElement)) return "caution";
+          return "neutral";
+        }
+
+        const readStyle = {
+          favourable: { badge: "bg-emerald-100 text-emerald-800", label: "Favourable" },
+          supported:  { badge: "bg-teal-100 text-teal-700",      label: "Supported"  },
+          caution:    { badge: "bg-amber-100 text-amber-800",     label: "Caution"    },
+          neutral:    { badge: "bg-slate-100 text-slate-600",     label: "Neutral"    },
+        };
+
+        return (
+          <AdminReportSection icon="📈" title="Luck Pillars (大運)">
+            <p className="mt-3 text-base leading-7 text-stone-600">
+              Luck Pillars are 10-year energy cycles that map the broader seasons of your life. Each pillar brings a different elemental emphasis that colours your career, relationships, wealth and personal growth during that period. Knowing which pillar you are currently in helps you work with the energy of your season rather than against it — some pillars accelerate growth, others call for consolidation, and understanding the difference allows you to pace yourself wisely.
+            </p>
+            <p className="mt-2 text-sm text-stone-400">
+              Cycles begin from age {luckPillars.startingAge.years}y{luckPillars.startingAge.months}m, stepping{" "}
+              {luckPillars.direction === "forward" ? "forward" : "in reverse"}{" "}
+              through the cycle from the month pillar.
+              {currentAge !== null && ` Current age: ${currentAge}.`}
+            </p>
+            <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200 print:rounded-none print:border-[#8B1A1A]">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-slate-50 text-left text-xs font-bold uppercase tracking-[0.12em] text-slate-600 print:bg-[#8B1A1A] print:text-white">
+                    <th className="px-4 py-2.5">Age</th>
+                    <th className="px-4 py-2.5">Pillar</th>
+                    <th className="px-4 py-2.5">Read</th>
+                    <th className="px-4 py-2.5">Decade Theme</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </AdminReportSection>
-      )}
+                </thead>
+                <tbody>
+                  {luckPillars.pillars.map((p, i) => {
+                    const isCurrent = currentAge !== null &&
+                      currentAge >= p.startAge.years &&
+                      currentAge < p.endAge.years;
+                    const read = pillarRead(p.pillar.stem.element);
+                    const rs = readStyle[read];
+                    const theme = tenGodTheme[p.tenGod] || null;
+                    return (
+                      <tr
+                        key={i}
+                        className={`border-t border-slate-100 align-top print:border-[#e5d5c0] odd:print:bg-white even:print:bg-[#FAE5D3] ${isCurrent ? "bg-amber-50 print:bg-[#FAE5D3]" : ""}`}
+                      >
+                        <td className="px-4 py-3 font-semibold text-slate-800 whitespace-nowrap">
+                          {p.startAge.years}y–{p.endAge.years}y
+                          {isCurrent && (
+                            <span className="ml-2 rounded-full bg-amber-600 px-2 py-0.5 text-[10px] font-bold text-white print:bg-[#8B1A1A]">
+                              NOW
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className="font-semibold">
+                            {p.pillar.stem.zh}{p.pillar.branch.zh}
+                          </span>{" "}
+                          <span className="text-stone-500">
+                            ({p.pillar.stem.name} {p.pillar.branch.animal})
+                          </span>
+                          <br />
+                          <span className="text-xs text-stone-400">{p.pillar.stem.element} · {p.tenGod}</span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${rs.badge}`}>
+                            {rs.label}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-stone-600 leading-5">
+                          {theme || "—"}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </AdminReportSection>
+        );
+      })()}
 
       <details
         className="mt-10 rounded-2xl border border-slate-200 bg-slate-50 p-5 print-no-export"
@@ -2452,7 +2535,17 @@ function exportAdminReportToPdf() {
   style.id = "huangs-print-style";
   style.textContent = `
     @media print {
-      @page { margin: 1.5cm; size: A4; }
+      @page {
+        margin: 1.5cm;
+        size: A4;
+        /* Blank out browser-injected URL/date/page-number headers and footers */
+        @top-left { content: ""; }
+        @top-center { content: ""; }
+        @top-right { content: ""; }
+        @bottom-left { content: ""; }
+        @bottom-center { content: ""; }
+        @bottom-right { content: ""; }
+      }
       body * { visibility: hidden !important; }
       #admin-full-report, #admin-full-report * { visibility: visible !important; }
       #admin-full-report { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; border: none !important; box-shadow: none !important; border-radius: 0 !important; padding: 0 !important; }
