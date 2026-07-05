@@ -1340,6 +1340,7 @@ function AdminFullReport({ report, clientName }) {
   const elementalBalance = report.chartFoundation?.elementalBalance || [];
   const monthlyOutlook = report.annualEnergy?.monthlyOverlay?.months || [];
   const strongerElements = elementalBalance.slice(0, 2).map((e) => e.name);
+  const moderateElements = elementalBalance.slice(2, -2).map((e) => e.name);
   const weakerElements = [...elementalBalance].slice(-2).map((e) => e.name);
 
   const directWealthPct = findProfilePct("Direct Wealth");
@@ -1656,6 +1657,7 @@ function AdminFullReport({ report, clientName }) {
               })(),
             ],
             ["Stronger Elements", strongerElements.join(", ") || "-"],
+            ...(moderateElements.length ? [["Moderate Elements", moderateElements.join(", ")]] : []),
             ["Weaker Elements", weakerElements.join(", ") || "-"],
             [
               "Useful God",
@@ -2125,10 +2127,6 @@ function AdminFullReport({ report, clientName }) {
         />
       </AdminReportSection>
 
-      <p className="mt-10 text-xs font-bold uppercase tracking-[0.3em] text-amber-700">
-        Additional Reference
-      </p>
-
       <AdminReportSection icon="✨" title="Hidden Strengths">
         <AdminBulletList
           items={personality.topStrengths}
@@ -2166,7 +2164,7 @@ function AdminFullReport({ report, clientName }) {
               items={stones.primaryRecommendations[0]?.stones}
               render={(item) => (
                 <>
-                  <strong>{item.name}</strong> — {item.customerMessage}
+                  <strong>{item.name}</strong> — {item.customerMessage.split(/\.\s+(?:Best|Helpful|Good)\s/)[0]}.
                 </>
               )}
             />
@@ -2181,7 +2179,7 @@ function AdminFullReport({ report, clientName }) {
               items={stones.secondaryRecommendations[0]?.stones}
               render={(item) => (
                 <>
-                  <strong>{item.name}</strong> — {item.customerMessage}
+                  <strong>{item.name}</strong> — {item.customerMessage.split(/\.\s+(?:Best|Helpful|Good)\s/)[0]}.
                 </>
               )}
             />
