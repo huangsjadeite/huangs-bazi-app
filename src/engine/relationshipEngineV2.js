@@ -259,11 +259,11 @@ function buildRelationshipStyle({ mainStructure, dayStatus }) {
 
 function buildPartnerDynamics({ spouseStar, primaryUsefulGod }) {
   const traits = {
-    Wood: "A partner dynamic that feels principled, growth-oriented and emotionally sincere.",
-    Fire: "A partner dynamic that feels warm, expressive, encouraging and emotionally present.",
-    Earth: "A partner dynamic that feels steady, grounded, patient and dependable.",
-    Metal: "A partner dynamic that feels clear, disciplined, responsible and decisive.",
-    Water: "A partner dynamic that feels adaptable, thoughtful, calm and emotionally perceptive.",
+    Wood: "You tend toward a partner dynamic that feels principled, growth-oriented and emotionally sincere.",
+    Fire: "You tend toward a partner dynamic that feels warm, expressive, encouraging and emotionally present.",
+    Earth: "You tend toward a partner dynamic that feels steady, grounded, patient and dependable.",
+    Metal: "You tend toward a partner dynamic that feels clear, disciplined, responsible and decisive.",
+    Water: "You tend toward a partner dynamic that feels adaptable, thoughtful, calm and emotionally perceptive.",
   };
 
   const favourablePartnerTraits = spouseStar?.element
@@ -278,7 +278,7 @@ function buildPartnerDynamics({ spouseStar, primaryUsefulGod }) {
     spouseStar.element !== primaryUsefulGod
   ) {
     potentialChallenges.push(
-      `In this chart, ${spouseStar.element} energy is the partner star — the element that naturally represents relationship and spouse energy. Because ${primaryUsefulGod} — not ${spouseStar.element} — is what supports this person’s own growth, relationships can sometimes feel like they pull in a slightly different direction from personal ambitions. This is healthy self-awareness: the right partner brings complementary energy, not identical energy.`
+      `In this chart, ${spouseStar.element} energy is the partner star — the element that naturally represents relationship and spouse energy. Because ${primaryUsefulGod} — not ${spouseStar.element} — is what supports your own growth, relationships can sometimes feel like they pull in a slightly different direction from personal ambitions. This is healthy self-awareness: the right partner brings complementary energy, not identical energy.`
     );
   }
 

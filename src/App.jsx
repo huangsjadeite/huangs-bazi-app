@@ -2034,10 +2034,10 @@ function AdminFullReport({ report, clientName }) {
         )}
         {!!favourableSet.size && (
           <p className="mt-3 text-base leading-7 text-stone-700">
-            Partners whose own chart leans toward {[...favourableSet].join(", ")} -
-            this chart's own supportive elements - tend to reinforce rather than
-            drain this person's energy, since those are the same elements this
-            chart already benefits from.
+            Partners whose own chart leans toward {[...favourableSet].join(", ")} —
+            your chart's own supportive elements — tend to reinforce rather than
+            drain your energy, since those are the same elements your chart
+            already benefits from.
           </p>
         )}
         {!!relationship.partnerDynamics?.potentialChallenges?.length && (
