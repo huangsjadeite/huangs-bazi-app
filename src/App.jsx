@@ -1640,7 +1640,7 @@ function AdminFullReport({ report, clientName }) {
             ["Gender", report.client?.gender || "-"],
             ["Birth Country", report.client?.birthCountry || "-"],
             [
-              "Day Master",
+              "Day Master (Horoscope)",
               (() => {
                 const stem = natalPillars?.day?.stem;
                 const label = stem
@@ -2150,7 +2150,7 @@ function AdminFullReport({ report, clientName }) {
         )}
       </AdminReportSection>
 
-      <AdminReportSection icon="💎" title="Supportive Elements & Stones">
+      <AdminReportSection icon="💎" title="Main Supportive Elements & Stones">
         <p className="mt-3 text-base text-stone-700">
           Favourable: {(usefulGod.favourableElements || []).join(", ") || "-"} · Use carefully:{" "}
           {(usefulGod.cautionElements || []).join(", ") || "-"}
@@ -2188,7 +2188,7 @@ function AdminFullReport({ report, clientName }) {
       </AdminReportSection>
 
       {(primaryDzi || secondaryDzi) && (
-        <AdminReportSection icon="🪬" title="Recommended Dzi Beads">
+        <AdminReportSection icon="🪬" title="Optional Dzi Beads">
           <p className="mt-3 text-sm text-stone-500">
             Tibetan amulet recommendations based on this chart's Useful God and energy needs.
           </p>
@@ -2223,7 +2223,7 @@ function AdminFullReport({ report, clientName }) {
         </AdminReportSection>
       )}
 
-      <AdminReportSection icon="🧭" title="Long-Term Life Direction">
+      <AdminReportSection icon="🧭" title="Your Life Direction">
         {!!lifeThemes.primaryThemes?.length && (
           <div className="mt-3 space-y-3">
             <p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-700">
@@ -2272,6 +2272,31 @@ function AdminFullReport({ report, clientName }) {
           <p className="mt-3 text-base leading-7 text-stone-600">
             Based on your birth year, Eight Mansions assigns you a Kua number that determines which compass directions support or drain your energy. Use your favourable directions for your desk, bed headboard and where you sit during important conversations or decisions. Avoiding unfavourable directions for sleep and major commitments helps reduce unnecessary friction over time.
           </p>
+          <div className="mt-4 flex items-start gap-5 rounded-xl border border-slate-200 bg-slate-50 p-4 print:bg-[#FAF3EF] print:border-[#e5d5c0]">
+            <svg width="110" height="110" viewBox="0 0 110 110" className="flex-shrink-0" aria-label="iPhone compass diagram">
+              <circle cx="55" cy="55" r="52" fill="#1C1C1E" stroke="#3A3A3C" strokeWidth="1.5"/>
+              <circle cx="55" cy="55" r="44" fill="none" stroke="#3A3A3C" strokeWidth="1"/>
+              {[0,30,60,90,120,150,180,210,240,270,300,330].map(deg => {
+                const r1 = deg % 90 === 0 ? 36 : 41;
+                const r2 = 44;
+                const a = (deg - 90) * Math.PI / 180;
+                return <line key={deg} x1={55 + r1*Math.cos(a)} y1={55 + r1*Math.sin(a)} x2={55 + r2*Math.cos(a)} y2={55 + r2*Math.sin(a)} stroke="#636366" strokeWidth={deg % 90 === 0 ? 1.5 : 0.75}/>;
+              })}
+              <polygon points="55,12 50,55 55,48 60,55" fill="#FF3B30"/>
+              <polygon points="55,98 50,55 55,62 60,55" fill="#EBEBF5"/>
+              <text x="55" y="10" textAnchor="middle" fill="#FF3B30" fontSize="11" fontWeight="bold" fontFamily="system-ui">N</text>
+              <text x="55" y="106" textAnchor="middle" fill="#EBEBF5" fontSize="11" fontWeight="bold" fontFamily="system-ui">S</text>
+              <text x="104" y="59" textAnchor="middle" fill="#EBEBF5" fontSize="11" fontWeight="bold" fontFamily="system-ui">E</text>
+              <text x="6" y="59" textAnchor="middle" fill="#EBEBF5" fontSize="11" fontWeight="bold" fontFamily="system-ui">W</text>
+              <circle cx="55" cy="55" r="4" fill="#636366"/>
+              <circle cx="55" cy="55" r="2" fill="#EBEBF5"/>
+            </svg>
+            <div className="text-xs text-stone-500 leading-relaxed">
+              <p className="font-semibold text-stone-700 mb-1">How to find your directions</p>
+              <p>Open the <strong>Compass app</strong> on your iPhone. Hold your phone flat and level. The <span className="text-red-600 font-bold">red needle always points North</span> — the white needle points South.</p>
+              <p className="mt-1.5">Once you know where North is, East is to your right, West to your left, and South is behind you. Use this to position your desk, bed headboard and seating accordingly.</p>
+            </div>
+          </div>
           <p className="mt-3 text-base text-stone-700">
             <strong>
               {eightMansions.lifeStar} ({eightMansions.trigram}, {eightMansions.element})
@@ -2513,46 +2538,73 @@ function AdminFullReport({ report, clientName }) {
                     <th className="px-4 py-2.5">Decade Energy</th>
                     <th className="px-4 py-2.5">Read</th>
                     <th className="px-4 py-2.5">Decade Theme</th>
+                    <th className="px-4 py-2.5">Wear & Display</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {luckPillars.pillars.map((p, i) => {
-                    const isCurrent = currentAge !== null &&
-                      currentAge >= p.startAge.years &&
-                      currentAge < p.endAge.years;
-                    const read = pillarRead(p.pillar.stem.element);
-                    const rs = readStyle[read];
-                    const theme = tenGodTheme[p.tenGod] || null;
-                    return (
-                      <tr
-                        key={i}
-                        className={`border-t border-slate-100 align-top print:border-[#e5d5c0] odd:print:bg-white even:print:bg-[#FAE5D3] ${isCurrent ? "bg-amber-50 print:bg-[#FAE5D3]" : ""}`}
-                      >
-                        <td className="px-4 py-3 font-semibold text-slate-800 whitespace-nowrap">
-                          {p.startAge.years}y–{p.endAge.years}y
-                          {isCurrent && (
-                            <span className="ml-2 rounded-full bg-amber-600 px-2 py-0.5 text-[10px] font-bold text-white print:bg-[#8B1A1A]">
-                              NOW
+                  {(() => {
+                    const elementWear = {
+                      Wood:  "green jadeite or green aventurine",
+                      Fire:  "red jadeite or garnet",
+                      Earth: "yellow jadeite or citrine",
+                      Metal: "white jadeite or clear quartz",
+                      Water: "black jadeite or aquamarine",
+                    };
+                    const elementDisplay = {
+                      Wood:  "plants or wooden decor",
+                      Fire:  "warm lighting or red accents",
+                      Earth: "crystal clusters or earthy ceramics",
+                      Metal: "metal ornaments or white crystals",
+                      Water: "a small water feature or dark stone decor",
+                    };
+                    const primaryUsefulEl = usefulGod.primaryUsefulGod || null;
+                    return luckPillars.pillars.map((p, i) => {
+                      const isCurrent = currentAge !== null &&
+                        currentAge >= p.startAge.years &&
+                        currentAge < p.endAge.years;
+                      const read = pillarRead(p.pillar.stem.element);
+                      const rs = readStyle[read];
+                      const theme = tenGodTheme[p.tenGod] || null;
+                      const recEl = read === "Caution" && primaryUsefulEl ? primaryUsefulEl : p.pillar.stem.element;
+                      const wearText = elementWear[recEl] || "—";
+                      const displayText = elementDisplay[recEl] || "—";
+                      const wearNote = read === "Caution" && primaryUsefulEl
+                        ? `Support with your Useful God (${primaryUsefulEl}). Wear ${wearText}. Display ${displayText}.`
+                        : `Wear ${wearText}. Display ${displayText}.`;
+                      return (
+                        <tr
+                          key={i}
+                          className={`border-t border-slate-100 align-top print:border-[#e5d5c0] odd:print:bg-white even:print:bg-[#FAE5D3] ${isCurrent ? "bg-amber-50 print:bg-[#FAE5D3]" : ""}`}
+                        >
+                          <td className="px-4 py-3 font-semibold text-slate-800 whitespace-nowrap">
+                            {p.startAge.years}y–{p.endAge.years}y
+                            {isCurrent && (
+                              <span className="ml-2 rounded-full bg-amber-600 px-2 py-0.5 text-[10px] font-bold text-white print:bg-[#8B1A1A]">
+                                NOW
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className="font-semibold text-stone-800">{p.pillar.stem.element}</span>
+                            {getProfileDisplay(p.tenGod)?.name && (
+                              <span className="text-stone-500"> · {getProfileDisplay(p.tenGod).name}</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${rs.badge}`}>
+                              {rs.label}
                             </span>
-                          )}
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className="font-semibold text-stone-800">{p.pillar.stem.element}</span>
-                          {getProfileDisplay(p.tenGod)?.name && (
-                            <span className="text-stone-500"> · {getProfileDisplay(p.tenGod).name}</span>
-                          )}
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${rs.badge}`}>
-                            {rs.label}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-stone-600 leading-5">
-                          {theme || "—"}
-                        </td>
-                      </tr>
-                    );
-                  })}
+                          </td>
+                          <td className="px-4 py-3 text-stone-600 leading-5">
+                            {theme || "—"}
+                          </td>
+                          <td className="px-4 py-3 text-xs text-stone-500 leading-5">
+                            {wearNote}
+                          </td>
+                        </tr>
+                      );
+                    });
+                  })()}
                 </tbody>
               </table>
             </div>
@@ -2596,6 +2648,10 @@ function AdminFullReport({ report, clientName }) {
           </table>
         </div>
       </AdminReportSection>
+
+      <p className="mt-10 text-xs text-stone-400 leading-relaxed border-t border-slate-100 pt-6 print:text-[#9A7060]">
+        <strong className="text-stone-500">Disclaimer:</strong> This Bazi analysis is intended as a tool for self-reflection and personal awareness. It is not a prediction of fixed outcomes and should not replace professional advice in areas of health, finance, law or relationships. Results are based on classical Bazi methodology and are provided as guidance only.
+      </p>
 
       <details
         className="mt-10 rounded-2xl border border-slate-200 bg-slate-50 p-5 print-no-export"
@@ -2725,12 +2781,12 @@ function PremiumInsights({ report, isAdmin = false, fullReport = null, clientNam
     },
     {
       icon: "💎",
-      title: "Supportive Elements & Stones",
+      title: "Main Supportive Elements & Stones",
       text: "Receive more specific guidance on favourable elements, gemstone support and practical energetic alignment.",
     },
     {
       icon: "🧭",
-      title: "Long-Term Life Direction",
+      title: "Your Life Direction",
       text: "Connect your current year energy with deeper life themes, growth cycles and long-term personal development.",
     },
   ];
