@@ -2202,6 +2202,7 @@ function AdminFullReport({ report, clientName }) {
                   <a href={primaryDzi.url} target="_blank" rel="noreferrer" className="hover:underline print:no-underline print:text-slate-900">
                     {primaryDzi.label}
                   </a>
+                  <span className="ml-2 text-sm font-normal text-stone-400">· {usefulGod.primaryUsefulGod} element</span>
                 </p>
                 <p className="mt-1 text-sm text-stone-600">{primaryDzi.why}</p>
               </div>
@@ -2215,6 +2216,7 @@ function AdminFullReport({ report, clientName }) {
                   <a href={secondaryDzi.url} target="_blank" rel="noreferrer" className="hover:underline print:no-underline print:text-slate-900">
                     {secondaryDzi.label}
                   </a>
+                  <span className="ml-2 text-sm font-normal text-stone-400">· {usefulGod.secondaryUsefulGod} element</span>
                 </p>
                 <p className="mt-1 text-sm text-stone-600">{secondaryDzi.why}</p>
               </div>
