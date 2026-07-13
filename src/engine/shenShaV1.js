@@ -219,7 +219,7 @@ export function buildShenShaV1({ pillars }) {
       zh: "孤辰",
       branch: branchLabel(solitaryBranchKey),
       theme: null,
-      caution: "Can show as a tendency toward independence or emotional distance, particularly around partnership.",
+      caution: "A tendency to feel unsupported or out of place, particularly when starting new chapters or in early life.",
       active: branchPresentInPillars(pillars, solitaryBranchKey),
     });
   }
@@ -231,7 +231,7 @@ export function buildShenShaV1({ pillars }) {
       zh: "寡宿",
       branch: branchLabel(widowBranchKey),
       theme: null,
-      caution: "Can show as a tendency toward independence or emotional distance, particularly around partnership.",
+      caution: "A tendency toward emotional withdrawal after loss or endings; can show as guardedness in close relationships.",
       active: branchPresentInPillars(pillars, widowBranchKey),
     });
   }
@@ -242,7 +242,7 @@ export function buildShenShaV1({ pillars }) {
       name: "Monthly Virtue",
       zh: "月德貴人",
       stem: stemLabel(monthlyVirtueStemKey),
-      theme: "Protection, goodwill, smoother resolution of difficulties.",
+      theme: "A recurring protective influence — disputes and difficulties tend to resolve more smoothly, month to month.",
       caution: null,
       active: stemPresentInPillars(pillars, monthlyVirtueStemKey),
     });
@@ -262,7 +262,7 @@ export function buildShenShaV1({ pillars }) {
         heavenlyVirtue.type === "stem"
           ? stemLabel(heavenlyVirtue.key)
           : branchLabel(heavenlyVirtue.key),
-      theme: "Protection, goodwill, smoother resolution of difficulties.",
+      theme: "One of the most powerful protective stars — heaven's grace helps resolve serious difficulties, including illness, legal matters and setbacks.",
       caution: null,
       active,
     });

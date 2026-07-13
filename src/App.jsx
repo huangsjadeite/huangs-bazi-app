@@ -2433,6 +2433,14 @@ function AdminFullReport({ report, clientName }) {
             active:   "Active in your chart — a natural pull toward self-reliance; deep meaningful connections may take more effort to sustain.",
             inactive: "Not active in your chart — this pattern of emotional solitude does not apply to you.",
           },
+          monthlyVirtue: {
+            active:   "Active in your chart — this protective energy is reinforced in your natal chart; disputes and setbacks are more likely to resolve smoothly.",
+            inactive: "Not directly reinforced in your chart — this protection is still present but works more subtly in the background.",
+          },
+          heavenlyVirtue: {
+            active:   "Active in your chart — one of the most auspicious signs; serious difficulties, illness or legal matters are more likely to resolve in your favour.",
+            inactive: "Not directly reinforced in your chart — this heavenly protection still supports you as a background influence.",
+          },
           fiveGhosts: {
             active:   "Active in your chart — friction, misunderstandings or hidden obstacles may appear more often than usual.",
             inactive: "Not active in your chart — you are less prone to hidden obstacles and interpersonal friction.",
