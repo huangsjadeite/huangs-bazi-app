@@ -1856,60 +1856,32 @@ function AdminFullReport({ report, clientName }) {
         </div>
       )}
 
-      {!!monthlyOutlook.length && (
-        <div className="mt-8">
-          <h3 className="text-xl font-bold text-slate-950">
-            🗓️ Monthly Outlook — {report.annualEnergy?.selectedYear || ""}
-          </h3>
-          <p className="mt-2 text-sm text-stone-500">
-            Each month's energy is read against this chart's favourable and caution elements. In the Chinese calendar, each month carries its own pillar — a heavenly stem and earthly branch pair — so every month has a different zodiac animal (the month's branch). This follows the classical Bazi methodology and is not related to the Western zodiac.
-          </p>
-          <p className="mt-1 text-xs text-stone-400">
-            Why a different animal each month: the 12 earthly branches are permanently mapped to the 12 Chinese months — Tiger is always the first month of spring, Rabbit the second, Dragon the third, and so on. Each calendar month corresponds to one of these branches, so the animal naturally changes every month.
-          </p>
-          <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200 print:rounded-none print:border-[#8B1A1A]">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-slate-50 text-left text-xs font-bold uppercase tracking-[0.12em] text-slate-600 print:bg-[#8B1A1A] print:text-white">
-                  <th className="px-4 py-2.5">Month</th>
-                  <th className="px-4 py-2.5">Read</th>
-                  <th className="px-4 py-2.5">Note</th>
-                </tr>
-              </thead>
-              <tbody>
-                {monthlyOutlook.map((item) => (
-                  <tr
-                    key={item.month}
-                    className="border-t border-slate-100 align-top print:border-[#e5d5c0] odd:print:bg-white even:print:bg-[#FAE5D3]"
-                  >
-                    <td className="px-4 py-2.5 font-semibold text-slate-800">
-                      {item.monthName}
-                    </td>
-                    <td className="px-4 py-2.5">
-                      <span
-                        className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${
-                          item.read === "Good"
-                            ? "bg-green-50 text-green-700"
-                            : item.read === "Caution"
-                            ? "bg-red-50 text-red-700"
-                            : "bg-slate-100 text-slate-600"
-                        }`}
-                      >
-                        {item.read}
-                      </span>
-                    </td>
-                    <td className="px-4 py-2.5 text-stone-600 leading-6">{expandMonthlyNote(item)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
       <p className="mt-10 text-xs font-bold uppercase tracking-[0.3em] text-amber-700">
         The Four Key Areas
       </p>
+
+      <AdminReportSection icon="✨" title="Hidden Strengths">
+        <AdminBulletList
+          items={personality.topStrengths}
+          render={(item) => (
+            <>
+              <strong>{item.title}</strong> — {item.description}
+            </>
+          )}
+        />
+      </AdminReportSection>
+
+      <AdminReportSection icon="⚠️" title="Personal Blind Spots">
+        {blindSpots.summary && (
+          <p className="mt-3 text-base leading-7 text-stone-700">{blindSpots.summary}</p>
+        )}
+        <AdminBulletList items={blindSpots.blindSpots} />
+        {blindSpots.growthAdvice && (
+          <p className="mt-4 text-base leading-7 text-stone-700">
+            <strong>Growth advice:</strong> {blindSpots.growthAdvice}
+          </p>
+        )}
+      </AdminReportSection>
 
       <AdminReportSection icon="💼" title="Career Timing & Direction">
         {(careerAuthorityProfile || careerOutputProfile) && (
@@ -2127,29 +2099,6 @@ function AdminFullReport({ report, clientName }) {
         />
       </AdminReportSection>
 
-      <AdminReportSection icon="✨" title="Hidden Strengths">
-        <AdminBulletList
-          items={personality.topStrengths}
-          render={(item) => (
-            <>
-              <strong>{item.title}</strong> — {item.description}
-            </>
-          )}
-        />
-      </AdminReportSection>
-
-      <AdminReportSection icon="⚠️" title="Personal Blind Spots">
-        {blindSpots.summary && (
-          <p className="mt-3 text-base leading-7 text-stone-700">{blindSpots.summary}</p>
-        )}
-        <AdminBulletList items={blindSpots.blindSpots} />
-        {blindSpots.growthAdvice && (
-          <p className="mt-4 text-base leading-7 text-stone-700">
-            <strong>Growth advice:</strong> {blindSpots.growthAdvice}
-          </p>
-        )}
-      </AdminReportSection>
-
       <AdminReportSection icon="💎" title="Main Supportive Elements & Stones">
         <p className="mt-3 text-base text-stone-700">
           Favourable: {(usefulGod.favourableElements || []).join(", ") || "-"} · Use carefully:{" "}
@@ -2196,7 +2145,7 @@ function AdminFullReport({ report, clientName }) {
             {primaryDzi && (
               <div className="rounded-xl border border-slate-200 p-4 print:border-[#8B1A1A] print:bg-[#FAE5D3]">
                 <p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-700 print:text-[#8B1A1A]">
-                  Supporting your {usefulGod.primaryUsefulGod} energy · Primary Useful God
+                  Supporting your {usefulGod.primaryUsefulGod} energy
                 </p>
                 <p className="mt-1 text-base font-semibold text-slate-900">
                   <a href={primaryDzi.url} target="_blank" rel="noreferrer" className="hover:underline print:no-underline print:text-slate-900">
@@ -2210,7 +2159,7 @@ function AdminFullReport({ report, clientName }) {
             {secondaryDzi && (
               <div className="rounded-xl border border-slate-200 p-4 print:border-[#8B1A1A] print:bg-[#FAE5D3]">
                 <p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-700 print:text-[#8B1A1A]">
-                  Supporting your {usefulGod.secondaryUsefulGod} energy · Secondary Useful God
+                  Supporting your {usefulGod.secondaryUsefulGod} energy
                 </p>
                 <p className="mt-1 text-base font-semibold text-slate-900">
                   <a href={secondaryDzi.url} target="_blank" rel="noreferrer" className="hover:underline print:no-underline print:text-slate-900">
@@ -2268,6 +2217,57 @@ function AdminFullReport({ report, clientName }) {
           </div>
         )}
       </AdminReportSection>
+
+      {!!monthlyOutlook.length && (
+        <div className="mt-8">
+          <h3 className="text-xl font-bold text-slate-950">
+            🗓️ Monthly Outlook — {report.annualEnergy?.selectedYear || ""}
+          </h3>
+          <p className="mt-2 text-sm text-stone-500">
+            Each month's energy is read against this chart's favourable and caution elements. In the Chinese calendar, each month carries its own pillar — a heavenly stem and earthly branch pair — so every month has a different zodiac animal (the month's branch). This follows the classical Bazi methodology and is not related to the Western zodiac.
+          </p>
+          <p className="mt-1 text-xs text-stone-400">
+            Why a different animal each month: the 12 earthly branches are permanently mapped to the 12 Chinese months — Tiger is always the first month of spring, Rabbit the second, Dragon the third, and so on. Each calendar month corresponds to one of these branches, so the animal naturally changes every month.
+          </p>
+          <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200 print:rounded-none print:border-[#8B1A1A]">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-slate-50 text-left text-xs font-bold uppercase tracking-[0.12em] text-slate-600 print:bg-[#8B1A1A] print:text-white">
+                  <th className="px-4 py-2.5">Month</th>
+                  <th className="px-4 py-2.5">Read</th>
+                  <th className="px-4 py-2.5">Note</th>
+                </tr>
+              </thead>
+              <tbody>
+                {monthlyOutlook.map((item) => (
+                  <tr
+                    key={item.month}
+                    className="border-t border-slate-100 align-top print:border-[#e5d5c0] odd:print:bg-white even:print:bg-[#FAE5D3]"
+                  >
+                    <td className="px-4 py-2.5 font-semibold text-slate-800">
+                      {item.monthName}
+                    </td>
+                    <td className="px-4 py-2.5">
+                      <span
+                        className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${
+                          item.read === "Good"
+                            ? "bg-green-50 text-green-700"
+                            : item.read === "Caution"
+                            ? "bg-red-50 text-red-700"
+                            : "bg-slate-100 text-slate-600"
+                        }`}
+                      >
+                        {item.read}
+                      </span>
+                    </td>
+                    <td className="px-4 py-2.5 text-stone-600 leading-6">{expandMonthlyNote(item)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {eightMansions && (
         <AdminReportSection icon="🧭" title="Personal Directions (Eight Mansions)">
@@ -2415,6 +2415,56 @@ function AdminFullReport({ report, clientName }) {
       {!!shenSha.length && (() => {
         const activeStars = shenSha.filter((s) => s.active);
         const referenceStars = shenSha.filter((s) => !s.active);
+
+        const animalMeaning = {
+          Rat:     "resourcefulness & social charm",
+          Ox:      "steadiness & quiet endurance",
+          Tiger:   "boldness & natural leadership",
+          Rabbit:  "charm, grace & romantic sensitivity",
+          Dragon:  "ambition, charisma & luck",
+          Snake:   "intuition & strategic thinking",
+          Horse:   "freedom & restless momentum",
+          Goat:    "creativity & artistic gentleness",
+          Monkey:  "cleverness & adaptability",
+          Rooster: "precision & confident attention to detail",
+          Dog:     "loyalty & protective instincts",
+          Pig:     "warmth, generosity & sincerity",
+        };
+
+        const starAnimalNote = (item) => {
+          const animals = item.branches?.length
+            ? item.branches.map(b => b.animal)
+            : item.branch
+            ? [item.branch.animal]
+            : [];
+          if (!animals.length) return null;
+          const parts = animals.filter(a => animalMeaning[a]).map(a => `${a} — ${animalMeaning[a]}`);
+          return parts.length ? parts.join(" · ") : null;
+        };
+
+        const challengingStarNote = {
+          fiveGhosts: {
+            active:   "Active in your chart — friction, misunderstandings or hidden obstacles may appear more often than usual.",
+            inactive: "Not active in your chart — you are less prone to hidden obstacles and interpersonal friction.",
+          },
+          widow: {
+            active:   "Active in your chart — a natural pull toward independence; be mindful of emotional distance in close relationships.",
+            inactive: "Not active in your chart — this pattern of emotional isolation does not apply to you.",
+          },
+          robberySha: {
+            active:   "Active in your chart — exercise extra caution with sudden decisions involving finances or resources.",
+            inactive: "Not active in your chart — sudden setbacks from this star do not apply to you.",
+          },
+        };
+
+        const starNote = (item) => {
+          if (challengingStarNote[item.key]) {
+            const entry = challengingStarNote[item.key];
+            return item.active ? entry.active : entry.inactive;
+          }
+          return starAnimalNote(item);
+        };
+
         const starTarget = (item) =>
           item.branches
             ? item.branches.map((b) => `${b.zh} ${b.animal}`).join(" / ")
@@ -2423,6 +2473,7 @@ function AdminFullReport({ report, clientName }) {
             : item.stem
             ? `${item.stem.zh} ${item.stem.name}`
             : "";
+
         return (
           <AdminReportSection icon="🌸" title="Personal Stars (Shen Sha)">
             <p className="mt-3 text-base leading-7 text-stone-600">
@@ -2433,12 +2484,16 @@ function AdminFullReport({ report, clientName }) {
                 <p className="mt-4 text-xs font-bold uppercase tracking-widest text-stone-400">Active in your chart</p>
                 <AdminBulletList
                   items={activeStars}
-                  render={(item) => (
-                    <>
-                      <strong>{item.name} ({item.zh})</strong> — {item.theme}
-                      {item.caution ? ` ${item.caution}` : ""}
-                    </>
-                  )}
+                  render={(item) => {
+                    const note = starNote(item);
+                    return (
+                      <>
+                        <strong>{item.name} ({item.zh})</strong> — {item.theme}
+                        {item.caution ? ` ${item.caution}` : ""}
+                        {note && <span className="block text-xs text-stone-400 mt-0.5">{note}</span>}
+                      </>
+                    );
+                  }}
                 />
               </>
             )}
@@ -2449,11 +2504,13 @@ function AdminFullReport({ report, clientName }) {
                   items={referenceStars}
                   render={(item) => {
                     const target = starTarget(item);
+                    const note = starNote(item);
                     return (
                       <>
                         <strong>{item.name} ({item.zh})</strong>
                         {target ? ` — ${target}` : ""}. {item.theme}
                         {item.caution ? ` ${item.caution}` : ""}
+                        {note && <span className="block text-xs text-stone-400 mt-0.5">{note}</span>}
                       </>
                     );
                   }}
