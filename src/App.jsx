@@ -2416,33 +2416,23 @@ function AdminFullReport({ report, clientName }) {
         const activeStars = shenSha.filter((s) => s.active);
         const referenceStars = shenSha.filter((s) => !s.active);
 
-        const animalMeaning = {
-          Rat:     "resourcefulness & social charm",
-          Ox:      "steadiness & quiet endurance",
-          Tiger:   "boldness & natural leadership",
-          Rabbit:  "charm, grace & romantic sensitivity",
-          Dragon:  "ambition, charisma & luck",
-          Snake:   "intuition & strategic thinking",
-          Horse:   "freedom & restless momentum",
-          Goat:    "creativity & artistic gentleness",
-          Monkey:  "cleverness & adaptability",
-          Rooster: "precision & confident attention to detail",
-          Dog:     "loyalty & protective instincts",
-          Pig:     "warmth, generosity & sincerity",
-        };
-
-        const starAnimalNote = (item) => {
-          const animals = item.branches?.length
-            ? item.branches.map(b => b.animal)
-            : item.branch
-            ? [item.branch.animal]
-            : [];
-          if (!animals.length) return null;
-          const parts = animals.filter(a => animalMeaning[a]).map(a => `${a} — ${animalMeaning[a]}`);
-          return parts.length ? parts.join(" · ") : null;
-        };
-
-        const challengingStarNote = {
+        const starStatusNote = {
+          peachBlossom: {
+            active:   "Active in your chart — natural magnetism; romance, popularity and social opportunities flow more easily to you.",
+            inactive: "Not active in your chart — social charm is built through effort rather than coming naturally.",
+          },
+          skyHorse: {
+            active:   "Active in your chart — movement, travel and change of environment are recurring themes in your life.",
+            inactive: "Not active in your chart — your energy is more settled; major relocations or restlessness are less driven by external push.",
+          },
+          intelligenceStar: {
+            active:   "Active in your chart — strong alignment with study and exams; academic or intellectual recognition comes more naturally.",
+            inactive: "Not active in your chart — intellectual success comes through sustained effort rather than natural exam luck.",
+          },
+          solitary: {
+            active:   "Active in your chart — a natural pull toward self-reliance; deep meaningful connections may take more effort to sustain.",
+            inactive: "Not active in your chart — this pattern of emotional solitude does not apply to you.",
+          },
           fiveGhosts: {
             active:   "Active in your chart — friction, misunderstandings or hidden obstacles may appear more often than usual.",
             inactive: "Not active in your chart — you are less prone to hidden obstacles and interpersonal friction.",
@@ -2458,11 +2448,18 @@ function AdminFullReport({ report, clientName }) {
         };
 
         const starNote = (item) => {
-          if (challengingStarNote[item.key]) {
-            const entry = challengingStarNote[item.key];
+          if (item.key === "noblePeople") {
+            const animals = item.branches?.length
+              ? item.branches.map(b => b.animal)
+              : item.branch ? [item.branch.animal] : [];
+            if (!animals.length) return null;
+            return `${animals.join(" & ")} year people are likely to be your natural benefactors and helpful connections.`;
+          }
+          if (starStatusNote[item.key]) {
+            const entry = starStatusNote[item.key];
             return item.active ? entry.active : entry.inactive;
           }
-          return starAnimalNote(item);
+          return null;
         };
 
         const starTarget = (item) =>
