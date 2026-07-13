@@ -1424,6 +1424,18 @@ function AdminFullReport({ report, clientName }) {
     Dragon: "April", Snake: "May", Horse: "June", Goat: "July",
     Monkey: "August", Rooster: "September", Dog: "October", Pig: "November",
   };
+  // 2020 = Rat year (index 0); cycle repeats every 12 years
+  const peachBlossomYears = (() => {
+    if (!peachBlossomAnimal) return [];
+    const order = ["Rat","Ox","Tiger","Rabbit","Dragon","Snake","Horse","Goat","Monkey","Rooster","Dog","Pig"];
+    const targetIdx = order.indexOf(peachBlossomAnimal);
+    if (targetIdx === -1) return [];
+    const currentYear = new Date().getFullYear();
+    const currentIdx = (currentYear - 2020 + 1200) % 12;
+    const offset = (targetIdx - currentIdx + 12) % 12;
+    const first = offset === 0 ? currentYear : currentYear + offset;
+    return [first, first + 12];
+  })();
 
   const careerStrongMonths = monthNamesWhere(
     (m) =>
@@ -2059,13 +2071,14 @@ function AdminFullReport({ report, clientName }) {
         {peachBlossomAnimal && (
           <p className="mt-3 text-base leading-7 text-stone-700">
             <strong>Romantic Peak Timing:</strong> Your Peach Blossom is the{" "}
-            <strong>{peachBlossomAnimal}</strong>. {peachBlossomAnimal} years (every 12 years) and{" "}
-            {animalToMonth[peachBlossomAnimal] ? (
-              <><strong>{animalToMonth[peachBlossomAnimal]}</strong> each year</>
-            ) : (
-              `${peachBlossomAnimal} months each year`
-            )}{" "}
-            are your strongest windows for romantic connections and social magnetism.
+            <strong>{peachBlossomAnimal}</strong>.{" "}
+            {peachBlossomYears.length === 2 && (
+              <>{peachBlossomYears[0]} and {peachBlossomYears[1]} are your next {peachBlossomAnimal} years — </>
+            )}
+            {animalToMonth[peachBlossomAnimal] && (
+              <><strong>{animalToMonth[peachBlossomAnimal]}</strong> each year is also a monthly peak. </>
+            )}
+            These are your strongest windows for romantic connections and social magnetism.
           </p>
         )}
         <AdminStrengthRiskGrid
