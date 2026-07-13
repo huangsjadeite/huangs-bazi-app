@@ -1401,6 +1401,30 @@ function AdminFullReport({ report, clientName }) {
   const cautionSet = new Set(usefulGod.cautionElements || []);
   const partnerStarElement = relationship.spouseStar?.element || null;
 
+  // Day Branch (Spouse Palace) — the earthly branch of the day pillar is the
+  // classical "relationship palace" in BaZi. Its element indicates the quality
+  // of energy the person brings to and seeks in close partnerships.
+  const dayBranchAnimal = natalPillars?.day?.branch?.animal || null;
+  const dayBranchZh = natalPillars?.day?.branch?.zh || null;
+  const dayBranchElement = natalPillars?.day?.branch?.element || null;
+  const spousePalaceNote = {
+    Wood:  "Your relationship palace carries Wood energy — growth, renewal and nurturing. You thrive with partners who are encouraging, flexible and growth-minded.",
+    Fire:  "Your relationship palace carries Fire energy — warmth, passion and expressiveness. You thrive with partners who are vibrant, emotionally present and open.",
+    Earth: "Your relationship palace carries Earth energy — stability, loyalty and groundedness. You thrive with partners who are dependable, patient and consistent.",
+    Metal: "Your relationship palace carries Metal energy — structure, clarity and principle. You thrive with partners who are decisive, honest and have strong personal values.",
+    Water: "Your relationship palace carries Water energy — depth, intuition and emotional flow. You thrive with partners who are perceptive, adaptable and emotionally intelligent.",
+  };
+
+  // Peach Blossom timing — the Peach Blossom branch indicates which years and
+  // months romance and social magnetism peak for this person.
+  const peachBlossomStar = shenSha.find((s) => s.key === "peachBlossom");
+  const peachBlossomAnimal = peachBlossomStar?.branch?.animal || null;
+  const animalToMonth = {
+    Rat: "December", Ox: "January", Tiger: "February", Rabbit: "March",
+    Dragon: "April", Snake: "May", Horse: "June", Goat: "July",
+    Monkey: "August", Rooster: "September", Dog: "October", Pig: "November",
+  };
+
   const careerStrongMonths = monthNamesWhere(
     (m) =>
       favourableSet.has(m.dominantElement) &&
@@ -1990,6 +2014,12 @@ function AdminFullReport({ report, clientName }) {
               : ""}
           </p>
         )}
+        {dayBranchAnimal && dayBranchElement && (
+          <p className="mt-3 text-base leading-7 text-stone-700">
+            <strong>Spouse Palace ({dayBranchZh} {dayBranchAnimal} · {dayBranchElement}):</strong>{" "}
+            {spousePalaceNote[dayBranchElement]}
+          </p>
+        )}
         <AdminMonthCallout label="Good months" months={relationshipGoodMonths} tone="good" />
         <AdminMonthCallout
           label="Extra grounding needed"
@@ -2024,6 +2054,18 @@ function AdminFullReport({ report, clientName }) {
             <strong>{report.annualEnergy?.selectedYear || "This year"}:</strong>{" "}
             {relationship.timingNotes.annualInfluence}{" "}
             {relationship.timingNotes.caution}
+          </p>
+        )}
+        {peachBlossomAnimal && (
+          <p className="mt-3 text-base leading-7 text-stone-700">
+            <strong>Romantic Peak Timing:</strong> Your Peach Blossom is the{" "}
+            <strong>{peachBlossomAnimal}</strong>. {peachBlossomAnimal} years (every 12 years) and{" "}
+            {animalToMonth[peachBlossomAnimal] ? (
+              <><strong>{animalToMonth[peachBlossomAnimal]}</strong> each year</>
+            ) : (
+              `${peachBlossomAnimal} months each year`
+            )}{" "}
+            are your strongest windows for romantic connections and social magnetism.
           </p>
         )}
         <AdminStrengthRiskGrid

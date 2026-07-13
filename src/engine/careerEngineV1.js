@@ -1,5 +1,10 @@
 // src/engine/careerEngineV1.js
 
+// Career industry directions are based on the Day Master's own element (what
+// you ARE), not usefulGodV4.primaryUsefulGod (the strength-balancing Useful
+// God, which is a different concept and can resolve to any element depending
+// on Day Master strength). Same distinction as the fix in wealthEngineV1.js.
+
 const VERSION = "career-engine-v1";
 
 function safeName(value) {
@@ -132,7 +137,7 @@ function getCareerRisks(mainStructure, dayStatus) {
   return risks.slice(0, 3);
 }
 
-function getRecommendedDirections(mainStructure, primaryUsefulGod) {
+function getRecommendedDirections(mainStructure, dayMasterElement) {
   const structureMap = {
     Connectors: [
       "Consulting",
@@ -171,7 +176,7 @@ function getRecommendedDirections(mainStructure, primaryUsefulGod) {
     ],
   };
 
-  const usefulGodMap = {
+  const dayMasterElementMap = {
     Wood: ["Education", "Growth Industries", "Planning"],
     Fire: ["Media", "Marketing", "Visibility-Based Work"],
     Earth: ["Property", "Operations", "Stability-Based Work"],
@@ -181,7 +186,7 @@ function getRecommendedDirections(mainStructure, primaryUsefulGod) {
 
   const directions = [
     ...(structureMap[mainStructure] || []),
-    ...(usefulGodMap[primaryUsefulGod] || []),
+    ...(dayMasterElementMap[dayMasterElement] || []),
   ];
 
   return [...new Set(directions)].slice(0, 5);
@@ -216,6 +221,7 @@ export function buildCareerEngineV1({
   const dayStatus = dayMasterStrengthV4?.status || null;
   const primaryUsefulGod = usefulGodV4?.primaryUsefulGod || null;
   const secondaryUsefulGod = usefulGodV4?.secondaryUsefulGod || null;
+  const dayMasterElement = usefulGodV4?.dayMasterElement || null;
 
   const careerStyle = getCareerStyle(mainStructure, dominantProfile);
   const idealWorkEnvironment = getIdealWorkEnvironment(mainStructure);
@@ -238,13 +244,14 @@ export function buildCareerEngineV1({
     careerRisks: getCareerRisks(mainStructure, dayStatus),
     recommendedDirections: getRecommendedDirections(
       mainStructure,
-      primaryUsefulGod
+      dayMasterElement
     ),
 
     debug: {
       mainStructure,
       dominantProfile,
       dayStatus,
+      dayMasterElement,
       primaryUsefulGod,
       secondaryUsefulGod,
       note:
