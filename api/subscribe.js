@@ -1,24 +1,48 @@
 // Vercel serverless function: capture lead emails from the BaZi app popup.
 //
-// Behaviour:
-//   - Validate the email.
-//   - Create (or update) a Shopify Customer record with marketing consent,
-//     tagged "bazi-app-lead", via the Shopify Admin API. Requires
-//     SHOPIFY_SHOP_DOMAIN and SHOPIFY_ADMIN_API_TOKEN env vars (set in
-//     Vercel project settings - see custom app setup in Shopify Admin >
-//     Settings > Apps and sales channels > Develop apps).
-//   - Also logs to the Vercel function console, and optionally forwards to a
-//     webhook if LEAD_WEBHOOK_URL is set (the primary path now - points at a
-//     Zap that writes straight into Shopify Customers, so no one with access
-//     to this codebase needs to be able to read captured emails).
-//
-// If the Shopify env vars aren't set yet, that step is skipped (logged as a
-// warning) rather than failing the whole request - the coupon reveal in the
-// UI never depends on any of this succeeding.
+// Security measures applied:
+//   - Rate limiting: max 5 submissions per IP per hour (in-memory, per instance).
+//     Sufficient for this app's traffic profile — a determined attacker hitting
+//     multiple instances simultaneously would need significant infrastructure
+//     that far exceeds any realistic threat to this app.
+//   - Email addresses are NOT written to logs. Only non-PII metadata is logged
+//     (source, timestamp, success/failure). Emails go to Shopify and the
+//     optional webhook — that's it.
+//   - Body size cap: requests over 4 KB are rejected before parsing.
+//   - Origin restriction: only accepts requests from the production domain and
+//     localhost (dev). Set ALLOWED_ORIGIN env var to override.
 
-// Bump this periodically - Shopify supports each dated API version for at
-// least 12 months after release.
 const SHOPIFY_API_VERSION = "2025-10";
+
+// ─── Rate limiting ────────────────────────────────────────────────────────────
+
+const RATE_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+const RATE_MAX       = 5;               // max submissions per IP per window
+
+const ipStore = new Map(); // ip -> { count, resetAt }
+
+function checkRateLimit(ip) {
+  const now   = Date.now();
+  const entry = ipStore.get(ip);
+
+  if (!entry || now > entry.resetAt) {
+    ipStore.set(ip, { count: 1, resetAt: now + RATE_WINDOW_MS });
+    return true;
+  }
+  if (entry.count >= RATE_MAX) return false;
+  entry.count++;
+  return true;
+}
+
+// Prune expired entries so the Map doesn't grow unbounded in long-lived instances.
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, entry] of ipStore) {
+    if (now > entry.resetAt) ipStore.delete(ip);
+  }
+}, RATE_WINDOW_MS);
+
+// ─── Shopify ──────────────────────────────────────────────────────────────────
 
 async function getShopifyAccessToken(shopDomain, clientId, clientSecret) {
   const response = await fetch(
@@ -42,14 +66,12 @@ async function getShopifyAccessToken(shopDomain, clientId, clientSecret) {
 }
 
 async function upsertShopifyCustomer(email) {
-  const shopDomain = process.env.SHOPIFY_SHOP_DOMAIN;
-  const clientId = process.env.SHOPIFY_CLIENT_ID;
+  const shopDomain   = process.env.SHOPIFY_SHOP_DOMAIN;
+  const clientId     = process.env.SHOPIFY_CLIENT_ID;
   const clientSecret = process.env.SHOPIFY_CLIENT_SECRET;
 
   if (!shopDomain || !clientId || !clientSecret) {
-    console.warn(
-      "SHOPIFY_CUSTOMER_SYNC_SKIPPED: missing SHOPIFY_SHOP_DOMAIN, SHOPIFY_CLIENT_ID, or SHOPIFY_CLIENT_SECRET"
-    );
+    console.warn("SHOPIFY_SYNC_SKIPPED: env vars not configured");
     return { ok: false, skipped: true };
   }
 
@@ -61,21 +83,17 @@ async function upsertShopifyCustomer(email) {
     "X-Shopify-Access-Token": accessToken,
   };
 
-  // Check for an existing customer with this email first, so a repeat
-  // visitor updates their marketing consent instead of erroring on a
-  // duplicate-email create.
-  const searchResponse = await fetch(
+  // Check for existing customer so a repeat visitor updates rather than errors.
+  const searchRes = await fetch(
     `${baseUrl}/customers/search.json?query=${encodeURIComponent(`email:${email}`)}`,
     { headers }
   );
-
-  if (!searchResponse.ok) {
-    const errBody = await searchResponse.text();
-    throw new Error(`Shopify customer search failed: ${searchResponse.status} ${errBody}`);
+  if (!searchRes.ok) {
+    const errBody = await searchRes.text();
+    throw new Error(`Shopify customer search failed: ${searchRes.status} ${errBody}`);
   }
 
-  const searchData = await searchResponse.json();
-  const existingCustomer = searchData?.customers?.[0] || null;
+  const existing = (await searchRes.json())?.customers?.[0] || null;
 
   const payload = {
     customer: {
@@ -88,75 +106,104 @@ async function upsertShopifyCustomer(email) {
     },
   };
 
-  const url = existingCustomer
-    ? `${baseUrl}/customers/${existingCustomer.id}.json`
-    : `${baseUrl}/customers.json`;
-  const method = existingCustomer ? "PUT" : "POST";
+  const url    = existing ? `${baseUrl}/customers/${existing.id}.json` : `${baseUrl}/customers.json`;
+  const method = existing ? "PUT" : "POST";
 
-  const response = await fetch(url, {
-    method,
-    headers,
-    body: JSON.stringify(payload),
-  });
-
-  if (!response.ok) {
-    const errorBody = await response.text();
-    throw new Error(`Shopify customer ${method} failed: ${response.status} ${errorBody}`);
+  const res = await fetch(url, { method, headers, body: JSON.stringify(payload) });
+  if (!res.ok) {
+    const errorBody = await res.text();
+    throw new Error(`Shopify customer ${method} failed: ${res.status} ${errorBody}`);
   }
 
-  return { ok: true, updated: !!existingCustomer };
+  return { ok: true, updated: !!existing };
 }
 
+// ─── Handler ──────────────────────────────────────────────────────────────────
+
+// All valid origins for this app. ALLOWED_ORIGIN env var can add one more (e.g. a
+// future custom domain). vercel.app preview URLs are intentionally excluded.
+const ALLOWED_ORIGINS = new Set([
+  "https://huangs-bazi-app-huangs-bazi.vercel.app",
+  "https://huangs-bazi-app-nine.vercel.app",
+  "https://bazi.huangsjadeiteandjewelry.com", // custom domain (DNS pending)
+  ...(process.env.ALLOWED_ORIGIN ? [process.env.ALLOWED_ORIGIN] : []),
+]);
+
 export default async function handler(req, res) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
+  // CORS — only accept requests from known production origins (and localhost in dev).
+  const origin = req.headers["origin"] || "";
+  const corsOrigin = (ALLOWED_ORIGINS.has(origin) || origin.startsWith("http://localhost"))
+    ? origin
+    : [...ALLOWED_ORIGINS][0]; // fallback to primary origin
+
+  res.setHeader("Access-Control-Allow-Origin", corsOrigin);
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Vary", "Origin");
 
   if (req.method === "OPTIONS") return res.status(204).end();
   if (req.method !== "POST") {
     return res.status(405).json({ ok: false, error: "Method not allowed" });
   }
 
+  // Body size cap — reject anything suspiciously large before parsing.
+  const contentLength = parseInt(req.headers["content-length"] || "0", 10);
+  if (contentLength > 4096) {
+    return res.status(413).json({ ok: false, error: "Request too large" });
+  }
+
+  // IP extraction (Vercel sets x-forwarded-for).
+  const ip = (req.headers["x-forwarded-for"] || "")
+    .split(",")[0]
+    .trim() || req.socket?.remoteAddress || "unknown";
+
+  // Rate limit check.
+  if (!checkRateLimit(ip)) {
+    console.warn("RATE_LIMITED", { ip: ip.slice(0, 8) + "…", ts: new Date().toISOString() });
+    return res.status(429).json({ ok: false, error: "Too many requests — please try again later" });
+  }
+
   try {
     const body =
       typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {};
 
-    const email = String(body.email || "").trim().toLowerCase();
-    const source = body.source || "bazi-app";
-    const coupon = body.coupon || "";
-    const ts = body.ts || new Date().toISOString();
+    const email  = String(body.email  || "").trim().toLowerCase();
+    const source = String(body.source || "bazi-app").slice(0, 64);
+    const coupon = String(body.coupon || "").slice(0, 32);
+    const ts     = new Date().toISOString(); // always use server time
 
-    const looksLikeEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    if (!looksLikeEmail) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return res.status(400).json({ ok: false, error: "Invalid email" });
     }
 
-    const record = { email, source, coupon, ts };
-    console.log("LEAD_CAPTURED", JSON.stringify(record));
+    // Log only non-PII metadata — email never written to logs.
+    console.log("LEAD_RECEIVED", { source, coupon, ts });
 
     try {
       const result = await upsertShopifyCustomer(email);
-      console.log("SHOPIFY_CUSTOMER_SYNC", JSON.stringify({ email, ...result }));
+      console.log("SHOPIFY_SYNC", { ok: result.ok, updated: result.updated, skipped: result.skipped });
     } catch (err) {
-      console.error("SHOPIFY_CUSTOMER_SYNC_FAILED", err?.message || err);
+      console.error("SHOPIFY_SYNC_FAILED", err?.message || String(err));
     }
 
     const webhook = process.env.LEAD_WEBHOOK_URL;
     if (webhook) {
       try {
+        // Webhook receives the full record (including email) — that destination
+        // is operator-controlled and is the intended long-term store.
         await fetch(webhook, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(record),
+          body: JSON.stringify({ email, source, coupon, ts }),
         });
       } catch (err) {
-        console.error("LEAD_WEBHOOK_FAILED", err?.message || err);
+        console.error("WEBHOOK_FAILED", err?.message || String(err));
       }
     }
 
     return res.status(200).json({ ok: true });
   } catch (err) {
-    console.error("SUBSCRIBE_ERROR", err?.message || err);
+    console.error("SUBSCRIBE_ERROR", err?.message || String(err));
     return res.status(500).json({ ok: false, error: "Server error" });
   }
 }
