@@ -123,9 +123,10 @@ async function upsertShopifyCustomer(email) {
 // All valid origins for this app. ALLOWED_ORIGIN env var can add one more (e.g. a
 // future custom domain). vercel.app preview URLs are intentionally excluded.
 const ALLOWED_ORIGINS = new Set([
-  "https://huangs-bazi-app-huangs-bazi.vercel.app",
-  "https://huangs-bazi-app-nine.vercel.app",
-  "https://bazi.huangsjadeiteandjewelry.com", // custom domain (DNS pending)
+  "https://www.huangsjadeiteandjewelry.com",   // Shopify store — live embed URL
+  "https://huangsjadeiteandjewelry.com",        // non-www variant
+  "https://huangs-bazi-app-huangs-bazi.vercel.app", // Vercel stable alias
+  "https://huangs-bazi-app-nine.vercel.app",    // Vercel stable alias
   ...(process.env.ALLOWED_ORIGIN ? [process.env.ALLOWED_ORIGIN] : []),
 ]);
 
