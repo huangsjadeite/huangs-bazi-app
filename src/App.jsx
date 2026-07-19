@@ -1,4 +1,3 @@
-import huangsLogo from "./assets/hjj-logo-black.png";
 import GenerateProfilePanel from "./components/form/GenerateProfilePanel";
 import LeadPopup from "./components/LeadPopup";
 import EmotionalEnergyBalance from "./components/public-report/EmotionalEnergyBalance";
@@ -18,79 +17,16 @@ import React, { useMemo, useState } from "react";
 import buildBaziChart from "./engine/buildBaziChart";
 import { mapChartToUi } from "./data/mapChartToUi";
 import { motion } from "framer-motion";
-
-function AdminBulletList({ items, render }) {
-  if (!Array.isArray(items) || !items.length) {
-    return <p className="mt-3 text-sm italic text-stone-400">No data.</p>;
-  }
-
-  return (
-    <ul className="mt-3 space-y-2 text-base leading-7 text-stone-700">
-      {items.map((item, i) => (
-        <li key={i} className="flex gap-3">
-          <span className="mt-1 text-orange-600">•</span>
-          <span>
-            {render
-              ? render(item)
-              : typeof item === "string"
-              ? item
-              : item?.title || item?.text || JSON.stringify(item)}
-          </span>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-function AdminReportSection({ icon, title, children }) {
-  return (
-    <div className="mt-10 border-t border-amber-100 pt-8 print:border-[#8B1A1A] print:mt-8 print:pt-6">
-      <h3 className="text-2xl font-bold text-slate-950 print:text-[#8B1A1A]">
-        {icon && <span className="print:hidden">{icon} </span>}{title}
-      </h3>
-      <div className="hidden print:block print:border-b print:border-[#8B1A1A] print:mt-1 print:mb-4" />
-      {children}
-    </div>
-  );
-}
-
-function AdminMonthCallout({ label, months, tone = "good" }) {
-  if (!months?.length) return null;
-
-  const toneClass =
-    tone === "good"
-      ? "bg-green-50 text-green-700"
-      : "bg-red-50 text-red-700";
-
-  return (
-    <p className="mt-3 text-sm">
-      <span className={`rounded-full px-2.5 py-0.5 font-bold ${toneClass}`}>
-        {label}: {months.join(", ")}
-      </span>
-    </p>
-  );
-}
-
-function AdminStrengthRiskGrid({ strengths, risks, strengthLabel = "Strengths", riskLabel = "Risks" }) {
-  if (!strengths?.length && !risks?.length) return null;
-
-  return (
-    <div className="mt-5 grid gap-5 md:grid-cols-2">
-      <div>
-        <p className="text-sm font-bold uppercase tracking-[0.18em] text-green-700">
-          {strengthLabel}
-        </p>
-        <AdminBulletList items={strengths} />
-      </div>
-      <div>
-        <p className="text-sm font-bold uppercase tracking-[0.18em] text-red-700">
-          {riskLabel}
-        </p>
-        <AdminBulletList items={risks} />
-      </div>
-    </div>
-  );
-}
+import BlindSpotsSection from "./components/admin-report/BlindSpotsSection";
+import CareerSection from "./components/admin-report/CareerSection";
+import ChartFoundationSection from "./components/admin-report/ChartFoundationSection";
+import { deriveAdminReportData } from "./components/admin-report/deriveAdminReportData";
+import { downloadReadingExport } from "./components/admin-report/downloadReadingExport";
+import HiddenStrengthsSection from "./components/admin-report/HiddenStrengthsSection";
+import RelationshipSection from "./components/admin-report/RelationshipSection";
+import { AdminBulletList, AdminReportSection } from "./components/admin-report/shared";
+import WealthSection from "./components/admin-report/WealthSection";
+import WellnessSection from "./components/admin-report/WellnessSection";
 
 export function AdminFullReport({ report, clientName }) {
   if (!report) {
@@ -101,852 +37,107 @@ export function AdminFullReport({ report, clientName }) {
     );
   }
 
-  const narrative = report.narrative || {};
-  const personality = report.personalityAndStructure || {};
-  const usefulGod = report.usefulGodAndElements || {};
-  const lifeAreas = report.lifeAreas || {};
-  const stones = report.practicalSupport?.stones || {};
-  const eightMansions = report.personalDirectionsAndStars?.eightMansions || null;
-  const shenSha = report.personalDirectionsAndStars?.shenSha?.stars || [];
-  const luckPillars = report.personalDirectionsAndStars?.luckPillars || null;
-  const lifePalace = report.personalDirectionsAndStars?.lifePalace || null;
-  const conceptionPalace = report.personalDirectionsAndStars?.conceptionPalace || null;
-  const natalPillars = report.chartFoundation?.pillars || null;
-  const tenGodByPillar = report.chartFoundation?.tenGodByPillar || null;
-  const annualPillar = report.annualEnergy?.annualOverlay?.annualPillar || null;
-  const annualZodiac = report.annualEnergy?.annualZodiac || null;
-
-  const rankedProfiles = [...(personality.tenProfileScoring?.rankedProfiles || [])].sort(
-    (a, b) => b.percentage - a.percentage
-  );
-  const findProfilePct = (name) =>
-    rankedProfiles.find((p) => p.profile === name)?.percentage;
-  const career = lifeAreas.career || {};
-  const wealth = lifeAreas.wealth || {};
-  const wealthArchetype = lifeAreas.wealthArchetype || {};
-  const relationship = lifeAreas.relationship || {};
-  const relationshipArchetype = lifeAreas.relationshipArchetype || {};
-  const relationshipPattern = lifeAreas.relationshipPattern || {};
-  const health = lifeAreas.health || {};
-  const blindSpots = personality.blindSpots || {};
-  const lifeThemes = lifeAreas.lifeThemes || {};
-  const growthAdvice = lifeAreas.growthAdvice || {};
-  const elementalBalance = report.chartFoundation?.elementalBalance || [];
-  const monthlyOutlook = report.annualEnergy?.monthlyOverlay?.months || [];
-  const strongerElements = elementalBalance.slice(0, 2).map((e) => e.name);
-  const moderateElements = elementalBalance.slice(2, -2).map((e) => e.name);
-  const weakerElements = [...elementalBalance].slice(-2).map((e) => e.name);
-
-  const directWealthPct = findProfilePct("Direct Wealth");
-  const indirectWealthPct = findProfilePct("Indirect Wealth");
-
-  const DAY_MASTER_TRAITS = {
-    Jia:  "Driven, principled and growth-oriented. Like a tall tree — pioneering by nature, with a strong sense of direction and deep-rooted conviction.",
-    Yi:   "Flexible, creative and people-attuned. Adapts well to changing conditions and builds lasting connections through warmth and resourcefulness.",
-    Bing: "Warm, expressive and naturally charismatic. Brings energy and light to those around them through enthusiasm, generosity and a strong presence.",
-    Ding: "Thoughtful, loyal and quietly perceptive. Like a steady flame — consistent in care, emotionally intelligent and deeply attuned to those nearby.",
-    Wu:   "Stable, patient and deeply dependable. Like a mountain — grounded and protective, with a strong inner foundation and slow-to-change conviction.",
-    Ji:   "Nurturing, practical and quietly supportive. Naturally builds a stable foundation for others, with a grounded, detail-oriented and giving nature.",
-    Geng: "Principled, decisive and direct. Strong sense of right and wrong with a preference for straightforward action and clear personal standards.",
-    Xin:  "Refined, perceptive and aesthetically attuned. Sensitive to quality and detail, with an appreciation for beauty, precision and how things are perceived.",
-    Ren:  "Ambitious, resourceful and expansive. Like a great river — naturally drawn to big-picture thinking, opportunity and adaptive flow.",
-    Gui:  "Gentle, intuitive and deeply perceptive. Quietly absorbs and processes the world, with a rich inner life and natural empathy for others.",
-  };
-
-  // Only surface a career-relevant profile's % if it's actually prominent
-  // in this chart (top 4) - forcing it into every report regardless of
-  // rank would misrepresent charts where it's dormant.
-  const findTopProfilePct = (names, topN = 4) => {
-    for (const name of names) {
-      const idx = rankedProfiles.findIndex((p) => p.profile === name);
-      if (idx !== -1 && idx < topN) {
-        return { name: rankedProfiles[idx].profile, percentage: rankedProfiles[idx].percentage };
-      }
-    }
-    return null;
-  };
-  const careerAuthorityProfile = findTopProfilePct(["Direct Officer", "Seven Killings"]);
-  const careerOutputProfile = findTopProfilePct(["Hurting Officer", "Eating God"]);
-
-  const weakestElement = elementalBalance[elementalBalance.length - 1];
-
-  // Which element plays which Ten-God role for this Day Master (Self/
-  // Resource/Output/Wealth/Officer) - structural fact, independent of
-  // favourability.
-  const elementForRole = (roleName) =>
-    elementalBalance.find((e) => e.role === roleName)?.name;
-  const officerElement = elementForRole("Officer");
-  const outputElement = elementForRole("Output");
-  const wealthElement = elementForRole("Wealth");
-
-  // A role being structurally relevant to an area (e.g. Officer -> Career)
-  // doesn't mean it's good for THIS chart - that depends on the Day Master's
-  // strength band. Intersect with what's actually favourable here so a weak
-  // Day Master chart (where Officer drains rather than helps) doesn't get a
-  // false "strong career month" callout.
-  const favourableSet = new Set([
-    ...(usefulGod.favourableElements || []),
-    ...(usefulGod.secondaryFavourableElements || []),
-  ]);
-
-  const monthNamesWhere = (predicate) =>
-    monthlyOutlook.filter(predicate).map((m) => m.monthName);
-
-  const cautionSet = new Set(usefulGod.cautionElements || []);
-  const partnerStarElement = relationship.spouseStar?.element || null;
-
-  // Day Branch (Spouse Palace) — the earthly branch of the day pillar is the
-  // classical "relationship palace" in BaZi. Its element indicates the quality
-  // of energy the person brings to and seeks in close partnerships.
-  const dayBranchAnimal = natalPillars?.day?.branch?.animal || null;
-  const dayBranchZh = natalPillars?.day?.branch?.zh || null;
-  const dayBranchElement = natalPillars?.day?.branch?.element || null;
-  const spousePalaceNote = {
-    Wood:  "Your relationship palace carries Wood energy — growth, renewal and nurturing. You thrive with partners who are encouraging, flexible and growth-minded.",
-    Fire:  "Your relationship palace carries Fire energy — warmth, passion and expressiveness. You thrive with partners who are vibrant, emotionally present and open.",
-    Earth: "Your relationship palace carries Earth energy — stability, loyalty and groundedness. You thrive with partners who are dependable, patient and consistent.",
-    Metal: "Your relationship palace carries Metal energy — structure, clarity and principle. You thrive with partners who are decisive, honest and have strong personal values.",
-    Water: "Your relationship palace carries Water energy — depth, intuition and emotional flow. You thrive with partners who are perceptive, adaptable and emotionally intelligent.",
-  };
-
-  // Peach Blossom timing — the Peach Blossom branch indicates which years and
-  // months romance and social magnetism peak for this person.
-  const peachBlossomStar = shenSha.find((s) => s.key === "peachBlossom");
-  const peachBlossomAnimal = peachBlossomStar?.branch?.animal || null;
-  const animalToMonth = {
-    Rat: "December", Ox: "January", Tiger: "February", Rabbit: "March",
-    Dragon: "April", Snake: "May", Horse: "June", Goat: "July",
-    Monkey: "August", Rooster: "September", Dog: "October", Pig: "November",
-  };
-  // 2020 = Rat year (index 0); cycle repeats every 12 years
-  const peachBlossomYears = (() => {
-    if (!peachBlossomAnimal) return [];
-    const order = ["Rat","Ox","Tiger","Rabbit","Dragon","Snake","Horse","Goat","Monkey","Rooster","Dog","Pig"];
-    const targetIdx = order.indexOf(peachBlossomAnimal);
-    if (targetIdx === -1) return [];
-    const currentYear = new Date().getFullYear();
-    const currentIdx = (currentYear - 2020 + 1200) % 12;
-    const offset = (targetIdx - currentIdx + 12) % 12;
-    const first = offset === 0 ? currentYear : currentYear + offset;
-    return [first, first + 12];
-  })();
-
-  const careerStrongMonths = monthNamesWhere(
-    (m) =>
-      favourableSet.has(m.dominantElement) &&
-      (m.dominantElement === officerElement || m.dominantElement === outputElement)
-  );
-  const careerCautionMonths = monthNamesWhere(
-    (m) =>
-      cautionSet.has(m.dominantElement) &&
-      (m.dominantElement === officerElement || m.dominantElement === outputElement)
-  );
-  const wealthStrongMonths = monthNamesWhere(
-    (m) => favourableSet.has(m.dominantElement) && m.dominantElement === wealthElement
-  );
-  const wealthCautionMonths = monthNamesWhere(
-    (m) => cautionSet.has(m.dominantElement) && m.dominantElement === wealthElement
-  );
-  // "Good" relationship months are anchored to the partner star element
-  // (the chart's own structural relationship signal) rather than the
-  // general favourable set, mirroring how Career/Wealth use their own
-  // role element rather than a generic favourable/caution split.
-  const relationshipGoodMonths = monthNamesWhere(
-    (m) => favourableSet.has(m.dominantElement) && m.dominantElement === partnerStarElement
-  );
-  const relationshipCautionMonths = monthNamesWhere((m) =>
-    (relationship.timingNotes?.activatedBy || []).includes(m.dominantElement)
-  );
-  const wellnessEasierMonths = monthNamesWhere((m) => m.read === "Good");
-  const wellnessCautionMonths = monthNamesWhere((m) => m.read === "Caution");
-
-  const annualZodiacName = annualZodiac?.displayName || "";
-  const coverYearLabel = `${report.annualEnergy?.selectedYear || new Date().getFullYear()}${annualZodiacName ? ` ${annualZodiacName}` : ""} Year`;
-
-  function expandMonthlyNote(item) {
-    const elementInfo = elementalBalance?.find((e) => e.name === item.dominantElement);
-    const roleDesc = elementInfo?.roleDescription;
-    const { chinese, branchAnimal, dominantElement, read } = item;
-    const roleText = roleDesc
-      ? ` For this chart, ${dominantElement} energy governs ${roleDesc}.`
-      : "";
-    const goodActionMap = {
-      Metal: "express ideas, build visibility and pursue creative or communication-led opportunities",
-      Water: "attract resources, pursue wealth goals and strengthen key relationships",
-      Wood: "build structure, take on responsibilities and establish long-term commitments",
-      Fire: "seek support, invest in learning and draw on mentors or helpful people",
-      Earth: "ground decisions, consolidate progress and build on what you already have",
-    };
-    const cautionNoteMap = {
-      Earth: "adds to what is already being managed in this chart, which can amplify heaviness or a sense of overcommitment",
-      Fire: "adds warmth that this chart needs to process carefully, which may stir emotional intensity or scattered energy",
-      Wood: "can intensify structure and obligation demands already present in this chart",
-      Metal: "may feel draining or overly cutting when the chart is already under pressure",
-      Water: "adds flow that can feel unsteady or emotionally heavy during a demanding period",
-    };
-    if (read === "Good") {
-      const action = goodActionMap[dominantElement] || "act on plans and take meaningful steps forward";
-      return `${chinese} (${branchAnimal}) brings ${dominantElement} energy this month.${roleText} This is a supportive window — a good time to ${action}. Use this month's momentum to take action on goals you have been building toward, and lean into opportunities that feel aligned rather than holding back.`;
-    }
-    if (read === "Caution") {
-      const cautionNote = cautionNoteMap[dominantElement] || "may create added demands on your energy";
-      return `${chinese} (${branchAnimal}) brings ${dominantElement} energy this month.${roleText} This energy ${cautionNote}. Pace yourself carefully — focus on maintaining what is already in place rather than starting new initiatives. Give yourself room to rest and recover, and avoid making major commitments from a place of pressure or urgency.`;
-    }
-    return `${chinese} (${branchAnimal}) brings ${dominantElement} energy this month.${roleText} This is a relatively neutral period for this chart — a steady time to maintain momentum without major push or pull in either direction. Use the quieter energy to consolidate, reflect and prepare for upcoming active windows.`;
-  }
-
-  // primaryUsefulGod from usefulGodV4 is an element name ("Metal", "Water", etc.)
-  const dziBeadMap = {
-    "Metal": { label: "7-Eye Dzi Bead",       url: "https://www.huangsjadeiteandjewelry.com/search?q=7+eye+dzi+bead",           why: "Amplifies expression, communication, creativity and professional visibility" },
-    "Water": { label: "3-Eye Dzi Bead",       url: "https://www.huangsjadeiteandjewelry.com/search?q=3+eye+dzi+bead",           why: "Activates wealth flow, opportunity recognition and financial abundance" },
-    "Wood":  { label: "9-Eye Dzi Bead",       url: "https://www.huangsjadeiteandjewelry.com/search?q=9+eye+dzi+bead",           why: "Strengthens authority, career structure and disciplined achievement" },
-    "Fire":  { label: "1-Eye Dzi Bead",       url: "https://www.huangsjadeiteandjewelry.com/search?q=1+eye+dzi+bead",           why: "Sharpens wisdom, clarity, protective learning and intuitive support" },
-    "Earth": { label: "5-Eye Dzi Bead",       url: "https://www.huangsjadeiteandjewelry.com/search?q=5+eye+dzi+bead",           why: "Grounds and balances energy, bringing stability and all-round luck from five directions" },
-  };
-
-  const primaryDzi = dziBeadMap[usefulGod.primaryUsefulGod] || null;
-  const secondaryDziRaw = dziBeadMap[usefulGod.secondaryUsefulGod] || null;
-  const secondaryDzi = secondaryDziRaw?.label !== primaryDzi?.label ? secondaryDziRaw : null;
-
-  function exportReadingAsJson() {
-    const dayPillar = natalPillars?.day?.stem;
-    const data = {
-      meta: {
-        exportedAt: new Date().toISOString().slice(0, 10),
-        year: report.annualEnergy?.selectedYear || new Date().getFullYear(),
-        annualPillar: annualZodiacName || null,
-      },
-      client: {
-        name: clientName || null,
-        gender: report.client?.gender || null,
-      },
-      dayMaster: {
-        zh: dayPillar?.zh || null,
-        stem: dayPillar?.name || null,
-        element: dayPillar?.element || null,
-        strength: report.chartFoundation?.dayMasterStrength?.status || null,
-        strengthScore: report.chartFoundation?.dayMasterStrength?.strengthScore ?? null,
-      },
-      elementsBalance: elementalBalance.map((e) => ({
-        element: e.name,
-        role: e.role || null,
-        roleDescription: e.roleDescription || null,
-        natalPct: Math.round(e.natalPercentage),
-        annualPct: Math.round(e.annualPercentage),
-      })),
-      usefulGod: {
-        primary: usefulGod.primaryUsefulGod || null,
-        secondary: usefulGod.secondaryUsefulGod || null,
-        favourableElements: usefulGod.favourableElements || [],
-        secondaryFavourableElements: usefulGod.secondaryFavourableElements || [],
-        cautionElements: usefulGod.cautionElements || [],
-      },
-      personalityProfiles: rankedProfiles.map((p) => ({
-        profile: p.profile,
-        percentage: Math.round(p.percentage),
-      })),
-      monthlyOutlook: monthlyOutlook.map((m) => ({
-        month: m.monthName,
-        pillar: m.chinese,
-        animal: m.branchAnimal,
-        dominantElement: m.dominantElement,
-        read: m.read,
-        note: expandMonthlyNote(m),
-      })),
-      career: report.lifeAreas?.career || null,
-      wealth: {
-        ...(report.lifeAreas?.wealth || {}),
-        ...(report.lifeAreas?.wealthArchetype || {}),
-      },
-      relationship: {
-        ...(report.lifeAreas?.relationship || {}),
-        ...(report.lifeAreas?.relationshipArchetype || {}),
-      },
-      wellness: report.lifeAreas?.health || null,
-      blindSpots: report.personality?.blindSpots || null,
-      hiddenStrengths: report.personality?.topStrengths || null,
-      lifeThemes: report.lifeThemes || null,
-      stones: report.stones || null,
-      dziBeads: {
-        primary: primaryDzi ? { element: usefulGod.primaryUsefulGod, ...primaryDzi } : null,
-        secondary: secondaryDzi ? { element: usefulGod.secondaryUsefulGod, ...secondaryDzi } : null,
-      },
-      eightMansions: eightMansions || null,
-      lifePalace: lifePalace
-        ? {
-            pillar: `${lifePalace.pillar.stem.zh}${lifePalace.pillar.branch.zh}`,
-            stem: lifePalace.pillar.stem.name,
-            element: lifePalace.pillar.stem.element,
-            animal: lifePalace.pillar.branch.animal,
-          }
-        : null,
-      conceptionPalace: conceptionPalace
-        ? {
-            pillar: `${conceptionPalace.pillar.stem.zh}${conceptionPalace.pillar.branch.zh}`,
-            stem: conceptionPalace.pillar.stem.name,
-            element: conceptionPalace.pillar.stem.element,
-            animal: conceptionPalace.pillar.branch.animal,
-          }
-        : null,
-      shenSha: shenSha.map((s) => ({
-        name: s.name,
-        zh: s.zh,
-        active: s.active || false,
-        theme: s.theme || null,
-        caution: s.caution || null,
-      })),
-      luckPillars: luckPillars
-        ? {
-            startingAge: luckPillars.startingAge,
-            direction: luckPillars.direction,
-            pillars: luckPillars.pillars.map((p) => ({
-              ageRange: p.ageRange,
-              pillar: p.pillarLabel,
-              element: p.element,
-              tenGod: p.tenGod,
-            })),
-          }
-        : null,
-    };
-
-    const filename = `${(clientName || "client").toLowerCase().replace(/\s+/g, "-")}-bazi-${data.meta.year}.json`;
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
+  const derived = deriveAdminReportData(report);
+  const {
+    narrative, personality, usefulGod, stones, eightMansions, shenSha,
+    luckPillars, lifePalace, conceptionPalace, natalPillars, tenGodByPillar,
+    annualPillar, annualZodiac,
+    rankedProfiles,
+    career, wealth, wealthArchetype, relationship, relationshipArchetype,
+    relationshipPattern, health, blindSpots, lifeThemes, growthAdvice,
+    elementalBalance, monthlyOutlook, strongerElements, moderateElements, weakerElements,
+    directWealthPct, indirectWealthPct,
+    dayMasterLabel, dayMasterTrait,
+    careerAuthorityProfile, careerOutputProfile,
+    weakestElement,
+    favourableSet,
+    dayBranchAnimal, dayBranchZh, dayBranchElement, spousePalaceNoteText,
+    peachBlossomAnimal, peachBlossomYears, peachBlossomMonth,
+    careerStrongMonths, careerCautionMonths,
+    wealthStrongMonths, wealthCautionMonths,
+    relationshipGoodMonths, relationshipCautionMonths,
+    wellnessEasierMonths, wellnessCautionMonths,
+    coverYearLabel, expandMonthlyNote,
+    primaryDzi, secondaryDzi,
+  } = derived;
 
   return (
     <div>
-      {/* Print-only cover page */}
-      <div className="print-cover hidden print:flex print:flex-col print:items-center print:justify-center print:py-24 print:text-center">
-        <img src={huangsLogo} alt="Huangs Jadeite and Jewelry" className="h-16 w-auto mb-6" />
-        <p className="text-sm font-bold tracking-widest uppercase mb-4" style={{color:"#8B1A1A"}}>HUANGS JADEITE &amp; JEWELRY</p>
-        <h1 className="text-2xl font-bold mb-6 leading-snug" style={{color:"#8B1A1A"}}>
-          Personal Feng Shui Energy Analysis<br/>for {coverYearLabel}
-        </h1>
-        <div className="print-cover-body max-w-md text-sm text-gray-600 leading-relaxed text-left mt-4">
-          <p>This personalized Bazi report is designed to help you better understand your elemental balance, natural strengths, emotional tendencies and life direction.</p>
-          <p className="mt-3">The purpose of this analysis is to provide guidance and self-awareness in areas such as career, wealth, relationships and health.</p>
-        </div>
-      </div>
-
-      {/* Print footer — shows on every page via CSS */}
-      <div className="print-footer hidden">
-        Bazi Analysis generated by huangsjadeiteandjewelry.com.
-      </div>
-
-      <div className="mt-7 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-5 print-no-export">
-        <p className="text-sm font-bold text-slate-700">Client Profile</p>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => exportReadingAsJson()}
-            className="rounded-xl bg-slate-700 px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-slate-600"
-          >
-            Export JSON
-          </button>
-          <button
-            type="button"
-            onClick={() => exportAdminReportToPdf()}
-            className="rounded-xl bg-amber-700 px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-amber-600"
-          >
-            Export Client PDF
-          </button>
-        </div>
-      </div>
-
-      {/* Client Profile heading for print */}
-      <h2 className="hidden print:block mt-4 text-3xl font-bold" style={{color:"#8B1A1A"}}>Client Profile</h2>
-      <div className="hidden print:block border-b mt-1 mb-4" style={{borderColor:"#8B1A1A"}} />
-
-      <table className="mt-4 w-full overflow-hidden rounded-2xl border border-slate-200 text-sm print:rounded-none print:border-[#8B1A1A]">
-        <tbody>
-          {[
-            ["Name", clientName || "-"],
-            ["Gender", report.client?.gender || "-"],
-            ["Birth Country", report.client?.birthCountry || "-"],
-            [
-              "Day Master (Horoscope)",
-              (() => {
-                const stem = natalPillars?.day?.stem;
-                const label = stem
-                  ? `${stem.zh} ${stem.name} ${stem.element}`
-                  : report.chartFoundation?.dayMasterElement || "-";
-                const trait = stem ? DAY_MASTER_TRAITS[stem.name] : null;
-                return trait ? (
-                  <>
-                    {label}
-                    <br />
-                    <span className="text-xs text-stone-500 leading-relaxed">{trait}</span>
-                  </>
-                ) : label;
-              })(),
-            ],
-            ["Stronger Elements", strongerElements.join(", ") || "-"],
-            ...(moderateElements.length ? [["Moderate Elements", moderateElements.join(", ")]] : []),
-            ["Weaker Elements", weakerElements.join(", ") || "-"],
-            [
-              "Useful God",
-              `${usefulGod.primaryUsefulGod || "-"} (primary) · ${
-                usefulGod.secondaryUsefulGod || "-"
-              } (secondary)`,
-            ],
-          ].map(([label, value]) => (
-            <tr key={label} className="border-b border-slate-100 last:border-0 print:border-[#e5d5c0]">
-              <td className="bg-slate-50 px-4 py-2.5 font-semibold text-slate-700 print:bg-[#8B1A1A] print:text-white print:w-40">
-                {label}
-              </td>
-              <td className="px-4 py-2.5 text-stone-700 print:bg-[#FAE5D3]">{value}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      {natalPillars && (
-        <div className="mt-8">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <h3 className="text-xl font-bold text-slate-950">Natal Chart</h3>
-
-            {annualPillar?.chinese && (
-              <p className="rounded-full bg-amber-50 px-4 py-1.5 text-sm font-semibold text-amber-800">
-                {report.annualEnergy?.selectedYear || "Annual"} Pillar:{" "}
-                {annualPillar.chinese}
-                {annualZodiac?.displayName ? ` (${annualZodiac.displayName})` : ""}
-              </p>
-            )}
-          </div>
-
-          <div className="mt-3 grid grid-cols-2 gap-x-6 gap-y-1 text-xs text-stone-500 md:grid-cols-4">
-            <p><span className="font-semibold text-slate-700">Year —</span> ancestral energy, family background and relationship with society. Governs early life (0–16).</p>
-            <p><span className="font-semibold text-slate-700">Month —</span> career, parents and productive adult years (17–40). Primary pillar for professional life.</p>
-            <p><span className="font-semibold text-slate-700">Day —</span> the self. The Day Heavenly Stem is the Day Master — the chart's core identity. The Day Branch represents the inner self and partner energy.</p>
-            <p><span className="font-semibold text-slate-700">Hour —</span> aspirations, children and the later years of life (40+). Reflects what the person is building toward.</p>
-          </div>
-
-          <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-slate-50 text-left text-xs font-bold uppercase tracking-[0.12em] text-slate-600">
-                  <th className="px-4 py-2.5"></th>
-                  {["hour", "day", "month", "year"].map((key) => (
-                    <th key={key} className="px-4 py-2.5 capitalize">
-                      {key}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="border-t border-slate-100">
-                  <td className="px-4 py-2.5 font-semibold text-slate-700">
-                    Heavenly Stem
-                  </td>
-                  {["hour", "day", "month", "year"].map((key) => {
-                    const pillar = natalPillars[key];
-                    return (
-                      <td key={key} className="px-4 py-2.5">
-                        {pillar?.stem ? (
-                          <>
-                            <span className="text-lg font-bold text-slate-950">
-                              {pillar.stem.zh}
-                            </span>{" "}
-                            <span className="text-stone-500">
-                              {pillar.stem.name} {pillar.stem.element}
-                            </span>
-                          </>
-                        ) : (
-                          <span className="text-stone-400">—</span>
-                        )}
-                      </td>
-                    );
-                  })}
-                </tr>
-
-                <tr className="border-t border-slate-100">
-                  <td className="px-4 py-2.5 font-semibold text-slate-700">
-                    Earthly Branch
-                  </td>
-                  {["hour", "day", "month", "year"].map((key) => {
-                    const pillar = natalPillars[key];
-                    return (
-                      <td key={key} className="px-4 py-2.5">
-                        {pillar?.branch ? (
-                          <>
-                            <span className="text-lg font-bold text-slate-950">
-                              {pillar.branch.zh}
-                            </span>{" "}
-                            <span className="text-stone-500">
-                              {pillar.branch.animal} {pillar.branch.element}
-                            </span>
-                          </>
-                        ) : (
-                          <span className="text-stone-400">—</span>
-                        )}
-                      </td>
-                    );
-                  })}
-                </tr>
-
-                <tr className="border-t border-slate-100 align-top">
-                  <td className="px-4 py-2.5 font-semibold text-slate-700">
-                    Hidden Stems
-                  </td>
-                  {["hour", "day", "month", "year"].map((key) => {
-                    const pillar = natalPillars[key];
-                    const hiddenTenGods = tenGodByPillar?.[key]?.hiddenStems || [];
-                    return (
-                      <td key={key} className="px-4 py-2.5">
-                        {pillar?.branch?.hiddenStems?.length ? (
-                          <div className="space-y-1">
-                            {pillar.branch.hiddenStems.map((hidden, i) => (
-                              <p key={hidden.key}>
-                                <span className="font-semibold text-slate-800">
-                                  {hidden.zh}
-                                </span>{" "}
-                                <span className="text-xs text-stone-500">
-                                  {hiddenTenGods[i]?.tenGod || ""}
-                                </span>
-                              </p>
-                            ))}
-                          </div>
-                        ) : (
-                          <span className="text-stone-400">—</span>
-                        )}
-                      </td>
-                    );
-                  })}
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {!!elementalBalance.length && (
-        <div className="mt-8">
-          <h3 className="text-xl font-bold text-slate-950">5 Elements Balance</h3>
-          <p className="mt-2 text-sm text-stone-500">
-            Natal Chart vs. {report.annualEnergy?.selectedYear || "this year"}'s Annual
-            Energy, and what each element represents in this chart.
-          </p>
-          <div className="mt-4 space-y-3">
-            {elementalBalance.map((item) => (
-              <div
-                key={item.name}
-                className="rounded-xl border border-slate-200 p-4"
-              >
-                <p className="text-base font-bold text-slate-950">
-                  {item.name} — Natal {Math.round(item.natalPercentage)}% · Annual{" "}
-                  {Math.round(item.annualPercentage)}%
-                </p>
-                {item.roleDescription && (
-                  <p className="mt-1 text-sm text-stone-600">
-                    {item.name} governs {item.roleDescription}.
-                  </p>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {!!rankedProfiles.length && (
-        <div className="mt-8">
-          <h3 className="text-xl font-bold text-slate-950">Personality Profile Breakdown</h3>
-          <p className="mt-3 text-sm text-stone-500">
-            Your personality is shaped by ten archetypal energy patterns derived from your natal chart. Each pattern influences how you think, make decisions, respond under pressure and connect with others. The percentage shows how strongly each pattern is wired into your natural behaviour — a higher score means that energy is dominant and shows up consistently, while a lower score indicates a dormant pattern that may emerge in specific situations or can be consciously developed over time.
-          </p>
-          <div className="mt-4 space-y-3">
-            {rankedProfiles.map((item) => {
-              const display = getProfileDisplay(item.profile);
-              return (
-                <div
-                  key={item.profile}
-                  className="rounded-xl border border-slate-200 p-4"
-                >
-                  <p className="text-base font-bold text-slate-950">
-                    {display.icon} {Math.round(item.percentage)}% {item.profile}
-                    {display.name ? ` — ${display.name}` : ""}
-                  </p>
-                  {display.subtitle && (
-                    <p className="mt-0.5 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700">
-                      {display.subtitle}
-                    </p>
-                  )}
-                  {display.theme && (
-                    <p className="mt-1.5 text-sm text-stone-600">{display.theme}</p>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
+      <ChartFoundationSection
+        report={report}
+        clientName={clientName}
+        natalPillars={natalPillars}
+        tenGodByPillar={tenGodByPillar}
+        annualPillar={annualPillar}
+        annualZodiac={annualZodiac}
+        dayMasterLabel={dayMasterLabel}
+        dayMasterTrait={dayMasterTrait}
+        strongerElements={strongerElements}
+        moderateElements={moderateElements}
+        weakerElements={weakerElements}
+        usefulGod={usefulGod}
+        elementalBalance={elementalBalance}
+        rankedProfiles={rankedProfiles}
+        coverYearLabel={coverYearLabel}
+        onExportJson={() => downloadReadingExport({ report, clientName, derived })}
+        onExportPdf={() => exportAdminReportToPdf()}
+      />
 
       <p className="mt-10 text-xs font-bold uppercase tracking-[0.3em] text-amber-700">
         The Four Key Areas
       </p>
 
-      <AdminReportSection icon="✨" title="Hidden Strengths">
-        <AdminBulletList
-          items={personality.topStrengths}
-          render={(item) => (
-            <>
-              <strong>{item.title}</strong> — {item.description}
-            </>
-          )}
-        />
-      </AdminReportSection>
+      <HiddenStrengthsSection topStrengths={personality.topStrengths} />
 
-      <AdminReportSection icon="⚠️" title="Personal Blind Spots">
-        {blindSpots.summary && (
-          <p className="mt-3 text-base leading-7 text-stone-700">{blindSpots.summary}</p>
-        )}
-        <AdminBulletList items={blindSpots.blindSpots} />
-        {blindSpots.growthAdvice && (
-          <p className="mt-4 text-base leading-7 text-stone-700">
-            <strong>Growth advice:</strong> {blindSpots.growthAdvice}
-          </p>
-        )}
-      </AdminReportSection>
+      <BlindSpotsSection blindSpots={blindSpots} />
 
-      <AdminReportSection icon="💼" title="Career Timing & Direction">
-        {(careerAuthorityProfile || careerOutputProfile) && (
-          <p className="mt-3 text-sm font-semibold text-amber-700">
-            {careerAuthorityProfile &&
-              `${careerAuthorityProfile.name} · ${getProfileDisplay(careerAuthorityProfile.name).name || ""} — ${Math.round(careerAuthorityProfile.percentage)}%`}
-            {careerAuthorityProfile && careerOutputProfile && " · "}
-            {careerOutputProfile &&
-              `${careerOutputProfile.name} · ${getProfileDisplay(careerOutputProfile.name).name || ""} — ${Math.round(careerOutputProfile.percentage)}%`}
-          </p>
-        )}
-        <AdminMonthCallout label="Strongest months" months={careerStrongMonths} tone="good" />
-        <AdminMonthCallout label="Pace yourself" months={careerCautionMonths} tone="caution" />
-        {career.careerStyle && (
-          <p className="mt-3 text-base text-stone-700">
-            <strong>{career.careerStyle}</strong>
-            {career.leadershipStyle ? ` · ${career.leadershipStyle}` : ""}
-          </p>
-        )}
-        {(career.careerStrategy || career.idealWorkEnvironment) && (
-          <p className="mt-2 text-base leading-7 text-stone-700">
-            {career.careerStrategy || career.idealWorkEnvironment}
-          </p>
-        )}
-        {narrative.careerFocus && (
-          <p className="mt-3 text-base leading-7 text-stone-700">{narrative.careerFocus}</p>
-        )}
-        <AdminStrengthRiskGrid
-          strengths={career.careerStrengths}
-          risks={career.careerRisks}
-          strengthLabel="Career Strengths"
-          riskLabel="Career Risks"
-        />
-        {!!career.recommendedDirections?.length && (
-          <div className="mt-5">
-            <p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-700">
-              Recommended Directions
-            </p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {career.recommendedDirections.map((item) => (
-                <span
-                  key={item}
-                  className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800"
-                >
-                  {item}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-      </AdminReportSection>
+      <CareerSection
+        careerAuthorityProfile={careerAuthorityProfile}
+        careerOutputProfile={careerOutputProfile}
+        careerStrongMonths={careerStrongMonths}
+        careerCautionMonths={careerCautionMonths}
+        career={career}
+        careerFocus={narrative.careerFocus}
+      />
 
-      <AdminReportSection icon="💰" title="Wealth Opportunities">
-        {(directWealthPct != null || indirectWealthPct != null) && (
-          <p className="mt-3 text-sm font-semibold text-amber-700">
-            {indirectWealthPct != null && `Indirect Wealth · ${getProfileDisplay("Indirect Wealth").name || ""} ${Math.round(indirectWealthPct)}%`}
-            {indirectWealthPct != null && directWealthPct != null && " · "}
-            {directWealthPct != null && `Direct Wealth · ${getProfileDisplay("Direct Wealth").name || ""} ${Math.round(directWealthPct)}%`}
-          </p>
-        )}
-        <AdminMonthCallout label="Strongest months" months={wealthStrongMonths} tone="good" />
-        <AdminMonthCallout label="Pace yourself" months={wealthCautionMonths} tone="caution" />
-        {wealthArchetype.wealthArchetype && (
-          <p className="mt-3 text-base text-stone-700">
-            <strong>{wealthArchetype.wealthArchetype}</strong>
-            {wealth.incomeStyle ? ` · ${wealth.incomeStyle}` : ""}
-          </p>
-        )}
-        {narrative.wealthFocus && (
-          <p className="mt-3 text-base leading-7 text-stone-700">{narrative.wealthFocus}</p>
-        )}
-        {wealth.wealthStrategy && (
-          <p className="mt-3 text-base leading-7 text-stone-700">{wealth.wealthStrategy}</p>
-        )}
-        <AdminStrengthRiskGrid
-          strengths={wealth.wealthStrengths || wealthArchetype.moneyStrengths}
-          risks={wealth.wealthRisks || wealthArchetype.moneyBlindSpots}
-          strengthLabel="Wealth Strengths"
-          riskLabel="Wealth Blind Spots"
-        />
-        {!!wealthArchetype.idealIncomeModels?.length && (
-          <div className="mt-5">
-            <p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-700">
-              Ideal Income Models
-            </p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {wealthArchetype.idealIncomeModels.map((item) => (
-                <span
-                  key={item}
-                  className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800"
-                >
-                  {item}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-      </AdminReportSection>
+      <WealthSection
+        directWealthPct={directWealthPct}
+        indirectWealthPct={indirectWealthPct}
+        wealthStrongMonths={wealthStrongMonths}
+        wealthCautionMonths={wealthCautionMonths}
+        wealthArchetype={wealthArchetype}
+        wealth={wealth}
+        wealthFocus={narrative.wealthFocus}
+      />
 
-      <AdminReportSection icon="❤️" title="Relationship Dynamics">
-        {relationshipArchetype.name && (
-          <p className="mt-3 text-base text-stone-700">
-            <strong>{relationshipArchetype.name}</strong>
-            {relationshipPattern.relationshipStyle
-              ? ` · ${relationshipPattern.relationshipStyle}`
-              : ""}
-          </p>
-        )}
-        {dayBranchAnimal && dayBranchElement && (
-          <p className="mt-3 text-base leading-7 text-stone-700">
-            <strong>Spouse Palace ({dayBranchZh} {dayBranchAnimal} · {dayBranchElement}):</strong>{" "}
-            {spousePalaceNote[dayBranchElement]}
-          </p>
-        )}
-        <AdminMonthCallout label="Good months" months={relationshipGoodMonths} tone="good" />
-        <AdminMonthCallout
-          label="Extra grounding needed"
-          months={relationshipCautionMonths}
-          tone="caution"
-        />
-        {narrative.relationshipFocus && (
-          <p className="mt-3 text-base leading-7 text-stone-700">
-            {narrative.relationshipFocus}
-          </p>
-        )}
-        {relationship.spouseStar?.interpretation && (
-          <p className="mt-3 text-base leading-7 text-stone-700">
-            {relationship.spouseStar.interpretation}
-          </p>
-        )}
-        {!!favourableSet.size && (
-          <p className="mt-3 text-base leading-7 text-stone-700">
-            Partners whose own chart leans toward {[...favourableSet].join(", ")} —
-            your chart's own supportive elements — tend to reinforce rather than
-            drain your energy, since those are the same elements your chart
-            already benefits from.
-          </p>
-        )}
-        {!!relationship.partnerDynamics?.potentialChallenges?.length && (
-          <p className="mt-3 text-base leading-7 text-stone-700">
-            {relationship.partnerDynamics.potentialChallenges.join(" ")}
-          </p>
-        )}
-        {relationship.timingNotes?.annualInfluence && (
-          <p className="mt-3 rounded-xl bg-amber-50 p-4 text-sm leading-6 text-amber-800">
-            <strong>{report.annualEnergy?.selectedYear || "This year"}:</strong>{" "}
-            {relationship.timingNotes.annualInfluence}{" "}
-            {relationship.timingNotes.caution}
-          </p>
-        )}
-        {peachBlossomAnimal && (
-          <p className="mt-3 text-base leading-7 text-stone-700">
-            <strong>Romantic Peak Timing:</strong> Your Peach Blossom is the{" "}
-            <strong>{peachBlossomAnimal}</strong>.{" "}
-            {peachBlossomYears.length === 2 && (
-              <>{peachBlossomYears[0]} and {peachBlossomYears[1]} are your next {peachBlossomAnimal} years — </>
-            )}
-            {animalToMonth[peachBlossomAnimal] && (
-              <><strong>{animalToMonth[peachBlossomAnimal]}</strong> each year is also a monthly peak. </>
-            )}
-            These are your strongest windows for romantic connections and social magnetism.
-          </p>
-        )}
-        <AdminStrengthRiskGrid
-          strengths={relationshipArchetype.strengths || relationshipPattern.relationshipStrengths}
-          risks={relationshipArchetype.blindSpots || relationshipPattern.relationshipBlindSpots}
-          strengthLabel="Relationship Strengths"
-          riskLabel="Relationship Blind Spots"
-        />
-        {!!relationshipPattern.emotionalNeeds?.length && (
-          <div className="mt-5">
-            <p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-700">
-              Emotional Needs
-            </p>
-            <AdminBulletList items={relationshipPattern.emotionalNeeds} />
-          </div>
-        )}
-        {!!(relationshipArchetype.partnerNeeds?.length || relationshipPattern.idealPartnerTraits?.length) && (
-          <div className="mt-5">
-            <p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-700">
-              What This Chart Needs In A Partner
-            </p>
-            <AdminBulletList
-              items={[
-                ...new Set([
-                  ...(relationshipArchetype.partnerNeeds || []),
-                  ...(relationshipPattern.idealPartnerTraits || []),
-                ]),
-              ]}
-            />
-          </div>
-        )}
-      </AdminReportSection>
+      <RelationshipSection
+        relationshipArchetype={relationshipArchetype}
+        relationshipPattern={relationshipPattern}
+        dayBranchAnimal={dayBranchAnimal}
+        dayBranchZh={dayBranchZh}
+        dayBranchElement={dayBranchElement}
+        spousePalaceNoteText={spousePalaceNoteText}
+        relationshipGoodMonths={relationshipGoodMonths}
+        relationshipCautionMonths={relationshipCautionMonths}
+        relationshipFocus={narrative.relationshipFocus}
+        relationship={relationship}
+        favourableSet={favourableSet}
+        selectedYear={report.annualEnergy?.selectedYear}
+        peachBlossomAnimal={peachBlossomAnimal}
+        peachBlossomYears={peachBlossomYears}
+        peachBlossomMonth={peachBlossomMonth}
+      />
 
-      <AdminReportSection icon="🌿" title="Wellness & Energy Balance">
-        {report.chartFoundation?.dayMasterStrength?.status && (
-          <p className="mt-3 text-sm font-semibold text-amber-700">
-            Chart Strength: {report.chartFoundation.dayMasterStrength.status}
-            {report.chartFoundation.dayMasterStrength.strengthScore != null &&
-              ` (${Math.round(Number(report.chartFoundation.dayMasterStrength.strengthScore))}/100)`}
-          </p>
-        )}
-        <AdminMonthCallout label="Easier months" months={wellnessEasierMonths} tone="good" />
-        <AdminMonthCallout label="Pace yourself" months={wellnessCautionMonths} tone="caution" />
-        {health.vitalityLevel && (
-          <p className="mt-3 text-base text-stone-700">
-            <strong>{health.vitalityLevel}</strong>
-            {health.stressPattern ? ` · ${health.stressPattern}` : ""}
-          </p>
-        )}
-        {narrative.wellnessFocus && (
-          <p className="mt-3 text-base leading-7 text-stone-700">{narrative.wellnessFocus}</p>
-        )}
-        {health.healthStrategy && (
-          <p className="mt-3 text-base leading-7 text-stone-700">{health.healthStrategy}</p>
-        )}
-        {weakestElement && (
-          <p className="mt-3 rounded-xl bg-amber-50 p-4 text-sm leading-6 text-amber-800">
-            <strong>
-              {weakestElement.name} is your weakest element at {Math.round(weakestElement.natalPercentage)}%
-              natally
-            </strong>
-            {weakestElement.roleDescription &&
-              ` — ${weakestElement.name} governs ${weakestElement.roleDescription}, so this is worth conscious support.`}
-            {weakestElement.bodySystem &&
-              ` In classical Five-Element wellness, ${weakestElement.name} is also associated with ${weakestElement.bodySystem} — worth keeping in mind as a lifestyle/energy focus, not a medical diagnosis.`}
-          </p>
-        )}
-        <AdminStrengthRiskGrid
-          strengths={health.wellnessStrengths}
-          risks={health.wellnessRisks}
-          strengthLabel="Wellness Strengths"
-          riskLabel="Wellness Risks"
-        />
-      </AdminReportSection>
+      <WellnessSection
+        dayMasterStrengthStatus={report.chartFoundation?.dayMasterStrength?.status}
+        dayMasterStrengthScore={report.chartFoundation?.dayMasterStrength?.strengthScore}
+        wellnessEasierMonths={wellnessEasierMonths}
+        wellnessCautionMonths={wellnessCautionMonths}
+        health={health}
+        wellnessFocus={narrative.wellnessFocus}
+        weakestElement={weakestElement}
+      />
+
 
       <AdminReportSection icon="💎" title="Main Supportive Elements & Stones">
         <p className="mt-3 text-base text-stone-700">
