@@ -553,7 +553,7 @@ function GenerateProfilePanel({ form, onChange, onGenerate }) {
           onClick={onGenerate}
           className="rounded-2xl bg-orange-700 px-10 py-4 text-sm font-semibold text-white shadow-md hover:bg-orange-600"
         >
-          Click Here Now
+          Click Here
         </button>
       </div>
     </section>
