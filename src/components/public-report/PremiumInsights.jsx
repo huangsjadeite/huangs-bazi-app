@@ -1,4 +1,4 @@
-import { AdminFullReport } from "../../App.jsx";
+import AdminFullReport from "../admin-report/AdminFullReport";
 
 export default function PremiumInsights({ report, isAdmin = false, fullReport = null, clientName = "" }) {
   if (!report) return null;
