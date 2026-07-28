@@ -1630,7 +1630,7 @@ function AdminFullReport({ report, clientName }) {
       {/* Print-only cover page */}
       <div className="print-cover hidden print:flex print:flex-col print:items-center print:justify-center print:py-24 print:text-center">
         <img src={huangsLogo} alt="Huangs Jadeite and Jewelry" className="h-16 w-auto mb-6" />
-        <p className="text-sm font-bold tracking-widest uppercase mb-4" style={{color:"#8B1A1A"}}>HUANGS JADEITE &amp; JEWELRY</p>
+        <p className="text-sm font-bold tracking-widest uppercase mb-4" style={{color:"#8B1A1A"}}>HUANGS JADEITE AND JEWELRY</p>
         <h1 className="text-2xl font-bold mb-6 leading-snug" style={{color:"#8B1A1A"}}>
           Personal Feng Shui Energy Analysis<br/>for {coverYearLabel}
         </h1>
