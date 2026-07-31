@@ -10,18 +10,14 @@ export default function GenerateProfilePanel({ form, onChange, onGenerate }) {
           alt="Huangs Logo"
           className="h-12 w-auto opacity-70"
         />
-
-        <p className="text-sm font-semibold uppercase tracking-[0.35em] text-stone-500">
-          Birth Details
-        </p>
       </div>
 
       <h1 className="text-3xl font-bold text-slate-950">
-        Generate Your Bazi (八字) Profile
+        Discover Your Bazi (八字) Stone Match @ $0
       </h1>
 
       <p className="mt-4 text-lg text-stone-500">
-        Birth time is used to calculate the Hour Pillar, Hidden Stems and Ten Gods weighting.
+        Birth time is used to accurately calculate your Bazi.
       </p>
 
       <div className="mt-8 grid gap-5 md:grid-cols-4">
@@ -166,10 +162,10 @@ export default function GenerateProfilePanel({ form, onChange, onGenerate }) {
       <div className="mt-8 flex items-center justify-between rounded-3xl border border-yellow-200 bg-yellow-50 p-6">
         <div>
           <h2 className="text-xl font-bold text-orange-900">
-            Bazi Calculation
+            Get Your Stone Match
           </h2>
           <p className="mt-2 text-orange-800">
-            Find out how your Bazi affects your Wealth, Health, Career and Relationships
+            See the stones that align with your energy to support your Wealth, Health, Career and Relationships.
           </p>
         </div>
 

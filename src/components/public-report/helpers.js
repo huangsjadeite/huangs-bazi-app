@@ -50,6 +50,71 @@ export function normalizeStoneItems(stones) {
   );
 }
 
+export function getStoneWhy(stone, group) {
+  const message = stone?.customerMessage || stone?.reason || group?.summary || "";
+  const firstSentence = String(message)
+    .split(/(?<=[.!?])\s+/)
+    .filter(Boolean)[0];
+
+  return firstSentence || message;
+}
+
+export function selectTeaserStones(stones, limit = 3) {
+  if (!stones) return [];
+
+  const groups = [
+    ...(stones.primaryRecommendations || []),
+    ...(stones.secondaryRecommendations || []),
+  ].filter((group) => group?.stones?.length);
+
+  if (groups.length === 0) {
+    return normalizeStoneItems(stones)
+      .slice(0, limit)
+      .map((item) => ({ ...item, why: getStoneWhy(item) }));
+  }
+
+  const picked = [];
+  const usedNames = new Set();
+
+  // Round-robin across groups so both elements are represented before a
+  // group offers a second stone; within a group, prefer a stone type
+  // (Jadeite vs Crystal vs Gemstone) that hasn't appeared yet for that
+  // element before repeating one.
+  let progressed = true;
+  while (picked.length < limit && progressed) {
+    progressed = false;
+
+    for (const group of groups) {
+      if (picked.length >= limit) break;
+
+      const usedTypesInGroup = picked
+        .filter((item) => item.element === group.element)
+        .map((item) => item.type);
+
+      const candidate =
+        group.stones.find(
+          (stone) =>
+            !usedNames.has(stone.name) &&
+            !usedTypesInGroup.includes(stone.type)
+        ) || group.stones.find((stone) => !usedNames.has(stone.name));
+
+      if (candidate) {
+        usedNames.add(candidate.name);
+        picked.push({
+          rank: `${group.category}-${candidate.name}`,
+          name: candidate.name,
+          type: candidate.type,
+          element: group.element,
+          why: getStoneWhy(candidate, group),
+        });
+        progressed = true;
+      }
+    }
+  }
+
+  return picked;
+}
+
 export function buildShopifySearchUrl(item) {
   const rawTerms = [
     item?.stone,

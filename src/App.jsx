@@ -1,5 +1,4 @@
 import GenerateProfilePanel from "./components/form/GenerateProfilePanel";
-import LeadPopup from "./components/LeadPopup";
 import EmotionalEnergyBalance from "./components/public-report/EmotionalEnergyBalance";
 import EmotionalEnergyProfile from "./components/public-report/EmotionalEnergyProfile";
 import { getFreePreviewReport } from "./components/public-report/helpers";
@@ -8,6 +7,7 @@ import PremiumInsights from "./components/public-report/PremiumInsights";
 import ProductRecommendationsSection from "./components/public-report/ProductRecommendationsSection";
 import RecommendedStones from "./components/public-report/RecommendedStones";
 import RelationshipArchetypeSection from "./components/public-report/RelationshipArchetypeSection";
+import StoneTeaserSection from "./components/public-report/StoneTeaserSection";
 import TopProfileStrengthSection from "./components/public-report/TopProfileStrengthSection";
 import TopStrengthsSection from "./components/public-report/TopStrengthsSection";
 import WealthTeaserSection from "./components/public-report/WealthTeaserSection";
@@ -47,7 +47,6 @@ export default function HuangsBaZiUIFrontend() {
   });
 
   const [submittedInput, setSubmittedInput] = useState(null);
-  const [popupOpen, setPopupOpen] = useState(false);
 
   const chart = useMemo(() => {
     if (!submittedInput) return null;
@@ -103,8 +102,6 @@ export default function HuangsBaZiUIFrontend() {
       timezone: getBirthCountryTimezone(form.birthCountry),
       useBirthTime: !form.birthTimeUnknown && Boolean(birthTime),
     });
-
-    setPopupOpen(true);
   }
 
   const wealthArchetype =
@@ -137,8 +134,6 @@ export default function HuangsBaZiUIFrontend() {
 
   return (
     <main className="min-h-screen bg-[#F7F3EB]">
-      <LeadPopup open={popupOpen} setOpen={setPopupOpen} />
-
       <div className="mx-auto max-w-[1600px] space-y-5 px-4 py-6 md:px-8 md:pb-6">
         <GenerateProfilePanel
           form={form}
@@ -175,51 +170,65 @@ export default function HuangsBaZiUIFrontend() {
               </div>
             )}
 
-                                                                     <EmotionalEnergyProfile profile={uiChart.profile} />
+            {isAdmin ? (
+              <>
+                <EmotionalEnergyProfile profile={uiChart.profile} />
 
-            <TopStrengthsSection strengths={topStrengths} />
+                <TopStrengthsSection strengths={topStrengths} />
 
-            <TopProfileStrengthSection chart={chart} uiChart={uiChart} />
+                <TopProfileStrengthSection chart={chart} uiChart={uiChart} />
 
-            <EmotionalEnergyBalance elements={uiChart?.elements} />
+                <EmotionalEnergyBalance elements={uiChart?.elements} />
 
-            <RelationshipArchetypeSection
-              relationshipArchetype={relationshipArchetype}
-            />
+                <RelationshipArchetypeSection
+                  relationshipArchetype={relationshipArchetype}
+                />
 
-            <WealthTeaserSection wealth={wealthArchetype} />
+                <WealthTeaserSection wealth={wealthArchetype} />
 
-            <LifeThemesSection
-              lifeThemes={
-                chart?.lifeThemes ||
-                uiChart?.lifeThemes ||
-                uiChart?.lifeAreas?.lifeThemes ||
-                chart?.lifeAreas?.lifeThemes
-              }
-            />
+                <LifeThemesSection
+                  lifeThemes={
+                    chart?.lifeThemes ||
+                    uiChart?.lifeThemes ||
+                    uiChart?.lifeAreas?.lifeThemes ||
+                    chart?.lifeAreas?.lifeThemes
+                  }
+                />
 
-            <RecommendedStones
-              stones={
-                chart?.recommendations?.stones ||
-                chart?.practicalSupport?.stones ||
-                uiChart?.stones ||
-                uiChart?.stoneRecommendations
-              }
-            />
+                <RecommendedStones
+                  stones={
+                    chart?.recommendations?.stones ||
+                    chart?.practicalSupport?.stones ||
+                    uiChart?.stones ||
+                    uiChart?.stoneRecommendations
+                  }
+                />
 
-            <ProductRecommendationsSection
-              products={
-                chart?.recommendations?.products ||
-                chart?.practicalSupport?.products
-              }
-            />
+                <ProductRecommendationsSection
+                  products={
+                    chart?.recommendations?.products ||
+                    chart?.practicalSupport?.products
+                  }
+                />
 
-            <PremiumInsights
-              report={previewReport}
-              isAdmin={isAdmin}
-              fullReport={chart?.paidReportSchemaV1}
-              clientName={submittedInput?.name}
-            />
+                <PremiumInsights
+                  report={previewReport}
+                  isAdmin={isAdmin}
+                  fullReport={chart?.paidReportSchemaV1}
+                  clientName={submittedInput?.name}
+                />
+              </>
+            ) : (
+              <StoneTeaserSection
+                stones={
+                  chart?.recommendations?.stones ||
+                  chart?.practicalSupport?.stones ||
+                  uiChart?.stones ||
+                  uiChart?.stoneRecommendations
+                }
+                clientName={submittedInput?.name}
+              />
+            )}
           </motion.div>
         ) : null}
       </div>

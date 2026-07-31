@@ -115,7 +115,7 @@ export default function PremiumInsights({ report, isAdmin = false, fullReport = 
         </p>
 
         <a
-          href="https://www.huangsjadeiteandjewelry.com/collections/singapore-feng-shui-master-services-%E5%BC%80%E5%85%89-kai-guang/products/personal-feng-shui-energy-analysis-gemstone-alignment"
+          href="https://www.huangsjadeiteandjewelry.com/cart/53586988302549:1"
           target="_blank"
           rel="noopener noreferrer"
           className="mt-10 inline-block rounded-2xl bg-orange-500 px-10 py-4 text-sm font-semibold text-white shadow-lg transition hover:bg-orange-400"
