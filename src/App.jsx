@@ -12,7 +12,7 @@ import TopProfileStrengthSection from "./components/public-report/TopProfileStre
 import TopStrengthsSection from "./components/public-report/TopStrengthsSection";
 import WealthTeaserSection from "./components/public-report/WealthTeaserSection";
 import { getBirthCountryTimezone } from "./data/birthCountryTimezones";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import buildBaziChart from "./engine/buildBaziChart";
 import { mapChartToUi } from "./data/mapChartToUi";
 import { motion } from "framer-motion";
@@ -47,6 +47,7 @@ export default function HuangsBaZiUIFrontend() {
   });
 
   const [submittedInput, setSubmittedInput] = useState(null);
+  const resultsRef = useRef(null);
 
   const chart = useMemo(() => {
     if (!submittedInput) return null;
@@ -68,6 +69,12 @@ export default function HuangsBaZiUIFrontend() {
 
     return mapChartToUi(chart, submittedInput.selectedYear);
   }, [chart, submittedInput]);
+
+  useEffect(() => {
+    if (uiChart && resultsRef.current) {
+      resultsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [uiChart]);
 
   function updateForm(nextValue) {
     setForm((current) => ({ ...current, ...nextValue }));
@@ -143,6 +150,7 @@ export default function HuangsBaZiUIFrontend() {
 
         {uiChart ? (
           <motion.div
+            ref={resultsRef}
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, delay: 0.08 }}
