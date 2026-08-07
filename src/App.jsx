@@ -154,7 +154,7 @@ export default function HuangsBaZiUIFrontend() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, delay: 0.08 }}
-            className="space-y-10"
+            className="scroll-mt-6 space-y-10"
           >
             {isAdmin && (
               <div className="rounded-2xl border border-amber-300 bg-amber-50 px-6 py-4 text-center">
