@@ -9,7 +9,7 @@ import {
 } from "../data/baziConstants.js";
 
 import {
-  getSolarYearApprox,
+  getSolarYearPrecise,
   getSolarMonthBranchApprox,
 } from "../data/solarTerms.js";
 
@@ -48,18 +48,21 @@ export function buildPillar({ stemKey, branchKey, meta = {} }) {
 }
 
 export function calculateYearPillar(normalizedInput) {
-  const solarYear = getSolarYearApprox(
+  const solar = getSolarYearPrecise(
     normalizedInput.year,
     normalizedInput.month,
-    normalizedInput.day
+    normalizedInput.day,
+    normalizedInput.hour ?? 0,
+    normalizedInput.minute ?? 0,
+    normalizedInput.useBirthTime
   );
 
-  const offset = solarYear - 1984;
+  const offset = solar.year - 1984;
 
   return buildPillar({
     stemKey: HEAVENLY_STEMS[cycleMod(offset, 10)].key,
     branchKey: EARTHLY_BRANCHES[cycleMod(offset, 12)].key,
-    meta: { solarYear },
+    meta: { solarYear: solar.year, onBoundaryDay: solar.onBoundaryDay, needsBirthTime: solar.needsTime },
   });
 }
 

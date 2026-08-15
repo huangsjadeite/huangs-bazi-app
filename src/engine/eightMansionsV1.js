@@ -1,4 +1,4 @@
-import { getSolarYearApprox } from "../data/solarTerms.js";
+import { getSolarYearPrecise } from "../data/solarTerms.js";
 
 // Gua (1-9, excluding 5) -> trigram identity, element, compass direction.
 // Validated against 4 of these 8 entries (1, 2, 4, 6) directly against real
@@ -41,9 +41,11 @@ function reduceToSingleDigit(value) {
   return n;
 }
 
-function calculateMingGua({ birthDate, gender }) {
+function calculateMingGua({ birthDate, birthTime, gender }) {
   const [year, month, day] = birthDate.split("-").map(Number);
-  const solarYear = getSolarYearApprox(year, month, day);
+  const [hour, minute] = birthTime ? birthTime.split(":").map(Number) : [0, 0];
+  const solar = getSolarYearPrecise(year, month, day, hour, minute, Boolean(birthTime));
+  const solarYear = solar.year;
   const lastTwoDigits = solarYear % 100;
   const reduced = reduceToSingleDigit(lastTwoDigits);
 
@@ -58,25 +60,34 @@ function calculateMingGua({ birthDate, gender }) {
   }
   gua = reduceToSingleDigit(gua);
 
+  // Male post-2000 subtraction (9 - reduced) can land exactly on 0 when
+  // reduced === 9; classical convention wraps that back to 9.
+  if (gua === 0) {
+    gua = 9;
+  }
+
   // Gua 5 has no trigram of its own in the Lo Shu framework; classical
   // convention reassigns it.
   if (gua === 5) {
     gua = isMale ? 2 : 8;
   }
 
-  return gua;
+  return { gua, solar };
 }
 
-export function buildEightMansionsV1({ birthDate, gender }) {
+export function buildEightMansionsV1({ birthDate, birthTime, gender }) {
   if (!birthDate) return null;
 
-  const gua = calculateMingGua({ birthDate, gender });
+  const { gua, solar } = calculateMingGua({ birthDate, birthTime, gender });
   const info = GUA_INFO[gua];
   const directions = DIRECTIONS_BY_GUA[gua];
 
   return {
     version: "eight-mansions-v1",
     gua,
+    solarYear: solar.year,
+    onBoundaryDay: solar.onBoundaryDay,
+    needsBirthTime: solar.needsTime,
     lifeStar: info.lifeStar,
     trigram: info.trigram,
     trigramZh: info.zh,
