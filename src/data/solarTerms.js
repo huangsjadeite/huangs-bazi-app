@@ -86,6 +86,43 @@ export function getSolarYearApprox(year, month, day) {
   return beforeLiChun ? year - 1 : year;
 }
 
+// Precise 立春 year boundary, using the real per-year Jie-term timestamps
+// (SOLAR_TERM_TIMESTAMPS_BY_YEAR, Meeus solar longitude) instead of the
+// fixed Feb-4 approximation above. 立春 lands on the 3rd or 5th in a large
+// minority of years, so the fixed cutoff misclassifies boundary births -
+// this is what year-pillar and Eight Mansions gua should use instead.
+// timeKnown matters only when the birth lands on the 立春 day itself; when
+// it does and time is unknown, needsTime comes back true rather than
+// guessing. Falls outside the timestamp table's 1899-2036 range, this
+// falls back to the approximation and flags outOfRange.
+export function getSolarYearPrecise(year, month, day, hour = 0, minute = 0, timeKnown = false) {
+  const terms = SOLAR_TERM_TIMESTAMPS_BY_YEAR[year];
+  const liChun = terms?.find((t) => t.branch === "yin");
+  if (!liChun) {
+    return {
+      year: getSolarYearApprox(year, month, day),
+      onBoundaryDay: false,
+      needsTime: false,
+      outOfRange: true,
+    };
+  }
+  const { day: lcDay, hour: lcH, minute: lcM } = liChun.timestamp;
+  const onBoundaryDay = month === 2 && day === lcDay;
+  let before;
+  if (month < 2) before = true;
+  else if (month > 2) before = false;
+  else if (day < lcDay) before = true;
+  else if (day > lcDay) before = false;
+  else before = timeKnown ? hour * 60 + minute < lcH * 60 + lcM : false;
+  return {
+    year: before ? year - 1 : year,
+    onBoundaryDay,
+    needsTime: onBoundaryDay && !timeKnown,
+    instant: liChun.timestamp,
+    outOfRange: false,
+  };
+}
+
 export function getSolarMonthBranchApprox(month, day) {
   const dateCode = month * 100 + day;
 

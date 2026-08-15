@@ -241,6 +241,7 @@ export function buildBaziChart(input) {
   try {
     eightMansionsV1Result = buildEightMansionsV1({
       birthDate: normalizedInput.birthDate,
+      birthTime: normalizedInput.birthTime,
       gender: normalizedInput.gender,
     });
   } catch (error) {
@@ -742,6 +743,12 @@ export function buildBaziChart(input) {
     "Month pillar uses approximate Jie Qi boundaries. Replace with exact solar-term timestamps before production.",
     "Day pillar uses a fixed reference anchor. Validate against chosen almanac before production lock.",
   ];
+
+  if (pillars.year.needsBirthTime) {
+    warnings.push(
+      "Birth falls on the 立春 boundary day and no birth time was given - year pillar and Eight Mansions gua defaulted to the current solar year rather than guessing. Provide a birth time to resolve."
+    );
+  }
 
   if (dayMasterStrengthV4Error) {
     warnings.push(
