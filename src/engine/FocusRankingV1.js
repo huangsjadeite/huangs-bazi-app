@@ -1,7 +1,7 @@
 // FocusRankingV1.js
-// Consumer-facing 2026 priorities engine.
-// No UI logic. No React. No traditional BaZi jargon in output.
-// Generates "Your 2026 Priorities" ranked across:
+// Consumer-facing annual priorities engine.
+// No UI logic. No React. No traditional Bazi jargon in output.
+// Generates "Your <year> Priorities" ranked across:
 // Career, Wealth, Relationship, Wellness.
 
 const PROFILE_ALIASES = {
@@ -189,7 +189,6 @@ function getAnnualFocusInput(input = {}) {
     input?.annual ||
     input?.yearOverlay ||
     input?.currentYear ||
-    input?.overlay2026 ||
     {}
   );
 }
@@ -579,7 +578,7 @@ function scoreFocusAreas(input = {}) {
     add(
       "CAREER",
       14,
-      "Your personal energy is strong, so 2026 may ask you to direct your strength more consciously.",
+      `Your personal energy is strong, so ${input.selectedYear || "this year"} may ask you to direct your strength more consciously.`,
       "Use your strength to lead clearly, not to carry everything alone."
     );
     add(

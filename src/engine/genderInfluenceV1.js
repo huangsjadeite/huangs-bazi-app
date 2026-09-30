@@ -11,7 +11,7 @@ function normalizeGender(gender) {
   if (value === "female" || value === "f") return "Female";
 
   // "other", "non-binary", "nonbinary", "nb", "prefer not to say", etc. are
-  // all read with the neutral relationship lens. In BaZi, the day-master and
+  // all read with the neutral relationship lens. In Bazi, the day-master and
   // ten-gods analysis does not depend on gender; only the spouse-star /
   // relationship-role framing does, and for these we stay gender-neutral.
   return "Unspecified";

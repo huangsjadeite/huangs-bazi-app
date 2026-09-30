@@ -40,10 +40,12 @@ export default function EmotionalEnergyProfile({ profile }) {
             Current Energy Influence
           </p>
 
-          <p className="mt-5 text-4xl font-bold tracking-wide">丙午</p>
+          <p className="mt-5 text-4xl font-bold tracking-wide">
+            {profile.annualPillar?.chinese || "-"}
+          </p>
 
           <p className="mt-4 text-2xl font-semibold md:text-3xl">
-            Fire Horse
+            {profile.annualZodiac || "-"}
           </p>
         </div>
       </div>

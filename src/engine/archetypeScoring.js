@@ -154,7 +154,7 @@ function getTenGodKey(dayStem, targetStem) {
   }
 
   // Wealth: Day Master controls target
-  // Traditional BaZi polarity:
+  // Traditional Bazi polarity:
   // same polarity = Indirect Wealth, opposite polarity = Direct Wealth
   if (targetElement === getControlledElement(dayElement)) {
     return samePolarity ? "indirectWealth" : "directWealth";

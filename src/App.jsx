@@ -12,12 +12,13 @@ import TopProfileStrengthSection from "./components/public-report/TopProfileStre
 import TopStrengthsSection from "./components/public-report/TopStrengthsSection";
 import WealthTeaserSection from "./components/public-report/WealthTeaserSection";
 import { getBirthCountryTimezone } from "./data/birthCountryTimezones";
+import { DEFAULT_YEAR } from "./data/energyYears";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import buildBaziChart from "./engine/buildBaziChart";
 import { mapChartToUi } from "./data/mapChartToUi";
 import { motion } from "framer-motion";
 
-export default function HuangsBaZiUIFrontend() {
+export default function HuangsBaziUIFrontend() {
   // Admin mode: visit with ?admin=PASSWORD to unlock the full paid report.
   // Password comes from VITE_ADMIN_PASSWORD (set in Vercel / .env); falls back
   // to a default for local dev. Light internal gate, not strong security.
@@ -43,7 +44,7 @@ export default function HuangsBaZiUIFrontend() {
     useBirthTime: true,
     gender: "",
     birthCountry: "",
-    selectedYear: 2026,
+    selectedYear: DEFAULT_YEAR,
   });
 
   const [submittedInput, setSubmittedInput] = useState(null);

@@ -220,7 +220,7 @@ export function buildWealthEngineV1({
       primaryUsefulGod,
       secondaryUsefulGod,
       note:
-        "WealthEngineV1 translates frozen Engine V2 outputs into practical wealth and income interpretation. It does not affect pillars, strength, structure or useful god.",
+        "WealthEngineV1 translates frozen Engine V2 outputs into practical wealth and income interpretation. It does not affect pillars, strength, structure or Elements to Enhance.",
     },
   };
 }

@@ -1,6 +1,6 @@
 // TopStrengthsV1.js
 // Consumer-facing strengths engine.
-// No UI logic. No React. No BaZi jargon in output.
+// No UI logic. No React. No Bazi jargon in output.
 // Generates "Your Natural Advantages" based on Ten Profiles, Structure,
 // Daymaster Strength and Useful God.
 

@@ -100,5 +100,6 @@ export function normalizeInput(input) {
   day: parsedDate.day,
   hour: parsedTime ? parsedTime.hour : null,
   minute: parsedTime ? parsedTime.minute : null,
+  selectedYear: Number(input.selectedYear) || null,
 };
 }

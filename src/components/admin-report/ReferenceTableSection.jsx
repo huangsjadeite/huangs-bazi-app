@@ -17,7 +17,7 @@ export default function ReferenceTableSection() {
   return (
     <AdminReportSection icon="📖" title="Bazi Reference — The 10 Energy Archetypes">
       <p className="mt-3 text-sm text-stone-500">
-        Each personality pattern in this report is derived from one of ten classical Bazi archetypes. Use this table as a quick reference when explaining any term that appears in the chart above.
+        Each personality pattern in this report is derived from one of ten classical Bazi archetypes. Use this table as a quick reference for any term that appears in your chart above.
       </p>
       <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200 print:rounded-none print:border-[#8B1A1A]">
         <table className="w-full text-sm">

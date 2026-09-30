@@ -210,8 +210,8 @@ export function buildLifeThemesV1({
     mainStructure ? `Main structure is ${mainStructure}.` : null,
     dayStatus ? `Day Master strength is ${dayStatus}.` : null,
     dominantProfileName ? `Dominant profile is ${dominantProfileName}.` : null,
-    primaryUsefulGod ? `Primary Useful God is ${primaryUsefulGod}.` : null,
-    secondaryUsefulGod ? `Secondary Useful God is ${secondaryUsefulGod}.` : null,
+    primaryUsefulGod ? `Primary Element to Enhance is ${primaryUsefulGod}.` : null,
+    secondaryUsefulGod ? `Secondary Element to Enhance is ${secondaryUsefulGod}.` : null,
   ].filter(Boolean);
 
   return {

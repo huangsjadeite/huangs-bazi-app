@@ -97,7 +97,7 @@ function getSpouseStar({ gender, dayElement }) {
       element,
       role: "Partner Star",
       source: "Officer Star",
-      interpretation: `${element} represents the partner/spouse star in this chart. It reflects relationship themes connected to commitment, partner dynamics, emotional security and long-term relational patterns.`,
+      interpretation: `${element} represents the partner/spouse star in your chart. It reflects relationship themes connected to commitment, partner dynamics, emotional security and long-term relational patterns.`,
     };
   }
 
@@ -108,7 +108,7 @@ function getSpouseStar({ gender, dayElement }) {
       element,
       role: "Partner Star",
       source: "Wealth Star",
-      interpretation: `${element} represents the partner/spouse star in this chart. It reflects relationship themes connected to attraction, partnership, emotional investment and long-term relational patterns.`,
+      interpretation: `${element} represents the partner/spouse star in your chart. It reflects relationship themes connected to attraction, partnership, emotional investment and long-term relational patterns.`,
     };
   }
 
@@ -172,7 +172,7 @@ function analyseSpouseStarPresence({ pillars, spouseStar }) {
 
   const interpretationMap = {
     Visible:
-      "The partner star is visible in the chart, so relationship themes tend to be more noticeable, conscious or externally expressed.",
+      "The partner star is visible in your chart, so relationship themes tend to be more noticeable, conscious or externally expressed.",
     Rooted:
       "The partner star is present through branch energy, suggesting relationship themes exist but may develop through circumstances, timing or lived experience.",
     Hidden:
@@ -257,7 +257,7 @@ function buildRelationshipStyle({ mainStructure, dayStatus }) {
   };
 }
 
-function buildPartnerDynamics({ spouseStar, primaryUsefulGod }) {
+function buildPartnerDynamics({ spouseStar, primaryUsefulGod, helpfulElements = [] }) {
   const traits = {
     Wood: "You tend toward a partner dynamic that feels principled, growth-oriented and emotionally sincere.",
     Fire: "You tend toward a partner dynamic that feels warm, expressive, encouraging and emotionally present.",
@@ -275,10 +275,10 @@ function buildPartnerDynamics({ spouseStar, primaryUsefulGod }) {
   if (
     spouseStar?.element &&
     primaryUsefulGod &&
-    spouseStar.element !== primaryUsefulGod
+    !helpfulElements.includes(spouseStar.element)
   ) {
     potentialChallenges.push(
-      `In this chart, ${spouseStar.element} energy is the partner star — the element that naturally represents relationship and spouse energy. Because ${primaryUsefulGod} — not ${spouseStar.element} — is what supports your own growth, relationships can sometimes feel like they pull in a slightly different direction from personal ambitions. This is healthy self-awareness: the right partner brings complementary energy, not identical energy.`
+      `In your chart, ${spouseStar.element} energy is the partner star — the element that naturally represents relationship and spouse energy. Because ${primaryUsefulGod} — not ${spouseStar.element} — is what supports your own growth, relationships can sometimes feel like they pull in a slightly different direction from personal ambitions. This is healthy self-awareness: the right partner brings complementary energy, not identical energy.`
     );
   }
 
@@ -403,6 +403,10 @@ export function buildRelationshipEngineV2({
   const partnerDynamics = buildPartnerDynamics({
     spouseStar,
     primaryUsefulGod,
+    helpfulElements: [
+      ...(usefulGodV4?.favourableElements || []),
+      ...(usefulGodV4?.secondaryFavourableElements || []),
+    ],
   });
 
   const timingNotes = buildTimingNotes({

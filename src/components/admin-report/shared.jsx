@@ -34,8 +34,6 @@ export function AdminReportSection({ icon, title, children }) {
 }
 
 export function AdminMonthCallout({ label, months, tone = "good" }) {
-  if (!months?.length) return null;
-
   const toneClass =
     tone === "good"
       ? "bg-green-50 text-green-700"
@@ -44,7 +42,7 @@ export function AdminMonthCallout({ label, months, tone = "good" }) {
   return (
     <p className="mt-3 text-sm">
       <span className={`rounded-full px-2.5 py-0.5 font-bold ${toneClass}`}>
-        {label}: {months.join(", ")}
+        {label}: {months?.length ? months.join(", ") : "None stand out this year"}
       </span>
     </p>
   );

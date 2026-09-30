@@ -3,6 +3,7 @@
 import { ELEMENT_STONE_MAP } from "./stoneMaps/elementStoneMap.js";
 import { STRUCTURE_STONE_TONE_MAP } from "./stoneMaps/structureStoneToneMap.js";
 import { PROFILE_STONE_TONE_MAP } from "./stoneMaps/profileStoneToneMap.js";
+import { STONE_CATALOG, FOCUS_AREA_LABELS } from "./stoneMaps/stoneCatalog.js";
 
 function getElementName(value) {
   if (!value) return null;
@@ -30,103 +31,45 @@ function getProfileTone(profileName) {
   );
 }
 
-const STONE_CUSTOMER_MESSAGES = {
-  "White Jadeite":
-    "Supports calm confidence, clean decision-making, reputation and steady relationship flow. Good as a main daily support when you need balance without feeling too forceful.",
+// Features the stones whose life areas best match the client's focus areas,
+// weighted by each area's focus score. A stone's first area is its main
+// benefit and counts fully; its other areas count half. Each pick halves the
+// pull of the areas it covers, so the featured set spreads across the client's
+// top areas. With no focus scores, the catalog order is used.
+function pickStones(element, focusRanking, limit) {
+  const pool = [...(STONE_CATALOG[element] || [])];
+  const weight = Object.fromEntries(
+    (focusRanking || [])
+      .filter((item) => FOCUS_AREA_LABELS[item?.key])
+      .map((item) => [item.key, Math.max(0, Number(item.score) || 0)])
+  );
+  const covered = {};
+  const picked = [];
+  const pull = (area, index) => (weight[area] || 0) * (index === 0 ? 1 : 0.5) * 0.5 ** (covered[area] || 0);
 
-  "Clear Quartz":
-    "Helps amplify focus, intention and mental clarity. Best when you want a simple, versatile support that strengthens the effect of your chosen direction.",
-
-  "White Moonstone":
-    "Supports emotional softness, intuition and smoother connection with others. Helpful when you want to stay receptive without losing your centre.",
-
-  Selenite:
-    "Supports energetic cleansing, calmness and mental spaciousness. Best when you feel mentally crowded, emotionally heavy or need a lighter daily reset.",
-
-  Diamond:
-    "Supports commitment, confidence, standards and long-term direction. Best when you need clarity, discipline and a stronger sense of self-worth.",
-
-  "Black Jadeite":
-    "Supports grounding, protection and emotional steadiness. Helpful when you need to feel safer, more contained and less affected by external pressure.",
-
-  "Blue Jadeite":
-    "Supports communication, emotional flow and calm expression. Helpful when your growth depends on speaking clearly, connecting gently and staying composed.",
-
-  "Green Jadeite":
-    "Supports growth, renewal, harmony and steady personal development. Good when you want a softer form of progress that still feels grounded.",
-
-  Aquamarine:
-    "Supports calm communication, emotional flow and trust. Helpful when you need to express yourself clearly without becoming defensive or overwhelmed.",
-
-  Morganite:
-    "Supports softness, heart-opening and emotional healing. Best when relationship energy needs more warmth, gentleness and receptivity.",
-
-  Amethyst:
-    "Supports reflection, intuition and emotional clarity. Helpful when you need to slow down, understand your inner world and avoid impulsive reactions.",
-
-  Citrine:
-    "Supports confidence, optimism and opportunity awareness. Best when you need more motivation, visibility and openness to growth.",
-
-  "Black Obsidian":
-    "Supports protection, grounding and energetic boundaries. Useful when you need to cut through emotional noise and stay centred.",
-
-  "Red Agate":
-    "Supports courage, stamina and steady action. Best when you need more drive, warmth and confidence to move forward.",
-
-  "Tiger Eye":
-    "Supports courage, focus and practical judgement. Helpful when you need to make decisions with both confidence and control.",
-
-  Lapis:
-    "Supports wisdom, communication and clear self-expression. Best when your growth depends on speaking with authority and inner truth.",
-
-  "Lapis Lazuli":
-    "Supports wisdom, communication and clear self-expression. Best when your growth depends on speaking with authority and inner truth.",
-};
-
-function getStoneCustomerMessage({ stone, element, stoneMap, structureTone, profileTone }) {
-  const specificMessage = STONE_CUSTOMER_MESSAGES[stone.name];
-
-  if (specificMessage) {
-    return specificMessage;
+  while (picked.length < limit && pool.length) {
+    const value = (item) => item.areas.reduce((sum, area, index) => sum + pull(area, index), 0);
+    let bestIndex = 0;
+    pool.forEach((item, index) => {
+      if (value(item) > value(pool[bestIndex])) bestIndex = index;
+    });
+    const [item] = pool.splice(bestIndex, 1);
+    const contributions = item.areas.map((area, index) => [area, pull(area, index)]);
+    const [pickedFor, strength] = contributions.sort((x, y) => y[1] - x[1])[0] || [];
+    item.areas.forEach((area) => {
+      covered[area] = (covered[area] || 0) + 1;
+    });
+    picked.push({ ...item, pickedFor: strength > 0 ? pickedFor : null });
   }
 
-  return `${stone.name} supports ${stoneMap.keywords.join(
-    ", "
-  )} qualities linked to ${element} energy. This can help with ${profileTone} while also supporting ${structureTone.tone}.`;
-}
-
-function flattenStoneGroups(element) {
-  const map = ELEMENT_STONE_MAP[element];
-
-  if (!map) {
-    return [];
-  }
-
-  return [
-    ...map.jadeite.map((name) => ({
-      name,
-      type: "Jadeite",
-    })),
-    ...map.crystals.map((name) => ({
-      name,
-      type: "Crystal",
-    })),
-    ...map.gemstones.map((name) => ({
-      name,
-      type: "Gemstone",
-    })),
-    ...map.dziBeads.map((name) => ({
-      name,
-      type: "Dzi Bead",
-    })),
-  ];
+  return { picked, others: pool.map((item) => item.name) };
 }
 
 function buildRecommendationGroup({
   element,
   category,
   structureTone,
-  profileTone,
+  focusRanking,
   limit = 5,
 }) {
   if (!element || !ELEMENT_STONE_MAP[element]) {
@@ -134,7 +77,7 @@ function buildRecommendationGroup({
   }
 
   const stoneMap = ELEMENT_STONE_MAP[element];
-  const stones = flattenStoneGroups(element).slice(0, limit);
+  const { picked, others } = pickStones(element, focusRanking, limit);
 
   return {
     element,
@@ -142,21 +85,19 @@ function buildRecommendationGroup({
 
     keywords: stoneMap.keywords,
 
-        stones: stones.map((stone) => ({
-      ...stone,
-      reason: `${stone.name} supports ${stoneMap.keywords.join(
-        ", "
-      )} qualities linked to ${element} energy.`,
-      customerMessage: getStoneCustomerMessage({
-        stone,
-        element,
-        stoneMap,
-        structureTone,
-        profileTone,
-      }),
+    stones: picked.map((item) => ({
+      name: item.name,
+      type: item.type,
+      areas: item.areas,
+      pickedFor: item.pickedFor,
+      pickedForLabel: item.pickedFor ? FOCUS_AREA_LABELS[item.pickedFor] : null,
+      reason: `${item.name} supports ${stoneMap.keywords.join(", ")} qualities linked to ${element} energy.`,
+      customerMessage: item.message,
     })),
 
-        productStyle:
+    alsoSuitable: others,
+
+    productStyle:
       structureTone.productStyle ||
       "daily wearable pieces that feel supportive, practical and easy to integrate into normal routines",
 
@@ -171,8 +112,7 @@ function buildAvoidRecommendationGroup({ element }) {
     return null;
   }
 
-  const stoneMap = ELEMENT_STONE_MAP[element];
-  const stones = flattenStoneGroups(element).slice(0, 4);
+  const stones = (STONE_CATALOG[element] || []).slice(0, 4).map(({ name, type }) => ({ name, type }));
 
   return {
     element,
@@ -194,6 +134,7 @@ export function buildStoneRecommendationsV4({
   tenProfileScoringV2,
   narrativePersonalization,
   elementBalanceV3,
+  focusRankingV1,
 } = {}) {
   const primaryElement = getElementName(usefulGodV4?.primaryUsefulGod);
   const secondaryElement = getElementName(usefulGodV4?.secondaryUsefulGod);
@@ -205,7 +146,9 @@ export function buildStoneRecommendationsV4({
     structureScoringV2?.mainStructure?.name || "Unknown";
 
   const dominantProfile =
-    tenProfileScoringV2?.dominantProfile?.name || "Unknown";
+    tenProfileScoringV2?.dominantProfile?.profile ||
+    tenProfileScoringV2?.dominantProfile?.name ||
+    "Unknown";
 
   const structureTone = getStoneToneByStructure(mainStructure);
   const profileTone = getProfileTone(dominantProfile);
@@ -214,7 +157,7 @@ export function buildStoneRecommendationsV4({
     element: primaryElement,
     category: "primary",
     structureTone,
-    profileTone,
+    focusRanking: focusRankingV1,
     limit: 5,
   });
 
@@ -222,7 +165,7 @@ export function buildStoneRecommendationsV4({
     element: secondaryElement,
     category: "secondary",
     structureTone,
-    profileTone,
+    focusRanking: focusRankingV1,
     limit: 4,
   });
 
@@ -293,18 +236,18 @@ export function buildStoneRecommendationsV4({
           : "No major caution stones detected.",
 
       explanation: primaryElement
-        ? `${primaryElement} is prioritised because it is the primary Useful God in the current chart interpretation.`
-        : "Stone recommendations could not identify a primary Useful God.",
+        ? `${primaryElement} is prioritised because it is the primary Element to Enhance in the current chart interpretation.`
+        : "Stone recommendations could not identify a primary Element to Enhance.",
     },
 
     reasoning: [
       primaryElement
-        ? `Primary recommendations are based on ${primaryElement} as the primary Useful God.`
-        : "No primary Useful God detected.",
+        ? `Primary recommendations are based on ${primaryElement} as the primary Element to Enhance.`
+        : "No primary Element to Enhance detected.",
 
       secondaryElement
         ? `${secondaryElement} is included as secondary energetic support.`
-        : "No secondary Useful God detected.",
+        : "No secondary Element to Enhance detected.",
 
       mainStructure !== "Unknown"
         ? `Structure modifier applied: ${mainStructure}.`

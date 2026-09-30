@@ -1,4 +1,5 @@
 import { getProfileDisplay } from "../../data/profileDisplay";
+import { LuckHalves, LuckReadLegend } from "./LuckCyclesSection";
 import { AdminReportSection } from "./shared";
 
 const TEN_GOD_THEME = {
@@ -29,109 +30,78 @@ const ELEMENT_DISPLAY = {
   Water: "a small water feature or dark stone decor",
 };
 
-const READ_STYLE = {
-  favourable: { badge: "bg-emerald-100 text-emerald-800", label: "Favourable" },
-  supported:  { badge: "bg-teal-100 text-teal-700",      label: "Supported"  },
-  caution:    { badge: "bg-amber-100 text-amber-800",     label: "Caution"    },
-  neutral:    { badge: "bg-slate-100 text-slate-600",     label: "Neutral"    },
-};
-
-export default function LuckPillarsSection({ luckPillars, usefulGod, elementalBalance, birthDate }) {
-  if (!luckPillars?.pillars?.length) return null;
-
-  // Compute client's current age to highlight the active pillar
-  const birthYear = birthDate ? Number(birthDate.split("-")[0]) : null;
-  const birthMonth = birthDate ? Number(birthDate.split("-")[1]) : null;
-  const now = new Date();
-  const currentAge = birthYear
-    ? now.getFullYear() - birthYear - (now.getMonth() + 1 < birthMonth ? 1 : 0)
-    : null;
-
-  const primaryEl = usefulGod.primaryUsefulGod;
-  const secondaryEl = usefulGod.secondaryUsefulGod;
-
-  function pillarRead(stemElement) {
-    if (stemElement === primaryEl) return "favourable";
-    if (stemElement === secondaryEl) return "supported";
-    // Elements that produce or are produced by the useful god are broadly neutral;
-    // elements that clash or drain it lean caution. Keep it simple: anything
-    // that isn't a useful-god element is caution if it's in the top-2 strongest
-    // natal elements (already excess in the chart).
-    const strongEls = elementalBalance
-      .slice(0, 2)
-      .map((e) => e.name);
-    if (strongEls.includes(stemElement)) return "caution";
-    return "neutral";
-  }
+export default function LuckPillarsSection({ luckPillars, luckTimeline, usefulGod, ageInSelectedYear, selectedYear }) {
+  if (!luckTimeline?.length) return null;
 
   const primaryUsefulEl = usefulGod.primaryUsefulGod || null;
+  const { startingAge, direction } = luckPillars;
 
   return (
-    <AdminReportSection icon="📈" title="Luck Pillars (大運)">
-      <p className="mt-3 text-base leading-7 text-stone-600">
-        Luck Pillars are 10-year energy cycles that map the broader seasons of your life. Each pillar brings a different elemental emphasis that colours your career, relationships, wealth and personal growth during that period. Knowing which pillar you are currently in helps you work with the energy of your season rather than against it — some pillars accelerate growth, others call for consolidation, and understanding the difference allows you to pace yourself wisely.
+    <AdminReportSection icon="📈" title="10-Year Luck Pillars (大运)">
+      <p className="mt-3 text-base leading-7 text-stone-700">
+        A Luck Pillar is a 10-year season of life. Each one brings in a new element that sits alongside the
+        your birth chart for the whole decade, so it colours career, money, relationships and health all at once.
+        Its top character shapes the first five years and its bottom character the last five. Halves that bring
+        in an Element to Enhance tend to feel like a tailwind; halves that add more of what your chart already has
+        plenty of feel like a headwind, and call for pacing rather than pushing.
       </p>
-      <p className="mt-2 text-sm text-stone-400">
-        Cycles begin from age {luckPillars.startingAge.years}y{luckPillars.startingAge.months}m, stepping{" "}
-        {luckPillars.direction === "forward" ? "forward" : "in reverse"}{" "}
-        through the cycle from the month pillar.
-        {currentAge !== null && ` Current age: ${currentAge}.`}
+      <p className="mt-2 text-sm leading-6 text-stone-500">
+        Your first Luck Pillar began at age {startingAge.years} years {startingAge.months} months. Before that,
+        your month of birth sets the tone. The pillars then step {direction === "forward" ? "forward" : "backward"}{" "}
+        through the 60-pillar cycle from your month pillar; the direction depends on gender and birth year.
+        {ageInSelectedYear !== null && ` You turn ${ageInSelectedYear} in ${selectedYear}.`}
       </p>
-      <div className="mt-3 flex flex-wrap gap-2">
-        {elementalBalance.map((e) => (
-          <span key={e.name} className="rounded-lg bg-slate-50 px-3 py-1.5 text-xs text-stone-600 border border-slate-200 print:bg-[#FAE5D3] print:border-[#e5d5c0]">
-            <strong className="text-stone-800">{e.name}</strong> — {e.roleDescription}
-          </span>
-        ))}
+
+      <div style={{ breakInside: "avoid" }}>
+        <LuckReadLegend usefulGod={usefulGod} />
       </div>
+
       <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200 print:rounded-none print:border-[#8B1A1A]">
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-slate-50 text-left text-xs font-bold uppercase tracking-[0.12em] text-slate-600 print:bg-[#8B1A1A] print:text-white">
               <th className="px-4 py-2.5">Age</th>
-              <th className="px-4 py-2.5">Decade Energy</th>
-              <th className="px-4 py-2.5">Read</th>
-              <th className="px-4 py-2.5">Decade Theme</th>
+              <th className="px-4 py-2.5">Pillar & Energy</th>
+              <th className="px-4 py-2.5">Rating</th>
+              <th className="px-4 py-2.5">What the Decade Brings</th>
               <th className="px-4 py-2.5">Wear & Display</th>
             </tr>
           </thead>
           <tbody>
-            {luckPillars.pillars.map((p, i) => {
-              const isCurrent = currentAge !== null &&
-                currentAge >= p.startAge.years &&
-                currentAge < p.endAge.years;
-              const read = pillarRead(p.pillar.stem.element);
-              const rs = READ_STYLE[read];
+            {luckTimeline.map((p, i) => {
               const theme = TEN_GOD_THEME[p.tenGod] || null;
-              const recEl = read === "Caution" && primaryUsefulEl ? primaryUsefulEl : p.pillar.stem.element;
+              const hasCaution = p.halves.some((h) => h.read === "caution");
+              const recEl = hasCaution && primaryUsefulEl ? primaryUsefulEl : p.pillar.stem.element;
               const wearText = ELEMENT_WEAR[recEl] || "—";
               const displayText = ELEMENT_DISPLAY[recEl] || "—";
-              const wearNote = read === "Caution" && primaryUsefulEl
-                ? `Support with your Useful God (${primaryUsefulEl}). Wear ${wearText}. Display ${displayText}.`
+              const wearNote = hasCaution && primaryUsefulEl
+                ? `Balance it with your Element to Enhance (${primaryUsefulEl}). Wear ${wearText}. Display ${displayText}.`
                 : `Wear ${wearText}. Display ${displayText}.`;
               return (
                 <tr
                   key={i}
-                  className={`border-t border-slate-100 align-top print:border-[#e5d5c0] odd:print:bg-white even:print:bg-[#FAE5D3] ${isCurrent ? "bg-amber-50 print:bg-[#FAE5D3]" : ""}`}
+                  className={`border-t border-slate-100 align-top print:border-[#e5d5c0] odd:print:bg-white even:print:bg-[#FAE5D3] ${p.isCurrent ? "bg-amber-50 print:bg-[#FAE5D3]" : ""}`}
                 >
                   <td className="px-4 py-3 font-semibold text-slate-800 whitespace-nowrap">
-                    {p.startAge.years}y–{p.endAge.years}y
-                    {isCurrent && (
+                    {p.startAge.years}–{p.endAge.years}
+                    {p.isCurrent && (
                       <span className="ml-2 rounded-full bg-amber-600 px-2 py-0.5 text-[10px] font-bold text-white print:bg-[#8B1A1A]">
                         NOW
                       </span>
                     )}
                   </td>
                   <td className="px-4 py-3">
-                    <span className="font-semibold text-stone-800">{p.pillar.stem.element}</span>
+                    <span className="font-bold text-slate-900">
+                      {p.pillar.stem.zh}
+                      {p.pillar.branch.zh}
+                    </span>{" "}
+                    <span className="font-semibold text-stone-800">{p.pillar.stem.element} / {p.pillar.branch.element}</span>
                     {getProfileDisplay(p.tenGod)?.name && (
                       <span className="text-stone-500"> · {getProfileDisplay(p.tenGod).name}</span>
                     )}
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${rs.badge}`}>
-                      {rs.label}
-                    </span>
+                    <LuckHalves halves={p.halves} />
                   </td>
                   <td className="px-4 py-3 text-stone-600 leading-5">
                     {theme || "—"}
@@ -145,6 +115,9 @@ export default function LuckPillarsSection({ luckPillars, usefulGod, elementalBa
           </tbody>
         </table>
       </div>
+      <p className="mt-2 text-xs text-stone-500">
+        Ages are exact ages, not Chinese nominal ages (虚岁), which run one year higher.
+      </p>
     </AdminReportSection>
   );
 }

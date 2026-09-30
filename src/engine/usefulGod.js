@@ -46,7 +46,7 @@ export function calculateUsefulGodSuggestion(dayMasterStrength, elementBalance) 
       cautionElements: [],
       reasoning:
         "Self element was unavailable, so Water is used as a conservative balancing fallback.",
-      note: "Prototype useful element suggestion only. Final Yong Shen logic should be reviewed manually before production use.",
+      note: "Prototype Elements to Enhance suggestion only. Final Elements to Enhance logic should be reviewed manually before production use.",
     };
   }
 
@@ -151,6 +151,6 @@ export function calculateUsefulGodSuggestion(dayMasterStrength, elementBalance) 
     },
 
     reasoning,
-    note: "Prototype useful element suggestion only. Final Yong Shen logic should be reviewed manually before production use.",
+    note: "Prototype Elements to Enhance suggestion only. Final Elements to Enhance logic should be reviewed manually before production use.",
   };
 }

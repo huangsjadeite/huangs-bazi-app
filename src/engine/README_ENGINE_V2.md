@@ -1,4 +1,4 @@
-# Huangs BaZi App — Engine V2 Beta Freeze
+# Huangs Bazi App — Engine V2 Beta Freeze
 
 Date: 14 Jun 2026
 

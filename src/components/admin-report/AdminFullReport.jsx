@@ -1,19 +1,13 @@
-import BlindSpotsSection from "./BlindSpotsSection";
 import CareerSection from "./CareerSection";
 import ChartFoundationSection from "./ChartFoundationSection";
 import { deriveAdminReportData } from "./deriveAdminReportData";
 import DisclaimerAndDebugSection from "./DisclaimerAndDebugSection";
 import { downloadReadingExport } from "./downloadReadingExport";
-import EightMansionsSection from "./EightMansionsSection";
 import { exportAdminReportToPdf } from "./exportAdminReportToPdf";
-import HiddenStrengthsSection from "./HiddenStrengthsSection";
-import LifeDirectionSection from "./LifeDirectionSection";
-import LifePalaceSection from "./LifePalaceSection";
-import LuckPillarsSection from "./LuckPillarsSection";
+import LuckCyclesSection from "./LuckCyclesSection";
 import MonthlyOutlookSection from "./MonthlyOutlookSection";
 import ReferenceTableSection from "./ReferenceTableSection";
 import RelationshipSection from "./RelationshipSection";
-import ShenShaSection from "./ShenShaSection";
 import StonesSection from "./StonesSection";
 import WealthSection from "./WealthSection";
 import WellnessSection from "./WellnessSection";
@@ -29,12 +23,12 @@ export default function AdminFullReport({ report, clientName }) {
 
   const derived = deriveAdminReportData(report);
   const {
-    narrative, personality, usefulGod, stones, eightMansions, shenSha,
-    luckPillars, lifePalace, conceptionPalace, natalPillars, tenGodByPillar,
+    narrative, usefulGod, stones,
+    natalPillars, tenGodByPillar, rankedProfiles,
     annualPillar, annualZodiac,
-    rankedProfiles,
+    currentLuck, annualRead, ageInSelectedYear, luckOverview,
     career, wealth, wealthArchetype, relationship, relationshipArchetype,
-    relationshipPattern, health, blindSpots, lifeThemes, growthAdvice,
+    relationshipPattern, health,
     elementalBalance, monthlyOutlook, strongerElements, moderateElements, weakerElements,
     directWealthPct, indirectWealthPct,
     dayMasterLabel, dayMasterTrait,
@@ -42,13 +36,14 @@ export default function AdminFullReport({ report, clientName }) {
     weakestElement,
     favourableSet,
     dayBranchAnimal, dayBranchZh, dayBranchElement, spousePalaceNoteText,
-    peachBlossomAnimal, peachBlossomYears, peachBlossomMonth,
+    peachBlossomAnimal, peachBlossomYears, peachBlossomMonth, peachBlossomRating,
     careerStrongMonths, careerCautionMonths,
     wealthStrongMonths, wealthCautionMonths,
     relationshipGoodMonths, relationshipCautionMonths,
     wellnessEasierMonths, wellnessCautionMonths,
-    coverYearLabel, expandMonthlyNote,
+    coverYearLabel,
     primaryDzi, secondaryDzi,
+    rawChartData,
   } = derived;
 
   return (
@@ -58,6 +53,8 @@ export default function AdminFullReport({ report, clientName }) {
         clientName={clientName}
         natalPillars={natalPillars}
         tenGodByPillar={tenGodByPillar}
+        rawChartData={rawChartData}
+        rankedProfiles={rankedProfiles}
         annualPillar={annualPillar}
         annualZodiac={annualZodiac}
         dayMasterLabel={dayMasterLabel}
@@ -67,19 +64,28 @@ export default function AdminFullReport({ report, clientName }) {
         weakerElements={weakerElements}
         usefulGod={usefulGod}
         elementalBalance={elementalBalance}
-        rankedProfiles={rankedProfiles}
         coverYearLabel={coverYearLabel}
         onExportJson={() => downloadReadingExport({ report, clientName, derived })}
         onExportPdf={() => exportAdminReportToPdf()}
       />
 
+      <LuckCyclesSection
+        currentLuck={currentLuck}
+        annualPillar={annualPillar}
+        annualZodiac={annualZodiac}
+        annualRead={annualRead}
+        selectedYear={report.annualEnergy?.selectedYear}
+        ageInSelectedYear={ageInSelectedYear}
+        luckOverview={luckOverview}
+        usefulGod={usefulGod}
+      />
+
       <p className="mt-10 text-xs font-bold uppercase tracking-[0.3em] text-amber-700">
         The Four Key Areas
       </p>
-
-      <HiddenStrengthsSection topStrengths={personality.topStrengths} />
-
-      <BlindSpotsSection blindSpots={blindSpots} />
+      <p className="mt-2 text-sm text-stone-500">
+        The Easiest months and Pace yourself months in each area come from the Monthly Outlook (流月) further down.
+      </p>
 
       <CareerSection
         careerAuthorityProfile={careerAuthorityProfile}
@@ -116,6 +122,7 @@ export default function AdminFullReport({ report, clientName }) {
         peachBlossomAnimal={peachBlossomAnimal}
         peachBlossomYears={peachBlossomYears}
         peachBlossomMonth={peachBlossomMonth}
+        peachBlossomRating={peachBlossomRating}
       />
 
       <WellnessSection
@@ -135,25 +142,9 @@ export default function AdminFullReport({ report, clientName }) {
         secondaryDzi={secondaryDzi}
       />
 
-      <LifeDirectionSection lifeThemes={lifeThemes} growthAdvice={growthAdvice} />
-
       <MonthlyOutlookSection
         monthlyOutlook={monthlyOutlook}
         selectedYear={report.annualEnergy?.selectedYear}
-        expandMonthlyNote={expandMonthlyNote}
-      />
-
-      <EightMansionsSection eightMansions={eightMansions} />
-
-      <LifePalaceSection lifePalace={lifePalace} conceptionPalace={conceptionPalace} />
-
-      <ShenShaSection shenSha={shenSha} />
-
-      <LuckPillarsSection
-        luckPillars={luckPillars}
-        usefulGod={usefulGod}
-        elementalBalance={elementalBalance}
-        birthDate={report.client?.birthDate}
       />
 
       <ReferenceTableSection />

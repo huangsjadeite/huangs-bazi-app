@@ -1,3 +1,5 @@
+import { DEFAULT_YEAR } from "../data/energyYears.js";
+
 const ELEMENT_ROLE_LABELS = {
   self: { role: "Self", text: "core identity, personal will and how directly you assert yourself" },
   resource: { role: "Resource", text: "support, learning, recovery and where you draw replenishment from" },
@@ -79,12 +81,13 @@ export function buildPaidReportSchemaV1(chart) {
       birthTime: chart?.input?.birthTime || "",
       birthCountry: chart?.input?.birthCountry || "",
       mode: chart?.mode || "",
-      selectedYear: chart?.input?.selectedYear || 2026,
+      selectedYear: chart?.input?.selectedYear || DEFAULT_YEAR,
     },
 
     chartFoundation: {
       pillars: chart?.pillars || null,
       tenGodByPillar: chart?.tenGods?.byPillar || null,
+      rawChartData: chart?.rawChartDataV1 || null,
       birthZodiac: chart?.birthZodiac || null,
       elementBalance: chart?.elementBalanceV3 || chart?.elementBalance || null,
       elementalBalance: buildElementalBalanceWithAnnual(chart),
@@ -133,7 +136,7 @@ export function buildPaidReportSchemaV1(chart) {
       annualOverlay: chart?.annualOverlayV3 || chart?.annualOverlay || null,
       annualZodiac: chart?.annualOverlay?.zodiac || null,
       monthlyOverlay: chart?.monthlyOverlayV1 || null,
-      selectedYear: chart?.input?.selectedYear || 2026,
+      selectedYear: chart?.input?.selectedYear || DEFAULT_YEAR,
     },
 
     lifeAreas: {

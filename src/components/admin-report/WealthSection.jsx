@@ -1,6 +1,20 @@
 import { getProfileDisplay } from "../../data/profileDisplay";
 import { AdminMonthCallout, AdminReportSection, AdminStrengthRiskGrid } from "./shared";
 
+// Links the strongest wealth energy (the percentages) to the text below it,
+// which comes from the overall chart pattern and can otherwise read as a
+// contradiction (e.g. "The Opportunist" above "rather than chasing fast gains").
+function wealthBridge(directPct, indirectPct) {
+  const direct = Math.round(directPct || 0);
+  const indirect = Math.round(indirectPct || 0);
+  if (!direct && !indirect) return null;
+  if (indirect > direct)
+    return `Your stronger money energy is Indirect Wealth (${getProfileDisplay("Indirect Wealth").name}), so you tend to spot openings others miss. The rest of your chart, described below, shapes how you turn those openings into lasting results.`;
+  if (direct > indirect)
+    return `Your stronger money energy is Direct Wealth (${getProfileDisplay("Direct Wealth").name}), so you do best with regular, dependable income. The rest of your chart, described below, shapes how you grow it.`;
+  return "Direct and Indirect Wealth are equally strong in your chart, so you can earn through both steady income and well-timed opportunities. The rest of your chart, described below, shapes how you use them.";
+}
+
 export default function WealthSection({
   directWealthPct,
   indirectWealthPct,
@@ -19,7 +33,10 @@ export default function WealthSection({
           {directWealthPct != null && `Direct Wealth · ${getProfileDisplay("Direct Wealth").name || ""} ${Math.round(directWealthPct)}%`}
         </p>
       )}
-      <AdminMonthCallout label="Strongest months" months={wealthStrongMonths} tone="good" />
+      {wealthBridge(directWealthPct, indirectWealthPct) && (
+        <p className="mt-2 text-base leading-7 text-stone-700">{wealthBridge(directWealthPct, indirectWealthPct)}</p>
+      )}
+      <AdminMonthCallout label="Easiest months" months={wealthStrongMonths} tone="good" />
       <AdminMonthCallout label="Pace yourself" months={wealthCautionMonths} tone="caution" />
       {wealthArchetype.wealthArchetype && (
         <p className="mt-3 text-base text-stone-700">

@@ -1,6 +1,6 @@
 // RelationshipArchetypeV1.js
 // Consumer-facing relationship archetype engine.
-// No UI logic. No React. No BaZi display formatting.
+// No UI logic. No React. No Bazi display formatting.
 // Input expected from buildBaziChart.js engine output.
 
 const PROFILE_ALIASES = {

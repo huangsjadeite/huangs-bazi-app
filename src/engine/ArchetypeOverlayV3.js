@@ -32,7 +32,7 @@ export function buildArchetypeOverlayV3({
       if (boostedKeys.includes(archetype.key)) {
         annualBoost += 12;
         adjustmentReasons.push(
-          `2026 activates your ${archetype.publicName} pattern more strongly.`
+          `This year activates your ${archetype.publicName} pattern more strongly.`
         );
       }
 
