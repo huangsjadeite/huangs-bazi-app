@@ -1,8 +1,8 @@
 // Reading ("Current Energy Year") options offered in the form.
 //
-// RELEASED_YEARS are live for everyone. PREVIEW_YEARS only appear on the local
-// dev server (`npm run dev`); in the deployed build they show as "Coming Soon"
-// and can't be picked. To release a year, move it from PREVIEW to RELEASED.
+// RELEASED_YEARS are live for everyone. PREVIEW_YEARS can be picked on the
+// local dev server (`npm run dev`) and with the admin link; public visitors see
+// them as "Coming Soon" and can't pick them. To release a year, move it from PREVIEW to RELEASED.
 export const RELEASED_YEARS = [2026];
 export const PREVIEW_YEARS = [2027];
 

@@ -147,6 +147,7 @@ export default function HuangsBaziUIFrontend() {
           form={form}
           onChange={updateForm}
           onGenerate={generateProfile}
+          isAdmin={isAdmin}
         />
 
         {uiChart ? (

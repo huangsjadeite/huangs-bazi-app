@@ -2,7 +2,10 @@ import huangsLogo from "../../assets/hjj-logo-black.png";
 import { BIRTH_COUNTRY_OPTIONS, getBirthCountryTimezone } from "../../data/birthCountryTimezones";
 import { IS_DEV_PREVIEW, PREVIEW_YEARS, RELEASED_YEARS } from "../../data/energyYears";
 
-export default function GenerateProfilePanel({ form, onChange, onGenerate }) {
+export default function GenerateProfilePanel({ form, onChange, onGenerate, isAdmin = false }) {
+  // Preview years can be picked on the dev server and with the admin link.
+  const canPreview = IS_DEV_PREVIEW || isAdmin;
+
   return (
     <section className="rounded-[28px] border border-slate-200 bg-white px-8 py-8 shadow-md">
       <div className="mb-4 flex items-center gap-2">
@@ -158,8 +161,8 @@ export default function GenerateProfilePanel({ form, onChange, onGenerate }) {
               </option>
             ))}
             {PREVIEW_YEARS.map((year) => (
-              <option key={year} value={year} disabled={!IS_DEV_PREVIEW}>
-                {IS_DEV_PREVIEW ? `${year} (Preview — localhost only)` : `${year} Coming Soon`}
+              <option key={year} value={year} disabled={!canPreview}>
+                {canPreview ? `${year} (Admin preview)` : `${year} Coming Soon`}
               </option>
             ))}
           </select>
