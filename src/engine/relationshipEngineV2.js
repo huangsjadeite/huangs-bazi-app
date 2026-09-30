@@ -379,7 +379,8 @@ export function buildRelationshipEngineV2({
 
   const dayStatus = dayMasterStrengthV4?.status || null;
   const mainStructure = structureScoringV2?.mainStructure?.name || null;
-  const dominantProfile = tenProfileScoringV2?.dominantProfile?.name || null;
+  const dominantProfile =
+    tenProfileScoringV2?.dominantProfile?.profile || tenProfileScoringV2?.dominantProfile?.name || null;
 
   const primaryUsefulGod = usefulGodV4?.primaryUsefulGod || null;
   const secondaryUsefulGod = usefulGodV4?.secondaryUsefulGod || null;

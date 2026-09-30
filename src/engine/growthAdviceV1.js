@@ -173,11 +173,13 @@ function getStructureName(structureScoringV2) {
   );
 }
 
+// rankedProfiles entries carry the Ten God name in `profile`.
 function getDominantProfileName(tenProfileScoringV2) {
+  const dominant = tenProfileScoringV2?.dominantProfile;
   return (
-    tenProfileScoringV2?.dominantProfile?.name ||
-    tenProfileScoringV2?.dominantProfile ||
-    tenProfileScoringV2?.profile ||
+    dominant?.profile ||
+    dominant?.name ||
+    (typeof dominant === "string" ? dominant : null) ||
     null
   );
 }

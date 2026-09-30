@@ -1,4 +1,6 @@
-export function exportAdminReportToPdf() {
+// The standard client PDF hides the upgraded-only sections; the upgraded PDF
+// prints them too.
+export function exportAdminReportToPdf({ upgraded = false } = {}) {
   const style = document.createElement("style");
   style.id = "huangs-print-style";
   style.textContent = `
@@ -18,6 +20,7 @@ export function exportAdminReportToPdf() {
       #admin-full-report, #admin-full-report * { visibility: visible !important; }
       #admin-full-report { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; border: none !important; box-shadow: none !important; border-radius: 0 !important; padding: 0 !important; }
       .print-no-export { display: none !important; }
+      ${upgraded ? "" : ".upgraded-only { display: none !important; }"}
       .print-footer { display: none !important; }
       .print-cover {
         display: flex !important;

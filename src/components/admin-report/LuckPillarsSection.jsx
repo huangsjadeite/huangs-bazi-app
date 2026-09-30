@@ -17,7 +17,7 @@ const TEN_GOD_THEME = {
 
 const ELEMENT_WEAR = {
   Wood:  "green jadeite or green aventurine",
-  Fire:  "red jadeite or garnet",
+  Fire:  "red jadeite or red garnet",
   Earth: "yellow jadeite or citrine",
   Metal: "white jadeite or clear quartz",
   Water: "black jadeite or aquamarine",
@@ -39,14 +39,15 @@ export default function LuckPillarsSection({ luckPillars, luckTimeline, usefulGo
   return (
     <AdminReportSection icon="📈" title="10-Year Luck Pillars (大运)">
       <p className="mt-3 text-base leading-7 text-stone-700">
-        A Luck Pillar is a 10-year season of life. Each one brings in a new element that sits alongside the
+        A Luck Pillar is a 10-year season of life. Each one brings in a new element that sits alongside
         your birth chart for the whole decade, so it colours career, money, relationships and health all at once.
         Its top character shapes the first five years and its bottom character the last five. Halves that bring
         in an Element to Enhance tend to feel like a tailwind; halves that add more of what your chart already has
         plenty of feel like a headwind, and call for pacing rather than pushing.
       </p>
       <p className="mt-2 text-sm leading-6 text-stone-500">
-        Your first Luck Pillar began at age {startingAge.years} years {startingAge.months} months. Before that,
+        Your first Luck Pillar began at age {startingAge.years} {startingAge.years === 1 ? "year" : "years"}{" "}
+        {startingAge.months} {startingAge.months === 1 ? "month" : "months"}. Before that,
         your month of birth sets the tone. The pillars then step {direction === "forward" ? "forward" : "backward"}{" "}
         through the 60-pillar cycle from your month pillar; the direction depends on gender and birth year.
         {ageInSelectedYear !== null && ` You turn ${ageInSelectedYear} in ${selectedYear}.`}

@@ -68,3 +68,16 @@ export function AdminStrengthRiskGrid({ strengths, risks, strengthLabel = "Stren
     </div>
   );
 }
+
+// Sections that only print in the upgraded PDF. On screen they carry a small
+// label so staff can tell them apart.
+export function UpgradedOnly({ children }) {
+  return (
+    <div className="upgraded-only">
+      <p className="print-no-export mt-10 -mb-6 inline-block rounded-full border border-dashed border-[#8B1A1A] px-3 py-0.5 text-[10px] font-bold uppercase tracking-[0.2em] text-[#8B1A1A]">
+        Upgraded PDF only
+      </p>
+      {children}
+    </div>
+  );
+}

@@ -75,8 +75,8 @@ export function buildRelationshipPatternV1({
 } = {}) {
   const topProfiles = getTopProfiles(tenProfileScoringV2);
   const dominantProfile =
+    tenProfileScoringV2?.dominantProfile?.profile ||
     tenProfileScoringV2?.dominantProfile?.name ||
-    tenProfileScoringV2?.dominantProfile ||
     topProfiles?.[0]?.name ||
     null;
 

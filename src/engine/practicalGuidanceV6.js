@@ -9,7 +9,9 @@ export function buildPracticalGuidanceV6({
 }) {
   const structure = structureScoringV2?.mainStructure?.name || "Unknown";
   const dominantProfile =
-    tenProfileScoringV2?.dominantProfile?.name || "Unknown";
+    tenProfileScoringV2?.dominantProfile?.profile ||
+    tenProfileScoringV2?.dominantProfile?.name ||
+    "Unknown";
 
   const dayMasterStatus =
     dayMasterStrengthV4?.status ||

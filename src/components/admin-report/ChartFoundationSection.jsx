@@ -1,7 +1,5 @@
 import huangsLogo from "../../assets/hjj-logo-black.png";
-import { IS_DEV_PREVIEW } from "../../data/energyYears";
 import { getProfileDisplay } from "../../data/profileDisplay";
-import RawChartDataSection from "./RawChartDataSection";
 import WuXingChart from "./WuXingChart";
 
 export default function ChartFoundationSection({
@@ -9,7 +7,6 @@ export default function ChartFoundationSection({
   clientName,
   natalPillars,
   tenGodByPillar,
-  rawChartData,
   rankedProfiles,
   annualPillar,
   annualZodiac,
@@ -23,6 +20,7 @@ export default function ChartFoundationSection({
   coverYearLabel,
   onExportJson,
   onExportPdf,
+  onExportUpgradedPdf,
 }) {
   // Helpful elements beyond the primary and secondary, so this row matches the
   // lists the luck, monthly and stones sections rate against.
@@ -72,6 +70,13 @@ export default function ChartFoundationSection({
           >
             Export Client PDF
           </button>
+          <button
+            type="button"
+            onClick={onExportUpgradedPdf}
+            className="rounded-xl bg-[#8B1A1A] px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-[#A52A2A]"
+          >
+            Export Upgraded PDF
+          </button>
         </div>
       </div>
 
@@ -115,14 +120,7 @@ export default function ChartFoundationSection({
         </tbody>
       </table>
 
-      {/* Destiny Chart & Luck Pillars grid is a localhost-only preview; the live site keeps the Natal Chart table. */}
-      {IS_DEV_PREVIEW && rawChartData ? (
-        <RawChartDataSection
-          rawChartData={rawChartData}
-          birthDate={report.client?.birthDate}
-          birthTime={report.client?.birthTime}
-        />
-      ) : natalPillars && (
+      {natalPillars && (
         <div className="mt-8">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h3 className="text-xl font-bold text-slate-950">Natal Chart</h3>

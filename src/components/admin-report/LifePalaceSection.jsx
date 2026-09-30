@@ -1,11 +1,11 @@
 import { AdminReportSection } from "./shared";
 
 const PALACE_STEM_MEANING = {
-  Metal: "the life path is oriented around clarity, precision and building things of lasting value",
-  Water: "the life path is oriented around wisdom, adaptability and the accumulation of deep inner knowing",
-  Wood: "the life path is oriented around growth, initiation and laying foundations that others can build on",
-  Fire: "the life path is oriented around vision, recognition and bringing people together through inspiration and warmth",
-  Earth: "the life path is oriented around stability, service and building structures that stand the test of time",
+  Metal: "your life path is oriented around clarity, precision and building things of lasting value",
+  Water: "your life path is oriented around wisdom, adaptability and the accumulation of deep inner knowing",
+  Wood: "your life path is oriented around growth, initiation and laying foundations that others can build on",
+  Fire: "your life path is oriented around vision, recognition and bringing people together through inspiration and warmth",
+  Earth: "your life path is oriented around stability, service and building structures that stand the test of time",
 };
 const PALACE_BRANCH_FLAVOUR = {
   Rat: "resourcefulness and social intelligence",
@@ -64,7 +64,7 @@ export default function LifePalaceSection({ lifePalace, conceptionPalace }) {
             </p>
             {CONCEPTION_STEM_MEANING[conceptionPalace.pillar.stem.element] && (
               <p className="mt-2 text-sm text-stone-600">
-                This person {CONCEPTION_STEM_MEANING[conceptionPalace.pillar.stem.element]}
+                You {CONCEPTION_STEM_MEANING[conceptionPalace.pillar.stem.element]}
                 {PALACE_BRANCH_FLAVOUR[conceptionPalace.pillar.branch.animal]
                   ? `, coloured by the ${conceptionPalace.pillar.branch.animal}'s energy of ${PALACE_BRANCH_FLAVOUR[conceptionPalace.pillar.branch.animal]}.`
                   : "."}

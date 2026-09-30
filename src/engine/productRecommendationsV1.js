@@ -198,6 +198,7 @@ export function buildProductRecommendationsV1({
     "Unknown";
 
   const dominantProfile =
+    tenProfileScoringV2?.dominantProfile?.profile ||
     tenProfileScoringV2?.dominantProfile?.name ||
     stoneRecommendationsV4?.dominantProfile ||
     "Unknown";
