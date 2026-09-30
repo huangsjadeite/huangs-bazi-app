@@ -18,7 +18,7 @@ export default function WellnessSection({
             ` (${Math.round(Number(dayMasterStrengthScore))}/100)`}
         </p>
       )}
-      <AdminMonthCallout label="Easier months" months={wellnessEasierMonths} tone="good" />
+      <AdminMonthCallout label="Easiest months" months={wellnessEasierMonths} tone="good" />
       <AdminMonthCallout label="Pace yourself" months={wellnessCautionMonths} tone="caution" />
       {health.vitalityLevel && (
         <p className="mt-3 text-base text-stone-700">

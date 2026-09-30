@@ -1,4 +1,7 @@
-const ELEMENT_CYCLE = ["Wood", "Fire", "Earth", "Metal", "Water"];
+import { calculateYearPillar } from "./pillars.js";
+import { DEFAULT_YEAR } from "../data/energyYears.js";
+
+const ELEMENT_CYCLE =["Wood", "Fire", "Earth", "Metal", "Water"];
 
 const STEM_ELEMENT_MAP = {
   甲: "Wood",
@@ -113,40 +116,31 @@ function getDominantElementFromAnnualElements(annualElements, fallbackElement) {
   );
 }
 
-export function buildAnnualOverlay(selectedYear = 2026, elementBalance = {}) {
-  const yearMap = {
-    2026: {
-      pillar: "丙午",
-      stem: "丙",
-      branch: "午",
-      zodiacAnimal: "Horse",
-      zodiacElement: "Fire",
-      zodiacDisplayName: "Fire Horse",
-      dominantTheme: "Visibility, momentum and emotional activation",
-    },
+// Hand-written one-line theme per reading year. The pillar and zodiac are
+// calculated, so a new year only needs a theme here (or uses the fallback).
+const YEAR_THEMES = {
+  2026: "Visibility, momentum and emotional activation",
+  2027: "Stability, refinement and emotional consolidation",
+};
 
-    2027: {
-      pillar: "丁未",
-      stem: "丁",
-      branch: "未",
-      zodiacAnimal: "Goat",
-      zodiacElement: "Fire",
-      zodiacDisplayName: "Fire Goat",
-      dominantTheme: "Stability, refinement and emotional consolidation",
-    },
+function getYearData(selectedYear) {
+  // Mid-year date sits safely after 立春, so this is that year's pillar.
+  const pillar = calculateYearPillar({ year: selectedYear, month: 6, day: 15 });
+
+  return {
+    pillar: `${pillar.stem.zh}${pillar.branch.zh}`,
+    stem: pillar.stem.zh,
+    branch: pillar.branch.zh,
+    zodiacAnimal: pillar.branch.animal,
+    zodiacElement: pillar.stem.element,
+    zodiacDisplayName: `${pillar.stem.element} ${pillar.branch.animal}`,
+    dominantTheme:
+      YEAR_THEMES[selectedYear] || "Annual energy influence and adjustment",
   };
+}
 
-  const fallback = {
-    pillar: "丙午",
-    stem: "丙",
-    branch: "午",
-    zodiacAnimal: "Horse",
-    zodiacElement: "Fire",
-    zodiacDisplayName: "Fire Horse",
-    dominantTheme: "Annual energy influence and adjustment",
-  };
-
-  const yearData = yearMap[selectedYear] || fallback;
+export function buildAnnualOverlay(selectedYear = DEFAULT_YEAR, elementBalance = {}) {
+  const yearData = getYearData(selectedYear);
 
   const annualElements = buildAnnualElementScores({
     stem: yearData.stem,

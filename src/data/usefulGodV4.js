@@ -375,6 +375,17 @@ export function usefulGodV4(chart = {}) {
   // so we never return an empty recommendation.
   if (!primaryFavourable.length) primaryFavourable = [...favourable];
 
+  // A weak Day Master is still weak even when its own element or Resource is
+  // plentiful by count (the strength verdict already weighed that), so those
+  // stay helpful: demote them to secondary rather than to caution.
+  if (strengthBand === "weak" || strengthBand === "veryWeak") {
+    [...favourable].reverse().forEach((element) => {
+      if (primaryFavourable.includes(element)) return;
+      caution.splice(caution.indexOf(element), 1);
+      if (!secondary.includes(element)) secondary.unshift(element);
+    });
+  }
+
   const secondaryFavourable = [];
   secondary.forEach((element) => {
     if (!primaryFavourable.includes(element)) {
@@ -418,7 +429,7 @@ export function usefulGodV4(chart = {}) {
       annualOverlay:
         annualCautions.length > 0
           ? `Annual influence amplifies ${annualCautions.join(", ")}, so these are handled carefully.`
-          : "Annual influence does not override the natal useful element logic.",
+          : "Annual influence does not override the natal Elements to Enhance logic.",
     },
   };
 }

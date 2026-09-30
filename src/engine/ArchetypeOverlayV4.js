@@ -32,6 +32,7 @@ function getStrongestLifeTheme(annualOverlayV3 = {}) {
 export function buildArchetypeOverlayV4({
   archetypes = [],
   annualOverlayV3 = {},
+  selectedYear,
 }) {
   const annualStemTenGod =
     annualOverlayV3?.annualTenGods?.stemTenGod || null;
@@ -55,7 +56,7 @@ export function buildArchetypeOverlayV4({
       if (boostedKeys.includes(archetype.key)) {
         annualBoost += 12;
         adjustmentReasons.push(
-          `2026 activates your ${archetype.publicName} pattern more strongly.`
+          `${selectedYear || "This year"} activates your ${archetype.publicName} pattern more strongly.`
         );
       }
 

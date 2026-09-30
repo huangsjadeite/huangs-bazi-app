@@ -51,7 +51,7 @@ export function annualOverlayV4({
     "natal";
 
   let explanation =
-    "Natal Useful God remains the priority.";
+    "Natal Elements to Enhance remain the priority.";
 
   // Fire-heavy year
   if (

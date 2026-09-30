@@ -1,9 +1,9 @@
 // src/engine/careerEngineV1.js
 
-// Career industry directions are based on the Day Master's own element (what
-// you ARE), not usefulGodV4.primaryUsefulGod (the strength-balancing Useful
-// God, which is a different concept and can resolve to any element depending
-// on Day Master strength). Same distinction as the fix in wealthEngineV1.js.
+// Best-fit industries come from the Elements to Enhance (usefulGodV4 primary +
+// secondary): working in a field of a favourable element feeds the chart what
+// it lacks. The older recommendedDirections list still uses the Day Master's
+// own element and is kept for compatibility; the admin report no longer shows it.
 
 const VERSION = "career-engine-v1";
 
@@ -176,20 +176,127 @@ function getRecommendedDirections(mainStructure, dayMasterElement) {
     ],
   };
 
-  const dayMasterElementMap = {
-    Wood: ["Education", "Growth Industries", "Planning"],
-    Fire: ["Media", "Marketing", "Visibility-Based Work"],
-    Earth: ["Property", "Operations", "Stability-Based Work"],
-    Metal: ["Finance", "Jewellery", "Systems and Precision Work"],
-    Water: ["Consulting", "Communication", "Trade and Movement"],
-  };
-
   const directions = [
     ...(structureMap[mainStructure] || []),
-    ...(dayMasterElementMap[dayMasterElement] || []),
+    ...(INDUSTRIES_BY_ELEMENT[dayMasterElement] || []),
   ];
 
   return [...new Set(directions)].slice(0, 5);
+}
+
+// Industries traditionally tied to each element. Kept separate from the structure-based roles above: roles say
+// what kind of work suits the person, industries say which field to do it in.
+const INDUSTRIES_BY_ELEMENT = {
+  Wood: ["Education & Training", "Publishing & Writing", "Healthcare & Wellness", "Fashion & Textiles", "Furniture & Horticulture"],
+  Fire: ["Media & Entertainment", "Marketing & Advertising", "Food & Beverage", "Beauty & Cosmetics", "Technology & Electronics"],
+  Earth: ["Property & Real Estate", "Construction", "Insurance", "Agriculture & Food Supply", "Administration & Operations"],
+  Metal: ["Finance & Banking", "Jewellery & Precious Metals", "Engineering", "Law & Compliance", "Automotive & Machinery"],
+  Water: ["Logistics & Shipping", "Travel & Hospitality", "Trading & Import/Export", "Communications", "Consulting"],
+};
+
+// What working in each element's industries surrounds a person with, so the
+// report can say why a field supports the chart.
+const INDUSTRY_ELEMENT_REASON = {
+  Wood: "growth, learning and nurturing",
+  Fire: "visibility, energy and being seen",
+  Earth: "land, buildings and steady, dependable systems",
+  Metal: "money, precision, rules and fine materials",
+  Water: "movement, travel, trade and the flow of information",
+};
+
+// Why the roles fit (from the chart's main structure), plus example job
+// titles so each role is concrete.
+const ROLE_DETAILS = {
+  Connectors: {
+    summary: "Your chart leans toward people and opportunity, so you do best in roles built on relationships, networking and deal-making.",
+    roles: {
+      Consulting: "Management consultant, business advisor",
+      Sales: "Account manager, sales lead",
+      "Business Development": "Partnerships manager, BD executive",
+      "Client Relationship Management": "Key account manager, relationship manager",
+      Entrepreneurship: "Founder, business owner",
+    },
+  },
+  Thinkers: {
+    summary: "Your chart leans toward knowledge and analysis, so you do best in roles where your thinking, expertise and judgement are the product.",
+    roles: {
+      Research: "Researcher, research analyst",
+      Strategy: "Strategy manager, business planner",
+      Education: "Lecturer, trainer",
+      Analysis: "Data analyst, financial analyst",
+      "Specialist Advisory": "Subject-matter expert, technical advisor",
+    },
+  },
+  Supporters: {
+    summary: "Your chart leans toward care and reliability, so you do best in roles where you look after, guide or develop other people.",
+    roles: {
+      Teaching: "Teacher, coach",
+      Wellness: "Therapist, wellness practitioner",
+      "Human Resources": "HR manager, people partner",
+      "Client Care": "Customer success manager, service lead",
+      "Advisory Services": "Counsellor, financial planner",
+    },
+  },
+  Creators: {
+    summary: "Your chart leans toward expression and originality, so you do best in roles where you create, present or shape ideas.",
+    roles: {
+      "Content Creation": "Content creator, writer",
+      Design: "Designer, art director",
+      Marketing: "Marketing manager, campaign lead",
+      Branding: "Brand strategist, creative director",
+      "Creative Business": "Studio or boutique owner",
+    },
+  },
+  Managers: {
+    summary: "Your chart leans toward structure and control, so you do best in roles where you run things and are accountable for results.",
+    roles: {
+      Operations: "Operations manager, COO",
+      Management: "General manager, department head",
+      Finance: "Finance manager, financial controller",
+      "Project Leadership": "Project manager, programme lead",
+      "Business Administration": "Office manager, business administrator",
+    },
+  },
+};
+
+function getBestFitIndustryGroups(primaryElement, secondaryElement) {
+  const hasSecondary = secondaryElement && secondaryElement !== primaryElement;
+  return [
+    { element: primaryElement, rank: "Main element to enhance", count: hasSecondary ? 3 : 5 },
+    ...(hasSecondary ? [{ element: secondaryElement, rank: "Second element to enhance", count: 2 }] : []),
+  ]
+    .filter((group) => INDUSTRIES_BY_ELEMENT[group.element])
+    .map(({ element, rank, count }) => ({
+      element,
+      rank,
+      reason: `${element} industries surround you with ${INDUSTRY_ELEMENT_REASON[element]}, which your chart needs more of.`,
+      industries: INDUSTRIES_BY_ELEMENT[element].slice(0, count),
+    }));
+}
+
+function getBestFitRoleDetails(mainStructure) {
+  const details = ROLE_DETAILS[mainStructure];
+  if (!details) return null;
+  return {
+    summary: details.summary,
+    roles: Object.entries(details.roles).map(([role, examples]) => ({ role, examples })),
+  };
+}
+
+function getBestFitRoles(mainStructure) {
+  return getRecommendedDirections(mainStructure, null);
+}
+
+// Three industries from the primary Element to Enhance and two from the
+// secondary; all five from the primary when there is no distinct secondary.
+function getBestFitIndustries(primaryElement, secondaryElement) {
+  const primary = INDUSTRIES_BY_ELEMENT[primaryElement] || [];
+  const secondary =
+    secondaryElement && secondaryElement !== primaryElement
+      ? INDUSTRIES_BY_ELEMENT[secondaryElement] || []
+      : [];
+  if (!secondary.length) return primary;
+  return [...primary.slice(0, 3), ...secondary.slice(0, 2)];
 }
 
 const DOMINANT_PROFILE_CAREER_MODIFIER = {
@@ -246,6 +353,13 @@ export function buildCareerEngineV1({
       mainStructure,
       dayMasterElement
     ),
+    bestFitIndustries: getBestFitIndustries(primaryUsefulGod, secondaryUsefulGod),
+    bestFitIndustryElements: [primaryUsefulGod, secondaryUsefulGod].filter(
+      (element, index, list) => element && list.indexOf(element) === index
+    ),
+    bestFitRoles: getBestFitRoles(mainStructure),
+    bestFitIndustryGroups: getBestFitIndustryGroups(primaryUsefulGod, secondaryUsefulGod),
+    bestFitRoleDetails: getBestFitRoleDetails(mainStructure),
 
     debug: {
       mainStructure,
@@ -255,7 +369,7 @@ export function buildCareerEngineV1({
       primaryUsefulGod,
       secondaryUsefulGod,
       note:
-        "CareerEngineV1 translates frozen Engine V2 outputs into practical career interpretation. It does not affect pillars, strength, structure or useful god.",
+        "CareerEngineV1 translates frozen Engine V2 outputs into practical career interpretation. It does not affect pillars, strength, structure or Elements to Enhance.",
     },
   };
 }

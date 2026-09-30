@@ -16,6 +16,7 @@ import { buildMonthlyOverlayV1 } from "./monthlyOverlayV1.js";
 import { buildEightMansionsV1 } from "./eightMansionsV1.js";
 import { buildShenShaV1 } from "./shenShaV1.js";
 import { buildLuckPillarsV1 } from "./luckPillarsV1.js";
+import { buildRawChartDataV1 } from "./rawChartDataV1.js";
 import { buildLifePalaceV1, buildConceptionPalaceV1 } from "./lifePalaceV1.js";
 import { buildRelationshipEngineV2 } from "./relationshipEngineV2.js";
 import { buildGenderInfluenceV1 } from "./genderInfluenceV1.js";
@@ -64,6 +65,8 @@ import {
   calculateDayMasterStrength,
 } from "./elementBalance.js";
 
+import { DEFAULT_YEAR } from "../data/energyYears.js";
+
 export const ENGINE_VERSION = "0.2.0-stable-output";
 
 function buildConsumerEngineInput({
@@ -106,12 +109,13 @@ function buildConsumerEngineInput({
 
     annualOverlayV3,
     annualOverlayV4: annualOverlayV4Result,
+    selectedYear: annualOverlay?.selectedYear,
   };
 }
 
 export function buildBaziChart(input) {
   const normalizedInput = normalizeInput(input);
-  const selectedYear = normalizedInput.selectedYear || 2026;
+  const selectedYear = normalizedInput.selectedYear || DEFAULT_YEAR;
   const pillars = calculatePillars(normalizedInput);
 
   const tenGodsV3 = calculateTenGods(pillars);
@@ -222,19 +226,6 @@ export function buildBaziChart(input) {
     annualOverlayV4Error = error.message;
   }
 
-  let monthlyOverlayV1Result = null;
-  let monthlyOverlayV1Error = null;
-
-  try {
-    monthlyOverlayV1Result = buildMonthlyOverlayV1({
-      selectedYear,
-      usefulGodV4: usefulGodV4Result,
-    });
-  } catch (error) {
-    console.warn("MonthlyOverlayV1 failed safely:", error);
-    monthlyOverlayV1Error = error.message;
-  }
-
   let eightMansionsV1Result = null;
   let eightMansionsV1Error = null;
 
@@ -267,6 +258,40 @@ export function buildBaziChart(input) {
   } catch (error) {
     console.warn("LuckPillarsV1 failed safely:", error);
     luckPillarsV1Error = error.message;
+  }
+
+  let rawChartDataV1Result = null;
+  let rawChartDataV1Error = null;
+
+  try {
+    rawChartDataV1Result = buildRawChartDataV1({
+      pillars,
+      luckPillars: luckPillarsV1Result,
+      selectedYear,
+      birthYear: normalizedInput.year,
+    });
+  } catch (error) {
+    console.warn("RawChartDataV1 failed safely:", error);
+    rawChartDataV1Error = error.message;
+  }
+
+  // Runs after Shen Sha and the raw chart so each month can be read against
+  // the natal pillars, stars and current Luck Pillar.
+  let monthlyOverlayV1Result = null;
+  let monthlyOverlayV1Error = null;
+
+  try {
+    monthlyOverlayV1Result = buildMonthlyOverlayV1({
+      selectedYear,
+      usefulGodV4: usefulGodV4Result,
+      pillars,
+      shenSha: shenShaV1Result,
+      gender: normalizedInput.gender,
+      currentLuckBranchKey: rawChartDataV1Result?.currentLuck?.branch?.key || null,
+    });
+  } catch (error) {
+    console.warn("MonthlyOverlayV1 failed safely:", error);
+    monthlyOverlayV1Error = error.message;
   }
 
   let lifePalaceV1Result = null;
@@ -570,6 +595,7 @@ export function buildBaziChart(input) {
   const archetypeOverlayV3 = buildArchetypeOverlayV4({
     archetypes,
     annualOverlayV3,
+    selectedYear,
   });
 
   const adjustedArchetypes = buildArchetypeOverlay({
@@ -625,6 +651,7 @@ export function buildBaziChart(input) {
       narrativePersonalization: narrativePersonalizationV1,
       elementBalanceV3,
       annualOverlayV4: annualOverlayV4Result,
+      focusRankingV1,
     });
   } catch (error) {
     console.warn("StoneRecommendationsV4 failed safely:", error);
@@ -700,6 +727,7 @@ export function buildBaziChart(input) {
       eightMansionsV1: eightMansionsV1Result,
       shenShaV1: shenShaV1Result,
       luckPillarsV1: luckPillarsV1Result,
+      rawChartDataV1: rawChartDataV1Result,
       lifePalaceV1: lifePalaceV1Result,
       conceptionPalaceV1: conceptionPalaceV1Result,
 
@@ -790,6 +818,10 @@ export function buildBaziChart(input) {
 
   if (luckPillarsV1Error) {
     warnings.push(`LuckPillarsV1 failed safely: ${luckPillarsV1Error}`);
+  }
+
+  if (rawChartDataV1Error) {
+    warnings.push(`RawChartDataV1 failed safely: ${rawChartDataV1Error}`);
   }
 
   if (lifePalaceV1Error) {
@@ -967,6 +999,7 @@ export function buildBaziChart(input) {
     eightMansionsV1: eightMansionsV1Result,
     shenShaV1: shenShaV1Result,
     luckPillarsV1: luckPillarsV1Result,
+    rawChartDataV1: rawChartDataV1Result,
     lifePalaceV1: lifePalaceV1Result,
     conceptionPalaceV1: conceptionPalaceV1Result,
     archetypeOverlayV3,

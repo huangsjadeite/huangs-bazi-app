@@ -46,6 +46,32 @@ function findTopProfilePct(rankedProfiles, names, topN = 4) {
   return null;
 }
 
+// Plain-English takeaway for how the current decade and year combine.
+const LUCK_TONE = { favourable: "good", supported: "good", caution: "caution", neutral: "neutral" };
+
+function buildLuckOverview(decadeRead, yearRead) {
+  const decade = LUCK_TONE[decadeRead];
+  const year = LUCK_TONE[yearRead];
+  if (!decade || !year) return null;
+  if (decade === "good" && year === "good")
+    return "A supportive phase of your Luck Pillar meeting a supportive year. This is a good time to push forward on plans and take considered risks.";
+  if (decade === "good" && year === "caution")
+    return "Your Luck Pillar is on your side right now, so this year's friction is a bump rather than a trend. Stay the course, but time big moves for the Easiest months.";
+  if (decade === "caution" && year === "good")
+    return "A demanding phase of your Luck Pillar, but this year opens a window. Use it to make real progress and build reserves for the harder stretches.";
+  if (decade === "caution" && year === "caution")
+    return "A demanding phase of your Luck Pillar and a demanding year. Focus on consolidating rather than expanding, protect health and finances, and lean on your Elements to Enhance.";
+  if (decade === "good")
+    return "A supportive phase of your Luck Pillar with a steady year on top. Progress comes reliably with effort; use the Easiest months for important moves.";
+  if (decade === "caution")
+    return "A demanding phase of your Luck Pillar with a steady year on top. Keep commitments manageable and use the Easiest months for anything important.";
+  if (year === "good")
+    return "A steady phase of your Luck Pillar with a supportive year on top. This year is a good one to act on plans that have been waiting.";
+  if (year === "caution")
+    return "A steady phase of your Luck Pillar with a more demanding year on top. Pace yourself this year and save big decisions for the Easiest months.";
+  return "A steady phase of your Luck Pillar and a steady year. Results follow effort; use the Easiest months for important moves.";
+}
+
 export function deriveAdminReportData(report) {
   const narrative = report.narrative || {};
   const personality = report.personalityAndStructure || {};
@@ -59,6 +85,7 @@ export function deriveAdminReportData(report) {
   const conceptionPalace = report.personalDirectionsAndStars?.conceptionPalace || null;
   const natalPillars = report.chartFoundation?.pillars || null;
   const tenGodByPillar = report.chartFoundation?.tenGodByPillar || null;
+  const rawChartData = report.chartFoundation?.rawChartData || null;
   const annualPillar = report.annualEnergy?.annualOverlay?.annualPillar || null;
   const annualZodiac = report.annualEnergy?.annualZodiac || null;
 
@@ -106,11 +133,7 @@ export function deriveAdminReportData(report) {
   const outputElement = elementForRole("Output");
   const wealthElement = elementForRole("Wealth");
 
-  // A role being structurally relevant to an area (e.g. Officer -> Career)
-  // doesn't mean it's good for THIS chart - that depends on the Day Master's
-  // strength band. Intersect with what's actually favourable here so a weak
-  // Day Master chart (where Officer drains rather than helps) doesn't get a
-  // false "strong career month" callout.
+  // Elements that help THIS chart (depends on the Day Master's strength band).
   const favourableSet = new Set([
     ...(usefulGod.favourableElements || []),
     ...(usefulGod.secondaryFavourableElements || []),
@@ -123,7 +146,7 @@ export function deriveAdminReportData(report) {
   const partnerStarElement = relationship.spouseStar?.element || null;
 
   // Day Branch (Spouse Palace) — the earthly branch of the day pillar is the
-  // classical "relationship palace" in BaZi. Its element indicates the quality
+  // classical "relationship palace" in Bazi. Its element indicates the quality
   // of energy the person brings to and seeks in close partnerships.
   const dayBranchAnimal = natalPillars?.day?.branch?.animal || null;
   const dayBranchZh = natalPillars?.day?.branch?.zh || null;
@@ -136,81 +159,137 @@ export function deriveAdminReportData(report) {
   const peachBlossomAnimal = peachBlossomStar?.branch?.animal || null;
   const peachBlossomMonth = peachBlossomAnimal ? ANIMAL_TO_MONTH[peachBlossomAnimal] : null;
   // 2020 = Rat year (index 0); cycle repeats every 12 years
+  // This year's rating for the Peach Blossom month, so the report never calls
+  // a month a romantic peak while the Monthly Outlook rates it Challenging.
+  const peachBlossomRating = monthlyOutlook.find((m) => m.monthName === peachBlossomMonth)?.rating || null;
   const peachBlossomYears = (() => {
     if (!peachBlossomAnimal) return [];
     const order = ["Rat","Ox","Tiger","Rabbit","Dragon","Snake","Horse","Goat","Monkey","Rooster","Dog","Pig"];
     const targetIdx = order.indexOf(peachBlossomAnimal);
     if (targetIdx === -1) return [];
-    const currentYear = new Date().getFullYear();
+    // Count from the reading year, not today, so a 2027 reading lists the
+    // years from 2027 on.
+    const currentYear = report.annualEnergy?.selectedYear || new Date().getFullYear();
     const currentIdx = (currentYear - 2020 + 1200) % 12;
     const offset = (targetIdx - currentIdx + 12) % 12;
     const first = offset === 0 ? currentYear : currentYear + offset;
     return [first, first + 12];
   })();
 
-  const careerStrongMonths = monthNamesWhere(
-    (m) =>
-      favourableSet.has(m.dominantElement) &&
-      (m.dominantElement === officerElement || m.dominantElement === outputElement)
+  // Each key area always shows both month lists, picked from the layered
+  // monthly forecast (rating, Ten God theme, clashes, stars). The area's own
+  // signal leads; when it finds nothing, fall back to the overall rating so
+  // the line is never blank. A month never lands in both lists.
+  const isEasyMonth = (m) => m.rating === "Excellent" || m.rating === "Good";
+  const isHardMonth = (m) => m.rating === "Challenging" || m.rating === "Difficult";
+  const hasStar = (m, key) => (m.stars || []).some((star) => star.key === key);
+  const clashes = (m, tag) => (m.clashedPillars || []).includes(tag);
+  const inGroup = (m, ...groups) => groups.includes(m.tenGodGroup);
+
+  const overallGoodMonths = monthNamesWhere(isEasyMonth);
+  const overallCautionMonths = monthNamesWhere(isHardMonth);
+  const withFallback = (easiest, pace) => {
+    const finalEasiest = easiest.length ? easiest : overallGoodMonths;
+    const notEasiest = (months) => months.filter((m) => !finalEasiest.includes(m));
+    const areaPace = notEasiest(pace);
+    return [finalEasiest, areaPace.length ? areaPace : notEasiest(overallCautionMonths)];
+  };
+
+  // Career: Officer (authority) and Output (expression) months; a clash with
+  // the Month pillar (the career pillar) always means pacing.
+  const [careerStrongMonths, careerCautionMonths] = withFallback(
+    monthNamesWhere((m) => isEasyMonth(m) && !clashes(m, "M") && inGroup(m, "Officer", "Output")),
+    monthNamesWhere((m) => (isHardMonth(m) && inGroup(m, "Officer", "Output")) || clashes(m, "M"))
   );
-  const careerCautionMonths = monthNamesWhere(
-    (m) =>
-      cautionSet.has(m.dominantElement) &&
-      (m.dominantElement === officerElement || m.dominantElement === outputElement)
+  // Wealth: Wealth months; Companion months (money going out) and Robbery Sha
+  // months are the pace months.
+  const [wealthStrongMonths, wealthCautionMonths] = withFallback(
+    monthNamesWhere((m) => isEasyMonth(m) && !hasStar(m, "robberySha") && inGroup(m, "Wealth")),
+    monthNamesWhere(
+      (m) => (isHardMonth(m) && inGroup(m, "Wealth", "Companion")) || hasStar(m, "robberySha")
+    )
   );
-  const wealthStrongMonths = monthNamesWhere(
-    (m) => favourableSet.has(m.dominantElement) && m.dominantElement === wealthElement
+  // Relationships: Peach Blossom, a combo with the Day pillar (spouse palace)
+  // or the partner star (Wealth for men, Officer for women); a Day-pillar clash is
+  // always a pace month.
+  const [relationshipGoodMonths, relationshipCautionMonths] = withFallback(
+    monthNamesWhere(
+      (m) =>
+        isEasyMonth(m) &&
+        !clashes(m, "D") &&
+        (hasStar(m, "peachBlossom") || m.combinesDay || m.activatesPartnerStar)
+    ),
+    monthNamesWhere(
+      (m) => clashes(m, "D") || (isHardMonth(m) && m.activatesPartnerStar)
+    )
   );
-  const wealthCautionMonths = monthNamesWhere(
-    (m) => cautionSet.has(m.dominantElement) && m.dominantElement === wealthElement
+  // Wellness: Resource (rest and support) months; every hard month is a pace
+  // month. With no Resource month, name only the two best-rated easy months
+  // rather than every good month, so the list still singles something out.
+  const resourceMonths = monthNamesWhere((m) => isEasyMonth(m) && inGroup(m, "Resource"));
+  const bestEasyMonths = (() => {
+    const top = monthlyOutlook
+      .filter(isEasyMonth)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 2);
+    return monthNamesWhere((m) => top.includes(m));
+  })();
+  const [wellnessEasierMonths, wellnessCautionMonths] = withFallback(
+    resourceMonths.length ? resourceMonths : bestEasyMonths,
+    monthNamesWhere(isHardMonth)
   );
-  // "Good" relationship months are anchored to the partner star element
-  // (the chart's own structural relationship signal) rather than the
-  // general favourable set, mirroring how Career/Wealth use their own
-  // role element rather than a generic favourable/caution split.
-  const relationshipGoodMonths = monthNamesWhere(
-    (m) => favourableSet.has(m.dominantElement) && m.dominantElement === partnerStarElement
-  );
-  const relationshipCautionMonths = monthNamesWhere((m) =>
-    (relationship.timingNotes?.activatedBy || []).includes(m.dominantElement)
-  );
-  const wellnessEasierMonths = monthNamesWhere((m) => m.read === "Good");
-  const wellnessCautionMonths = monthNamesWhere((m) => m.read === "Caution");
 
   const annualZodiacName = annualZodiac?.displayName || "";
   const coverYearLabel = `${report.annualEnergy?.selectedYear || new Date().getFullYear()}${annualZodiacName ? ` ${annualZodiacName}` : ""} Year`;
 
+  // Plain-text version of a month's forecast (used by the JSON export).
   function expandMonthlyNote(item) {
-    const elementInfo = elementalBalance?.find((e) => e.name === item.dominantElement);
-    const roleDesc = elementInfo?.roleDescription;
-    const { chinese, branchAnimal, dominantElement, read } = item;
-    const roleText = roleDesc
-      ? ` For this chart, ${dominantElement} energy governs ${roleDesc}.`
-      : "";
-    const goodActionMap = {
-      Metal: "express ideas, build visibility and pursue creative or communication-led opportunities",
-      Water: "attract resources, pursue wealth goals and strengthen key relationships",
-      Wood: "build structure, take on responsibilities and establish long-term commitments",
-      Fire: "seek support, invest in learning and draw on mentors or helpful people",
-      Earth: "ground decisions, consolidate progress and build on what you already have",
-    };
-    const cautionNoteMap = {
-      Earth: "adds to what is already being managed in this chart, which can amplify heaviness or a sense of overcommitment",
-      Fire: "adds warmth that this chart needs to process carefully, which may stir emotional intensity or scattered energy",
-      Wood: "can intensify structure and obligation demands already present in this chart",
-      Metal: "may feel draining or overly cutting when the chart is already under pressure",
-      Water: "adds flow that can feel unsteady or emotionally heavy during a demanding period",
-    };
-    if (read === "Good") {
-      const action = goodActionMap[dominantElement] || "act on plans and take meaningful steps forward";
-      return `${chinese} (${branchAnimal}) brings ${dominantElement} energy this month.${roleText} This is a supportive window — a good time to ${action}. Use this month's momentum to take action on goals you have been building toward, and lean into opportunities that feel aligned rather than holding back.`;
-    }
-    if (read === "Caution") {
-      const cautionNote = cautionNoteMap[dominantElement] || "may create added demands on your energy";
-      return `${chinese} (${branchAnimal}) brings ${dominantElement} energy this month.${roleText} This energy ${cautionNote}. Pace yourself carefully — focus on maintaining what is already in place rather than starting new initiatives. Give yourself room to rest and recover, and avoid making major commitments from a place of pressure or urgency.`;
-    }
-    return `${chinese} (${branchAnimal}) brings ${dominantElement} energy this month.${roleText} This is a relatively neutral period for this chart — a steady time to maintain momentum without major push or pull in either direction. Use the quieter energy to consolidate, reflect and prepare for upcoming active windows.`;
+    const parts = [`${item.chinese} (${item.branchAnimal}) brings ${item.dominantElement} energy. Rated ${item.rating}.`];
+    if (item.theme) parts.push(`Theme: ${item.theme} (${item.tenGod?.primary}).`);
+    if (item.doText) parts.push(`Do: ${item.doText}.`);
+    [...(item.support || []), ...(item.watch || [])].forEach((line) => parts.push(`${line}.`));
+    (item.stars || []).forEach((star) => parts.push(`${star.label}: ${star.text}.`));
+    return parts.join(" ");
   }
+
+  // Luck (运) layers: the 10-year Luck Pillar (大运) and the year (流年), each
+  // rated by the stem element against the same element lists the months,
+  // stones and relationship sections use, so every section agrees.
+  const luckRead = (element) => {
+    if (element === usefulGod.primaryUsefulGod) return "favourable";
+    if (favourableSet.has(element)) return "supported";
+    if (cautionSet.has(element)) return "caution";
+    return "neutral";
+  };
+  const selectedYear = report.annualEnergy?.selectedYear || null;
+  const birthYear = Number(report.client?.birthDate?.split("-")[0]) || null;
+  // Age reached during the reading year, so a 2027 reading shows the pillar
+  // active in 2027 rather than today's.
+  const ageInSelectedYear = selectedYear && birthYear ? selectedYear - birthYear : null;
+  // Each Luck Pillar is read in two halves: the stem (天干) colours the first
+  // five years and the branch (地支) the last five, so a decade can turn.
+  const luckTimeline = (luckPillars?.pillars || []).map((p) => {
+    const midAge = p.startAge.years + 5;
+    const halves = [
+      { half: "first", startAge: p.startAge.years, endAge: midAge, zh: p.pillar.stem.zh, element: p.pillar.stem.element },
+      { half: "second", startAge: midAge, endAge: p.endAge.years, zh: p.pillar.branch.zh, element: p.pillar.branch.element },
+    ].map((h) => ({
+      ...h,
+      read: luckRead(h.element),
+      isCurrent: ageInSelectedYear !== null && ageInSelectedYear >= h.startAge && ageInSelectedYear < h.endAge,
+    }));
+    const isCurrent =
+      ageInSelectedYear !== null &&
+      ageInSelectedYear >= p.startAge.years &&
+      ageInSelectedYear < p.endAge.years;
+    // `read` is the half in force during the reading year (the first half
+    // when the decade is not the current one).
+    const activeHalf = halves.find((h) => h.isCurrent) || halves[0];
+    return { ...p, halves, read: activeHalf.read, isCurrent };
+  });
+  const currentLuck = luckTimeline.find((p) => p.isCurrent) || null;
+  const annualRead = annualPillar?.stemElement ? luckRead(annualPillar.stemElement) : null;
+  const luckOverview = buildLuckOverview(currentLuck?.read, annualRead);
 
   // primaryUsefulGod from usefulGodV4 is an element name ("Metal", "Water", etc.)
   const primaryDzi = DZI_BEAD_MAP[usefulGod.primaryUsefulGod] || null;
@@ -220,7 +299,9 @@ export function deriveAdminReportData(report) {
   return {
     narrative, personality, usefulGod, lifeAreas, stones, eightMansions, shenSha,
     luckPillars, lifePalace, conceptionPalace, natalPillars, tenGodByPillar,
+    rawChartData,
     annualPillar, annualZodiac,
+    luckTimeline, currentLuck, annualRead, ageInSelectedYear, luckOverview,
     rankedProfiles, findProfilePct,
     career, wealth, wealthArchetype, relationship, relationshipArchetype,
     relationshipPattern, health, blindSpots, lifeThemes, growthAdvice,
@@ -231,7 +312,7 @@ export function deriveAdminReportData(report) {
     weakestElement, officerElement, outputElement, wealthElement,
     favourableSet, cautionSet, partnerStarElement,
     dayBranchAnimal, dayBranchZh, dayBranchElement, spousePalaceNoteText,
-    peachBlossomAnimal, peachBlossomYears, peachBlossomMonth,
+    peachBlossomAnimal, peachBlossomYears, peachBlossomMonth, peachBlossomRating,
     careerStrongMonths, careerCautionMonths,
     wealthStrongMonths, wealthCautionMonths,
     relationshipGoodMonths, relationshipCautionMonths,

@@ -255,12 +255,12 @@ export function buildProductRecommendationsV1({
 
     reasoning: [
       stoneRecommendationsV4?.primaryElement
-        ? `Primary products are based on ${stoneRecommendationsV4.primaryElement} as the primary Useful God.`
-        : "No primary Useful God product mapping available.",
+        ? `Primary products are based on ${stoneRecommendationsV4.primaryElement} as the primary Element to Enhance.`
+        : "No primary Element to Enhance product mapping available.",
 
       stoneRecommendationsV4?.secondaryElement
         ? `Secondary products are based on ${stoneRecommendationsV4.secondaryElement} as secondary support.`
-        : "No secondary Useful God product mapping available.",
+        : "No secondary Element to Enhance product mapping available.",
 
       mainStructure !== "Unknown"
         ? `Product form preference adjusted for ${mainStructure} structure.`

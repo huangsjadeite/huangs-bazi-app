@@ -1,5 +1,14 @@
 import { AdminBulletList, AdminMonthCallout, AdminReportSection, AdminStrengthRiskGrid } from "./shared";
 
+// Follows "In <year> it is rated <rating>", matching the Monthly Outlook.
+const PEACH_MONTH_ADVICE = {
+  Excellent: ", which makes it a strong window for romance.",
+  Good: ", which makes it a good window for romance.",
+  Mixed: ", so enjoy the attention but keep expectations light.",
+  Challenging: ", so meet people and enjoy the attention, but hold off on big relationship decisions until an Easiest month.",
+  Difficult: ", so meet people and enjoy the attention, but hold off on big relationship decisions until an Easiest month.",
+};
+
 export default function RelationshipSection({
   relationshipArchetype,
   relationshipPattern,
@@ -16,6 +25,7 @@ export default function RelationshipSection({
   peachBlossomAnimal,
   peachBlossomYears,
   peachBlossomMonth,
+  peachBlossomRating,
 }) {
   return (
     <AdminReportSection icon="❤️" title="Relationship Dynamics">
@@ -33,12 +43,8 @@ export default function RelationshipSection({
           {spousePalaceNoteText}
         </p>
       )}
-      <AdminMonthCallout label="Good months" months={relationshipGoodMonths} tone="good" />
-      <AdminMonthCallout
-        label="Extra grounding needed"
-        months={relationshipCautionMonths}
-        tone="caution"
-      />
+      <AdminMonthCallout label="Easiest months" months={relationshipGoodMonths} tone="good" />
+      <AdminMonthCallout label="Pace yourself" months={relationshipCautionMonths} tone="caution" />
       {relationshipFocus && (
         <p className="mt-3 text-base leading-7 text-stone-700">
           {relationshipFocus}
@@ -74,12 +80,19 @@ export default function RelationshipSection({
           <strong>Romantic Peak Timing:</strong> Your Peach Blossom is the{" "}
           <strong>{peachBlossomAnimal}</strong>.{" "}
           {peachBlossomYears.length === 2 && (
-            <>{peachBlossomYears[0]} and {peachBlossomYears[1]} are your next {peachBlossomAnimal} years — </>
+            <>
+              {peachBlossomYears[0]} and {peachBlossomYears[1]} are your next {peachBlossomAnimal} years, your
+              strongest windows for romantic connections and social magnetism.{" "}
+            </>
           )}
           {peachBlossomMonth && (
-            <><strong>{peachBlossomMonth}</strong> each year is also a monthly peak. </>
+            <>
+              <strong>{peachBlossomMonth}</strong> is your Peach Blossom month each year, when you draw people in
+              more easily.
+              {peachBlossomRating && ` In ${selectedYear || "this year"} it is rated ${peachBlossomRating}`}
+              {peachBlossomRating && PEACH_MONTH_ADVICE[peachBlossomRating]}
+            </>
           )}
-          These are your strongest windows for romantic connections and social magnetism.
         </p>
       )}
       <AdminStrengthRiskGrid
@@ -99,7 +112,7 @@ export default function RelationshipSection({
       {!!(relationshipArchetype.partnerNeeds?.length || relationshipPattern.idealPartnerTraits?.length) && (
         <div className="mt-5">
           <p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-700">
-            What This Chart Needs In A Partner
+            What You Need In A Partner
           </p>
           <AdminBulletList
             items={[

@@ -1,5 +1,6 @@
 import huangsLogo from "../../assets/hjj-logo-black.png";
 import { BIRTH_COUNTRY_OPTIONS, getBirthCountryTimezone } from "../../data/birthCountryTimezones";
+import { IS_DEV_PREVIEW, PREVIEW_YEARS, RELEASED_YEARS } from "../../data/energyYears";
 
 export default function GenerateProfilePanel({ form, onChange, onGenerate }) {
   return (
@@ -151,10 +152,16 @@ export default function GenerateProfilePanel({ form, onChange, onGenerate }) {
             value={form.selectedYear}
             onChange={(e) => onChange({ selectedYear: Number(e.target.value) })}
           >
-            <option value={2026}>2026</option>
-            <option value={2027} disabled>
-              2027 Coming Soon
-            </option>
+            {RELEASED_YEARS.map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))}
+            {PREVIEW_YEARS.map((year) => (
+              <option key={year} value={year} disabled={!IS_DEV_PREVIEW}>
+                {IS_DEV_PREVIEW ? `${year} (Preview — localhost only)` : `${year} Coming Soon`}
+              </option>
+            ))}
           </select>
         </div>
       </div>

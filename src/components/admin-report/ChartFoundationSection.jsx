@@ -1,11 +1,16 @@
 import huangsLogo from "../../assets/hjj-logo-black.png";
+import { IS_DEV_PREVIEW } from "../../data/energyYears";
 import { getProfileDisplay } from "../../data/profileDisplay";
+import RawChartDataSection from "./RawChartDataSection";
+import WuXingChart from "./WuXingChart";
 
 export default function ChartFoundationSection({
   report,
   clientName,
   natalPillars,
   tenGodByPillar,
+  rawChartData,
+  rankedProfiles,
   annualPillar,
   annualZodiac,
   dayMasterLabel,
@@ -15,11 +20,21 @@ export default function ChartFoundationSection({
   weakerElements,
   usefulGod,
   elementalBalance,
-  rankedProfiles,
   coverYearLabel,
   onExportJson,
   onExportPdf,
 }) {
+  // Helpful elements beyond the primary and secondary, so this row matches the
+  // lists the luck, monthly and stones sections rate against.
+  const alsoHelpful = [...(usefulGod.favourableElements || []), ...(usefulGod.secondaryFavourableElements || [])].filter(
+    (element) => element !== usefulGod.primaryUsefulGod && element !== usefulGod.secondaryUsefulGod
+  );
+
+  // A 0% energy isn't in the chart, so it gets a one-line mention instead of a
+  // card describing it as one of their traits.
+  const activeProfiles = (rankedProfiles || []).filter((item) => Math.round(item.percentage) > 0);
+  const inactiveProfiles = (rankedProfiles || []).filter((item) => Math.round(item.percentage) <= 0);
+
   return (
     <>
       {/* Print-only cover page */}
@@ -84,10 +99,10 @@ export default function ChartFoundationSection({
             ...(moderateElements.length ? [["Moderate Elements", moderateElements.join(", ")]] : []),
             ["Weaker Elements", weakerElements.join(", ") || "-"],
             [
-              "Useful God",
+              "Elements to Enhance",
               `${usefulGod.primaryUsefulGod || "-"} (primary) · ${
                 usefulGod.secondaryUsefulGod || "-"
-              } (secondary)`,
+              } (secondary)${alsoHelpful.length ? ` · ${alsoHelpful.join(", ")} (also helpful)` : ""}`,
             ],
           ].map(([label, value]) => (
             <tr key={label} className="border-b border-slate-100 last:border-0 print:border-[#e5d5c0]">
@@ -100,7 +115,14 @@ export default function ChartFoundationSection({
         </tbody>
       </table>
 
-      {natalPillars && (
+      {/* Destiny Chart & Luck Pillars grid is a localhost-only preview; the live site keeps the Natal Chart table. */}
+      {IS_DEV_PREVIEW && rawChartData ? (
+        <RawChartDataSection
+          rawChartData={rawChartData}
+          birthDate={report.client?.birthDate}
+          birthTime={report.client?.birthTime}
+        />
+      ) : natalPillars && (
         <div className="mt-8">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h3 className="text-xl font-bold text-slate-950">Natal Chart</h3>
@@ -117,7 +139,7 @@ export default function ChartFoundationSection({
           <div className="mt-3 grid grid-cols-2 gap-x-6 gap-y-1 text-xs text-stone-500 md:grid-cols-4">
             <p><span className="font-semibold text-slate-700">Year —</span> ancestral energy, family background and relationship with society. Governs early life (0–16).</p>
             <p><span className="font-semibold text-slate-700">Month —</span> career, parents and productive adult years (17–40). Primary pillar for professional life.</p>
-            <p><span className="font-semibold text-slate-700">Day —</span> the self. The Day Heavenly Stem is the Day Master — the chart's core identity. The Day Branch represents the inner self and partner energy.</p>
+            <p><span className="font-semibold text-slate-700">Day —</span> the self. The Day Heavenly Stem is the Day Master — your core identity. The Day Branch represents the inner self and partner energy.</p>
             <p><span className="font-semibold text-slate-700">Hour —</span> aspirations, children and the later years of life (40+). Reflects what the person is building toward.</p>
           </div>
 
@@ -220,11 +242,19 @@ export default function ChartFoundationSection({
       )}
 
       {!!elementalBalance.length && (
+        <WuXingChart
+          elementalBalance={elementalBalance}
+          dayMasterElement={natalPillars?.day?.stem?.element}
+          enhanceElements={[usefulGod.primaryUsefulGod, usefulGod.secondaryUsefulGod, ...alsoHelpful].filter(Boolean)}
+        />
+      )}
+
+      {!!elementalBalance.length && (
         <div className="mt-8">
           <h3 className="text-xl font-bold text-slate-950">5 Elements Balance</h3>
           <p className="mt-2 text-sm text-stone-500">
             Natal Chart vs. {report.annualEnergy?.selectedYear || "this year"}'s Annual
-            Energy, and what each element represents in this chart.
+            Energy, and what each element represents in your chart.
           </p>
           <div className="mt-4 space-y-3">
             {elementalBalance.map((item) => (
@@ -246,21 +276,20 @@ export default function ChartFoundationSection({
           </div>
         </div>
       )}
-
-      {!!rankedProfiles.length && (
+      {!!rankedProfiles?.length && (
         <div className="mt-8">
-          <h3 className="text-xl font-bold text-slate-950">Personality Profile Breakdown</h3>
+          <h3 className="text-xl font-bold text-slate-950">10 God Structure</h3>
           <p className="mt-3 text-sm text-stone-500">
-            Your personality is shaped by ten archetypal energy patterns derived from your natal chart. Each pattern influences how you think, make decisions, respond under pressure and connect with others. The percentage shows how strongly each pattern is wired into your natural behaviour — a higher score means that energy is dominant and shows up consistently, while a lower score indicates a dormant pattern that may emerge in specific situations or can be consciously developed over time.
+            Every character in your chart relates to your Day Master as one of the ten Gods (十神). Together they show
+            how you think, make decisions, respond under pressure and connect with others. The
+            percentage shows how strongly each energy is wired into your chart: a high score shows up consistently,
+            while a low score is a quieter pattern that surfaces in specific situations or can be developed.
           </p>
           <div className="mt-4 space-y-3">
-            {rankedProfiles.map((item) => {
+            {activeProfiles.map((item) => {
               const display = getProfileDisplay(item.profile);
               return (
-                <div
-                  key={item.profile}
-                  className="rounded-xl border border-slate-200 p-4"
-                >
+                <div key={item.profile} className="rounded-xl border border-slate-200 p-4" style={{ breakInside: "avoid" }}>
                   <p className="text-base font-bold text-slate-950">
                     {display.icon} {Math.round(item.percentage)}% {item.profile}
                     {display.name ? ` — ${display.name}` : ""}
@@ -270,13 +299,24 @@ export default function ChartFoundationSection({
                       {display.subtitle}
                     </p>
                   )}
-                  {display.theme && (
-                    <p className="mt-1.5 text-sm text-stone-600">{display.theme}</p>
-                  )}
+                  {display.theme && <p className="mt-1.5 text-sm text-stone-600">{display.theme}</p>}
                 </div>
               );
             })}
           </div>
+          {!!inactiveProfiles.length && (
+            <p className="mt-3 text-sm text-stone-500">
+              <span className="font-semibold text-slate-700">Not active in your chart:</span>{" "}
+              {inactiveProfiles
+                .map((item) => {
+                  const display = getProfileDisplay(item.profile);
+                  return display.name ? `${item.profile} (${display.name})` : item.profile;
+                })
+                .join(", ")}
+              . These energies don't appear in your birth chart, so they are not natural patterns for you,
+              though a Luck Pillar, year or month carrying them can bring them in for a while.
+            </p>
+          )}
         </div>
       )}
     </>

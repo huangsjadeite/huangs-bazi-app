@@ -291,8 +291,8 @@ export function buildGrowthAdviceV1({
         ? `Capacity modifier is based on Day Master status: ${dayMasterStatus}.`
         : "No Day Master strength detected.",
       primaryUsefulGod
-        ? `Supportive energy references primary Useful God: ${primaryUsefulGod}.`
-        : "No primary Useful God detected.",
+        ? `Supportive energy references primary Element to Enhance: ${primaryUsefulGod}.`
+        : "No primary Element to Enhance detected.",
     ],
   };
 }

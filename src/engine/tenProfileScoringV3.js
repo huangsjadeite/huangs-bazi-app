@@ -27,12 +27,12 @@ const STEMS = {
 const BRANCH_HIDDEN_STEMS = {
   Zi: ["Gui"], Chou: ["Ji", "Gui", "Xin"], Yin: ["Jia", "Bing", "Wu"],
   Mao: ["Yi"], Chen: ["Wu", "Yi", "Gui"], Si: ["Bing", "Wu", "Geng"],
-  Wu: ["Ding", "Ji"], Wei: ["Ji", "Yi", "Ding"], Shen: ["Geng", "Ren", "Wu"],
+  Wu: ["Ding", "Ji"], Wei: ["Ji", "Ding", "Yi"], Shen: ["Geng", "Ren", "Wu"],
   You: ["Xin"], Xu: ["Wu", "Xin", "Ding"], Hai: ["Ren", "Jia"],
 
   子: ["Gui"], 丑: ["Ji", "Gui", "Xin"], 寅: ["Jia", "Bing", "Wu"],
   卯: ["Yi"], 辰: ["Wu", "Yi", "Gui"], 巳: ["Bing", "Wu", "Geng"],
-  午: ["Ding", "Ji"], 未: ["Ji", "Yi", "Ding"], 申: ["Geng", "Ren", "Wu"],
+  午: ["Ding", "Ji"], 未: ["Ji", "Ding", "Yi"], 申: ["Geng", "Ren", "Wu"],
   酉: ["Xin"], 戌: ["Wu", "Xin", "Ding"], 亥: ["Ren", "Jia"],
 };
 
@@ -87,6 +87,60 @@ const WEIGHTS = {
   annualStem: 0.18,
   annualBranch: 0.22,
 };
+
+// Display percentages only, calibrated 2026-09-29 against Joey Yap's 10 Profiles
+// natal percentages for seven charts. A character counts more when its element
+// is in season (by the month branch), hidden stems weigh more, the Day Master
+// gives Friend a small baseline, and the scale is capped at 100 rather than
+// forcing the top profile to 100. These percentages set the ranking and the
+// dominant profile; the WEIGHTS score above only breaks ties.
+const DISPLAY_WEIGHTS = {
+  heavenlyStem: {
+    year: 0.62,
+    month: 0.38,
+    day: 0,
+    hour: 1.31,
+  },
+  hiddenStem: {
+    main: 1.27,
+    middle: 0.82,
+    residual: 0.65,
+  },
+  branchPosition: {
+    year: 0.83,
+    month: 2.21,
+    day: 1.01,
+    hour: 1.18,
+  },
+  // Element status versus the season of the month branch.
+  season: {
+    prosperous: 1,
+    strengthening: 0.62,
+    resting: 0.47,
+    trapped: 0.49,
+    dead: 0.48,
+  },
+  dayMasterFriendBaseline: 0.33,
+  // Raw score to percentage, capped at 100.
+  percentPerPoint: 67.5,
+};
+
+const SEASON_ELEMENT = {
+  Zi: "Water", Chou: "Earth", Yin: "Wood", Mao: "Wood", Chen: "Earth", Si: "Fire",
+  Wu: "Fire", Wei: "Earth", Shen: "Metal", You: "Metal", Xu: "Earth", Hai: "Water",
+  子: "Water", 丑: "Earth", 寅: "Wood", 卯: "Wood", 辰: "Earth", 巳: "Fire",
+  午: "Fire", 未: "Earth", 申: "Metal", 酉: "Metal", 戌: "Earth", 亥: "Water",
+};
+
+function seasonFactor(element, seasonElement) {
+  const s = DISPLAY_WEIGHTS.season;
+  if (!element || !seasonElement) return 1;
+  if (element === seasonElement) return s.prosperous;
+  if (GENERATES[seasonElement] === element) return s.strengthening;
+  if (GENERATES[element] === seasonElement) return s.resting;
+  if (CONTROLS[element] === seasonElement) return s.trapped;
+  return s.dead;
+}
 
 function emptyScores() {
   return Object.fromEntries(PROFILE_NAMES.map((name) => [name, 0]));
@@ -260,6 +314,30 @@ function scoreNatal(chart = {}) {
   return { scores, breakdown };
 }
 
+function scoreDisplay(chart = {}) {
+  const pillars = getPillars(chart);
+  const dayStem = getDayStem(chart);
+  const scores = emptyScores();
+  const seasonElement = SEASON_ELEMENT[pillars.month.branch];
+  const add = (stem, weight) => {
+    const profile = getProfile(dayStem, stem);
+    if (profile) scores[profile] += weight * seasonFactor(STEMS[stem]?.element, seasonElement);
+  };
+
+  if (STEMS[dayStem]) scores.Friend += DISPLAY_WEIGHTS.dayMasterFriendBaseline;
+
+  Object.entries(pillars).forEach(([position, pillar]) => {
+    if (!pillar) return;
+    if (position !== "day" && pillar.stem) add(pillar.stem, DISPLAY_WEIGHTS.heavenlyStem[position] || 0);
+    (BRANCH_HIDDEN_STEMS[pillar.branch] || []).forEach((stem, index) => {
+      const hidden = [DISPLAY_WEIGHTS.hiddenStem.main, DISPLAY_WEIGHTS.hiddenStem.middle, DISPLAY_WEIGHTS.hiddenStem.residual][Math.min(index, 2)];
+      add(stem, hidden * (DISPLAY_WEIGHTS.branchPosition[position] || 1));
+    });
+  });
+
+  return scores;
+}
+
 function scoreAnnualOverlay(chart = {}) {
   const dayStem = getDayStem(chart);
   const annual = chart.annualOverlay || chart.currentYearOverlay || chart.yearOverlay;
@@ -294,26 +372,27 @@ function scoreAnnualOverlay(chart = {}) {
   return { scores, breakdown };
 }
 
-function toPercentages(scores) {
-  const max = Math.max(...Object.values(scores), 0.01);
-
+function toPercentages(displayScores) {
   return Object.fromEntries(
-    Object.entries(scores).map(([profile, score]) => [
+    Object.entries(displayScores).map(([profile, score]) => [
       profile,
-      Number(((score / max) * 100).toFixed(1)),
+      Number(Math.min(100, score * DISPLAY_WEIGHTS.percentPerPoint).toFixed(1)),
     ])
   );
 }
 
-function rankProfiles(scores, annualScores) {
+function rankProfiles(scores, displayScores, annualScores) {
+  const percentages = toPercentages(displayScores);
   return PROFILE_NAMES
     .map((profile) => ({
       profile,
       score: Number(scores[profile].toFixed(3)),
-      percentage: toPercentages(scores)[profile],
+      percentage: percentages[profile],
       annualActivation: Number((annualScores[profile] || 0).toFixed(3)),
     }))
-    .sort((a, b) => b.score - a.score);
+    // Displayed percentage first, so the top of the list and the dominant
+    // profile always agree; the WEIGHTS score breaks ties (several can cap at 100).
+    .sort((a, b) => b.percentage - a.percentage || b.score - a.score);
 }
 
 export function tenProfileScoringV3(chart = {}) {
@@ -321,15 +400,17 @@ export function tenProfileScoringV3(chart = {}) {
   const annual = scoreAnnualOverlay(chart);
 
   const finalScores = { ...natal.scores };
+  const displayScores = scoreDisplay(chart);
 
-  const rankedProfiles = rankProfiles(finalScores, annual.scores);
+  const rankedProfiles = rankProfiles(finalScores, displayScores, annual.scores);
 
   return {
     version: "TenProfileScoringV3",
     framework: "Natal-first profile scoring with annual overlay as activation/context only.",
     weights: WEIGHTS,
     scores: finalScores,
-    percentages: toPercentages(finalScores),
+    percentages: toPercentages(displayScores),
+    displayWeights: DISPLAY_WEIGHTS,
     rankedProfiles,
     dominantProfile: rankedProfiles[0] || null,
     supportingProfiles: rankedProfiles.slice(1, 4),

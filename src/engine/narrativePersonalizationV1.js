@@ -225,7 +225,7 @@ export function buildNarrativePersonalizationV1({
         : null,
 
       primaryUsefulGod
-        ? `Primary Useful God is ${primaryUsefulGod}.`
+        ? `Primary Element to Enhance is ${primaryUsefulGod}.`
         : null,
     ].filter(Boolean),
   };

@@ -201,7 +201,7 @@ function buildPartnerDynamics({ spouseStar, primaryUsefulGod }) {
     spouseStar.element !== primaryUsefulGod
   ) {
     potentialChallenges.push(
-      `The spouse star is ${spouseStar.element}, while the current useful element is ${primaryUsefulGod}. This may show attraction to relationship patterns that require balancing with your personal growth needs.`
+      `The spouse star is ${spouseStar.element}, while your primary Element to Enhance is ${primaryUsefulGod}. This may show attraction to relationship patterns that require balancing with your personal growth needs.`
     );
   }
 

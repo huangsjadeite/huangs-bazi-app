@@ -73,7 +73,7 @@ export default function ShenShaSection({ shenSha }) {
   return (
     <AdminReportSection icon="🌸" title="Personal Stars (Shen Sha)">
       <p className="mt-3 text-base leading-7 text-stone-600">
-        Shen Sha are auxiliary stars derived from your natal chart that highlight specific recurring themes in your life — from romance and travel to learning, protection and hidden obstacles. They are not dominant forces like your Day Master or Useful God, but they colour how certain energies show up in your experiences.
+        Shen Sha are auxiliary stars derived from your natal chart that highlight specific recurring themes in your life — from romance and travel to learning, protection and hidden obstacles. They are not dominant forces like your Day Master or Elements to Enhance, but they colour how certain energies show up in your experiences.
       </p>
       {activeStars.length > 0 && (
         <>
