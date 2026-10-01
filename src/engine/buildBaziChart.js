@@ -19,6 +19,7 @@ import { buildLuckPillarsV1 } from "./luckPillarsV1.js";
 import { buildRawChartDataV1 } from "./rawChartDataV1.js";
 import { buildLuckDecadeDetailsV1 } from "./luckDecadeDetailsV1.js";
 import { buildLifePalaceV1, buildConceptionPalaceV1 } from "./lifePalaceV1.js";
+import { buildZodiacCompatibilityV1 } from "./zodiacCompatibilityV1.js";
 import { buildPalaceReadingV1 } from "./palaceReadingV1.js";
 import { buildRelationshipEngineV2 } from "./relationshipEngineV2.js";
 import { buildGenderInfluenceV1 } from "./genderInfluenceV1.js";
@@ -307,6 +308,16 @@ export function buildBaziChart(input) {
   } catch (error) {
     console.warn("MonthlyOverlayV1 failed safely:", error);
     monthlyOverlayV1Error = error.message;
+  }
+
+  let zodiacCompatibilityV1Result = null;
+  let zodiacCompatibilityV1Error = null;
+
+  try {
+    zodiacCompatibilityV1Result = buildZodiacCompatibilityV1({ pillars });
+  } catch (error) {
+    console.warn("ZodiacCompatibilityV1 failed safely:", error);
+    zodiacCompatibilityV1Error = error.message;
   }
 
   let lifePalaceV1Result = null;
@@ -763,6 +774,7 @@ export function buildBaziChart(input) {
       luckDecadeDetailsV1,
       lifePalaceV1: lifePalaceV1Result,
       conceptionPalaceV1: conceptionPalaceV1Result,
+      zodiacCompatibilityV1: zodiacCompatibilityV1Result,
 
       archetypes,
       adjustedArchetypes,
@@ -855,6 +867,10 @@ export function buildBaziChart(input) {
 
   if (rawChartDataV1Error) {
     warnings.push(`RawChartDataV1 failed safely: ${rawChartDataV1Error}`);
+  }
+
+  if (zodiacCompatibilityV1Error) {
+    warnings.push(`ZodiacCompatibilityV1 failed safely: ${zodiacCompatibilityV1Error}`);
   }
 
   if (lifePalaceV1Error) {
@@ -1036,6 +1052,7 @@ export function buildBaziChart(input) {
     luckDecadeDetailsV1,
     lifePalaceV1: lifePalaceV1Result,
     conceptionPalaceV1: conceptionPalaceV1Result,
+    zodiacCompatibilityV1: zodiacCompatibilityV1Result,
     archetypeOverlayV3,
 
     elementBalance,

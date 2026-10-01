@@ -20,6 +20,7 @@ import ShenShaSection from "./ShenShaSection";
 import StonesSection from "./StonesSection";
 import WealthSection from "./WealthSection";
 import WellnessSection from "./WellnessSection";
+import ZodiacCompatibilitySection from "./ZodiacCompatibilitySection";
 
 // One report for both PDF exports: "Export Client PDF" prints this page with the
 // <UpgradedOnly> sections hidden, "Export Upgraded PDF" prints all of it. Keep
@@ -36,7 +37,7 @@ export default function AdminFullReport({ report, clientName }) {
   const derived = deriveAdminReportData(report);
   const {
     narrative, personality, usefulGod, stones, eightMansions, shenSha,
-    luckPillars, luckTimeline, lifePalace, conceptionPalace,
+    luckPillars, luckTimeline, lifePalace, conceptionPalace, zodiacCompatibility,
     blindSpots, lifeThemes, growthAdvice,
     natalPillars, tenGodByPillar, rankedProfiles,
     annualPillar, annualZodiac,
@@ -165,6 +166,8 @@ export default function AdminFullReport({ report, clientName }) {
         wellnessFocus={narrative.wellnessFocus}
         weakestElement={weakestElement}
       />
+
+      <ZodiacCompatibilitySection compatibility={zodiacCompatibility} />
 
       <UpgradedOnly>
         <LifeDirectionSection lifeThemes={lifeThemes || {}} growthAdvice={growthAdvice || {}} />

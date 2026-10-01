@@ -169,6 +169,7 @@ export function buildPaidReportSchemaV1(chart) {
       luckDecadeDetails: chart?.luckDecadeDetailsV1 || [],
       lifePalace: chart?.lifePalaceV1 || null,
       conceptionPalace: chart?.conceptionPalaceV1 || null,
+      zodiacCompatibility: chart?.zodiacCompatibilityV1 || null,
     },
 
     futureModules: {
