@@ -11,52 +11,72 @@ const ELEMENT_COLOR = {
 
 const HEADING = "text-sm font-bold uppercase tracking-[0.18em] text-amber-700";
 
+const KEEP = { breakInside: "avoid" };
+
+// Heading, intro and the first item print together so a heading never strands
+// at the foot of a page; the remaining items flow on, each kept whole. Keeping
+// the whole block together left a large gap before it in the PDF.
+function IndustryCard({ group }) {
+  return (
+    <div
+      className="mt-3 rounded-xl border-l-4 bg-stone-50 px-4 py-3"
+      style={{ ...KEEP, borderColor: ELEMENT_COLOR[group.element] }}
+    >
+      <p className="text-sm font-bold" style={{ color: ELEMENT_COLOR[group.element] }}>
+        {group.element} <span className="font-medium text-stone-500">· {group.rank}</span>
+      </p>
+      <p className="mt-1 text-base font-semibold text-slate-900">{group.industries.join(" · ")}</p>
+      <p className="mt-1 text-sm text-stone-600">{group.reason}</p>
+    </div>
+  );
+}
+
 function BestFitIndustries({ groups }) {
   if (!groups?.length) return null;
+  const [first, ...rest] = groups;
   return (
-    <div className="mt-6" style={{ breakInside: "avoid" }}>
-      <p className={HEADING}>Best-fit industries</p>
-      <p className="mt-1 text-base leading-7 text-stone-700">
-        Working in these fields surrounds you with the elements your chart is short of, so the work
-        itself tends to feel supportive rather than draining.
-      </p>
-      <div className="mt-3 space-y-3">
-        {groups.map((group) => (
-          <div
-            key={group.element}
-            className="rounded-xl border-l-4 bg-stone-50 px-4 py-3"
-            style={{ borderColor: ELEMENT_COLOR[group.element] }}
-          >
-            <p className="text-sm font-bold" style={{ color: ELEMENT_COLOR[group.element] }}>
-              {group.element} <span className="font-medium text-stone-500">· {group.rank}</span>
-            </p>
-            <p className="mt-1 text-base font-semibold text-slate-900">{group.industries.join(" · ")}</p>
-            <p className="mt-1 text-sm text-stone-600">{group.reason}</p>
-          </div>
-        ))}
+    <div className="mt-6">
+      <div style={KEEP}>
+        <p className={HEADING}>Best-fit industries</p>
+        <p className="mt-1 text-base leading-7 text-stone-700">
+          Working in these fields surrounds you with the elements your chart is short of, so the work
+          itself tends to feel supportive rather than draining.
+        </p>
+        <IndustryCard group={first} />
       </div>
+      {rest.map((group) => (
+        <IndustryCard key={group.element} group={group} />
+      ))}
+    </div>
+  );
+}
+
+function RoleRow({ role, examples }) {
+  return (
+    <div className="grid grid-cols-[2fr_3fr] border-t border-slate-100 py-2 text-sm" style={KEEP}>
+      <p className="pr-3 font-semibold text-slate-900">{role}</p>
+      <p className="text-stone-600">e.g. {examples}</p>
     </div>
   );
 }
 
 function BestFitRoles({ details }) {
   if (!details?.roles?.length) return null;
+  const [first, ...rest] = details.roles;
   return (
-    <div className="mt-6" style={{ breakInside: "avoid" }}>
-      <p className={HEADING}>Best-fit roles</p>
-      <p className="mt-1 text-base leading-7 text-stone-700">
-        {details.summary} These suit you in any industry.
-      </p>
-      <table className="mt-3 w-full border-collapse text-sm">
-        <tbody>
-          {details.roles.map(({ role, examples }) => (
-            <tr key={role} className="border-t border-slate-100">
-              <td className="w-2/5 py-2 pr-3 font-semibold text-slate-900">{role}</td>
-              <td className="py-2 text-stone-600">e.g. {examples}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="mt-6">
+      <div style={KEEP}>
+        <p className={HEADING}>Best-fit roles</p>
+        <p className="mt-1 text-base leading-7 text-stone-700">
+          {details.summary} These suit you in any industry.
+        </p>
+        <div className="mt-3">
+          <RoleRow {...first} />
+        </div>
+      </div>
+      {rest.map((item) => (
+        <RoleRow key={item.role} {...item} />
+      ))}
     </div>
   );
 }
