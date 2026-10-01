@@ -12,6 +12,8 @@ const ELEMENT_FIT_TEXT = {
   Caution: "strains your chart",
 };
 
+const MONTH_ROW = "grid grid-cols-[7rem_7rem_1fr]";
+
 function Line({ label, children }) {
   return (
     <p>
@@ -41,58 +43,54 @@ export default function MonthlyOutlookSection({ monthlyOutlook, selectedYear }) 
         zodiac animal: Tiger is always the first month of spring, Rabbit the second, and so on. This is not related
         to the Western zodiac.
       </p>
-      <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200 print:rounded-none print:border-[#8B1A1A]">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="bg-slate-50 text-left text-xs font-bold uppercase tracking-[0.12em] text-slate-600 print:bg-[#8B1A1A] print:text-white">
-              <th className="px-4 py-2.5">Month</th>
-              <th className="px-4 py-2.5">Rating</th>
-              <th className="px-4 py-2.5">Forecast</th>
-            </tr>
-          </thead>
-          <tbody>
-            {monthlyOutlook.map((item) => (
-              <tr
-                key={item.month}
-                className="border-t border-slate-100 align-top print:border-[#e5d5c0] odd:print:bg-white even:print:bg-[#FAE5D3]"
-                style={{ breakInside: "avoid" }}
-              >
-                <td className="px-4 py-2.5">
-                  <p className="font-semibold text-slate-800">{item.monthName}</p>
-                  <p className="text-xs text-stone-500">
-                    {item.chinese} · {item.branchAnimal}
-                  </p>
-                </td>
-                <td className="px-4 py-2.5">
-                  <span className={`whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-bold ${RATING_STYLE[item.rating] || RATING_STYLE.Mixed}`}>
-                    {item.rating || item.read}
-                  </span>
-                </td>
-                <td className="space-y-1 px-4 py-2.5 leading-6 text-stone-600">
-                  {item.theme ? (
-                    <p className="font-semibold text-slate-900">
-                      {item.theme} <span className="font-normal text-stone-500">({item.tenGod?.primary})</span>
-                    </p>
-                  ) : null}
-                  <p>
-                    {item.dominantElement} month, which {ELEMENT_FIT_TEXT[item.read]}.
-                  </p>
-                  {item.doText && <Line label="Do">{item.doText}</Line>}
-                  {!!item.support?.length && <Line label="Support">{item.support.join("; ")}</Line>}
-                  <Line label="Watch">
-                    {[...(item.watch || []), ...(item.watchText ? [item.watchText] : [])].join("; ") || "nothing specific"}
-                  </Line>
-                  {!!item.stars?.length && (
-                    <Line label="Stars">
-                      {item.stars.map((star) => `${star.icon} ${star.label}: ${star.text}`).join("; ")}
-                    </Line>
-                  )}
-                  {!!item.focusAreas?.length && <Line label="Area to focus">{item.focusAreas.join(", ")}</Line>}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {/* Rows are plain blocks, not a <table>: print engines leave large gaps
+          when keeping table rows whole, while blocks fill each page. */}
+      <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200 text-sm print:overflow-visible print:rounded-none print:border-[#8B1A1A]">
+        <div className={`${MONTH_ROW} bg-slate-50 text-left text-xs font-bold uppercase tracking-[0.12em] text-slate-600 print:bg-[#8B1A1A] print:text-white`}>
+          <p className="px-4 py-2.5">Month</p>
+          <p className="px-4 py-2.5">Rating</p>
+          <p className="px-4 py-2.5">Forecast</p>
+        </div>
+        {monthlyOutlook.map((item) => (
+          <div
+            key={item.month}
+            className={`${MONTH_ROW} border-t border-slate-100 print:border-[#e5d5c0] even:print:bg-white odd:print:bg-[#FAE5D3]`}
+            style={{ breakInside: "avoid" }}
+          >
+            <div className="px-4 py-2.5">
+              <p className="font-semibold text-slate-800">{item.monthName}</p>
+              <p className="text-xs text-stone-500">
+                {item.chinese} · {item.branchAnimal}
+              </p>
+            </div>
+            <div className="px-4 py-2.5">
+              <span className={`whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-bold ${RATING_STYLE[item.rating] || RATING_STYLE.Mixed}`}>
+                {item.rating || item.read}
+              </span>
+            </div>
+            <div className="space-y-1 px-4 py-2.5 leading-6 text-stone-600">
+              {item.theme ? (
+                <p className="font-semibold text-slate-900">
+                  {item.theme} <span className="font-normal text-stone-500">({item.tenGod?.primary})</span>
+                </p>
+              ) : null}
+              <p>
+                {item.dominantElement} month, which {ELEMENT_FIT_TEXT[item.read]}.
+              </p>
+              {item.doText && <Line label="Do">{item.doText}</Line>}
+              {!!item.support?.length && <Line label="Support">{item.support.join("; ")}</Line>}
+              <Line label="Watch">
+                {[...(item.watch || []), ...(item.watchText ? [item.watchText] : [])].join("; ") || "nothing specific"}
+              </Line>
+              {!!item.stars?.length && (
+                <Line label="Stars">
+                  {item.stars.map((star) => `${star.icon} ${star.label}: ${star.text}`).join("; ")}
+                </Line>
+              )}
+              {!!item.focusAreas?.length && <Line label="Area to focus">{item.focusAreas.join(", ")}</Line>}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
