@@ -37,50 +37,58 @@ const DETAIL_AREAS = [
   ["health", "Health"],
 ];
 
-function KeyYearList({ label, years, tone }) {
-  if (!years?.length) return null;
+// Decade cards may run across a page in the PDF; each labelled block stays
+// whole instead, so pages fill up rather than leaving gaps.
+const KEEP = { breakInside: "avoid" };
+
+function Block({ label, tone = "text-amber-700 print:text-[#8B1A1A]", className = "", children }) {
   return (
-    <div>
+    <div className={className} style={KEEP}>
       <dt className={`text-xs font-bold uppercase tracking-[0.14em] ${tone}`}>{label}</dt>
-      <dd className="text-stone-700">
-        {years.map((y) => (
-          <span key={y.year} className="block">
-            <strong>{y.year}</strong> {y.zh} {y.animal} (age {y.age}): {y.reason}.
-          </span>
-        ))}
-      </dd>
+      <dd className="text-stone-700">{children}</dd>
     </div>
   );
 }
 
+function yearLines(years) {
+  return years.map((y) => (
+    <span key={y.year} className="block">
+      <strong>{y.year}</strong> {y.zh} {y.animal} (age {y.age}): {y.reason}.
+    </span>
+  ));
+}
+
+const ROW = "grid gap-x-5 gap-y-2.5 md:grid-cols-2 print:grid-cols-2";
+
 function DecadeExtras({ details }) {
   const { energy, undercurrent, voidNote, stars, keyYears } = details;
-  const hasYears = keyYears?.best?.length || keyYears?.watch?.length;
-  if (!energy && !undercurrent && !voidNote && !stars?.length && !hasYears) return null;
+  const hidden = [undercurrent, voidNote].filter(Boolean).join(" ");
+  const best = keyYears?.best || [];
+  const watch = keyYears?.watch || [];
+  if (!energy && !hidden && !stars?.length && !best.length && !watch.length) return null;
   return (
-    <dl className="mt-3 grid gap-x-5 gap-y-2.5 border-t border-slate-200 pt-3 text-sm leading-6 md:grid-cols-2 print:grid-cols-2">
-      {energy && (
-        <div>
-          <dt className="text-xs font-bold uppercase tracking-[0.14em] text-amber-700 print:text-[#8B1A1A]">Personal energy</dt>
-          <dd className="text-stone-700">{energy}</dd>
-        </div>
-      )}
-      {(undercurrent || voidNote) && (
-        <div>
-          <dt className="text-xs font-bold uppercase tracking-[0.14em] text-amber-700 print:text-[#8B1A1A]">Hidden influences</dt>
-          <dd className="text-stone-700">{[undercurrent, voidNote].filter(Boolean).join(" ")}</dd>
+    <dl className="mt-3 space-y-2.5 border-t border-slate-200 pt-3 text-sm leading-6">
+      {(energy || hidden) && (
+        <div className={ROW}>
+          {energy && <Block label="Personal energy">{energy}</Block>}
+          {hidden && <Block label="Hidden influences">{hidden}</Block>}
         </div>
       )}
       {stars?.length > 0 && (
-        <div className="md:col-span-2 print:col-span-2">
-          <dt className="text-xs font-bold uppercase tracking-[0.14em] text-amber-700 print:text-[#8B1A1A]">Stars activated</dt>
-          <dd className="text-stone-700">
-            {stars.map((s) => <span key={s} className="block">{s}</span>)}
-          </dd>
+        <Block label="Stars activated">
+          {stars.map((star) => <span key={star} className="block">{star}</span>)}
+        </Block>
+      )}
+      {(best.length > 0 || watch.length > 0) && (
+        <div className={ROW}>
+          {best.length > 0 && (
+            <Block label="Best years" tone="text-emerald-700 print:text-[#2f6b3a]">{yearLines(best)}</Block>
+          )}
+          {watch.length > 0 && (
+            <Block label="Years to watch" tone="text-rose-700 print:text-[#8B1A1A]">{yearLines(watch)}</Block>
+          )}
         </div>
       )}
-      <KeyYearList label="Best years" years={keyYears?.best} tone="text-emerald-700 print:text-[#2f6b3a]" />
-      <KeyYearList label="Years to watch" years={keyYears?.watch} tone="text-rose-700 print:text-[#8B1A1A]" />
     </dl>
   );
 }
@@ -126,8 +134,8 @@ export default function LuckPillarsSection({ luckPillars, luckTimeline, usefulGo
             <div
               key={i}
               className={`rounded-2xl border p-4 print:rounded-none ${p.isCurrent ? "border-amber-400 bg-amber-50 print:border-[#8B1A1A] print:bg-[#FAE5D3]" : "border-slate-200 print:border-[#e5d5c0]"}`}
-              style={{ breakInside: "avoid" }}
             >
+              <div style={KEEP}>
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <p className="text-lg font-bold text-slate-900">
                   Age {p.startAge.years}–{p.endAge.years}
@@ -155,20 +163,16 @@ export default function LuckPillarsSection({ luckPillars, luckTimeline, usefulGo
                 <p className="mt-2 text-sm font-semibold leading-6 text-slate-900">{p.details.overview}</p>
               )}
               {theme && <p className="mt-1 text-sm leading-6 text-stone-700">{theme}</p>}
+              </div>
               {p.details && (
-                <dl className="mt-3 grid gap-x-5 gap-y-2.5 text-sm leading-6 md:grid-cols-2 print:grid-cols-2">
+                <dl className={`mt-3 text-sm leading-6 ${ROW}`}>
                   {DETAIL_AREAS.map(([key, label]) =>
-                    p.details[key] ? (
-                      <div key={key}>
-                        <dt className="text-xs font-bold uppercase tracking-[0.14em] text-amber-700 print:text-[#8B1A1A]">{label}</dt>
-                        <dd className="text-stone-700">{p.details[key]}</dd>
-                      </div>
-                    ) : null
+                    p.details[key] ? <Block key={key} label={label}>{p.details[key]}</Block> : null
                   )}
                 </dl>
               )}
               {p.details && <DecadeExtras details={p.details} />}
-              <p className="mt-3 border-t border-slate-200 pt-2 text-xs leading-5 text-stone-500">
+              <p className="mt-3 border-t border-slate-200 pt-2 text-xs leading-5 text-stone-500" style={KEEP}>
                 <strong className="text-stone-600">Wear &amp; display:</strong> {wearNote}
               </p>
             </div>
