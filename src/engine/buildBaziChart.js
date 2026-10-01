@@ -17,6 +17,7 @@ import { buildEightMansionsV1 } from "./eightMansionsV1.js";
 import { buildShenShaV1 } from "./shenShaV1.js";
 import { buildLuckPillarsV1 } from "./luckPillarsV1.js";
 import { buildRawChartDataV1 } from "./rawChartDataV1.js";
+import { buildLuckDecadeDetailsV1 } from "./luckDecadeDetailsV1.js";
 import { buildLifePalaceV1, buildConceptionPalaceV1 } from "./lifePalaceV1.js";
 import { buildRelationshipEngineV2 } from "./relationshipEngineV2.js";
 import { buildGenderInfluenceV1 } from "./genderInfluenceV1.js";
@@ -273,6 +274,18 @@ export function buildBaziChart(input) {
   } catch (error) {
     console.warn("RawChartDataV1 failed safely:", error);
     rawChartDataV1Error = error.message;
+  }
+
+  let luckDecadeDetailsV1 = [];
+
+  try {
+    luckDecadeDetailsV1 = buildLuckDecadeDetailsV1({
+      rawChartData: rawChartDataV1Result,
+      usefulGod: usefulGodV4Result,
+      gender: normalizedInput.gender,
+    });
+  } catch (error) {
+    console.warn("luckDecadeDetailsV1 failed safely:", error);
   }
 
   // Runs after Shen Sha and the raw chart so each month can be read against
@@ -728,6 +741,7 @@ export function buildBaziChart(input) {
       shenShaV1: shenShaV1Result,
       luckPillarsV1: luckPillarsV1Result,
       rawChartDataV1: rawChartDataV1Result,
+      luckDecadeDetailsV1,
       lifePalaceV1: lifePalaceV1Result,
       conceptionPalaceV1: conceptionPalaceV1Result,
 
@@ -1000,6 +1014,7 @@ export function buildBaziChart(input) {
     shenShaV1: shenShaV1Result,
     luckPillarsV1: luckPillarsV1Result,
     rawChartDataV1: rawChartDataV1Result,
+    luckDecadeDetailsV1,
     lifePalaceV1: lifePalaceV1Result,
     conceptionPalaceV1: conceptionPalaceV1Result,
     archetypeOverlayV3,

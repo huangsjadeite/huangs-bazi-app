@@ -268,6 +268,7 @@ export function deriveAdminReportData(report) {
   const ageInSelectedYear = selectedYear && birthYear ? selectedYear - birthYear : null;
   // Each Luck Pillar is read in two halves: the stem (天干) colours the first
   // five years and the branch (地支) the last five, so a decade can turn.
+  const luckDecadeDetails = report.personalDirectionsAndStars?.luckDecadeDetails || [];
   const luckTimeline = (luckPillars?.pillars || []).map((p) => {
     const midAge = p.startAge.years + 5;
     const halves = [
@@ -285,7 +286,8 @@ export function deriveAdminReportData(report) {
     // `read` is the half in force during the reading year (the first half
     // when the decade is not the current one).
     const activeHalf = halves.find((h) => h.isCurrent) || halves[0];
-    return { ...p, halves, read: activeHalf.read, isCurrent };
+    const details = luckDecadeDetails.find((d) => d.startAge === p.startAge.years) || null;
+    return { ...p, halves, read: activeHalf.read, isCurrent, details };
   });
   const currentLuck = luckTimeline.find((p) => p.isCurrent) || null;
   const annualRead = annualPillar?.stemElement ? luckRead(annualPillar.stemElement) : null;

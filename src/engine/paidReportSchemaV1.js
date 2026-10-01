@@ -1,4 +1,5 @@
 import { DEFAULT_YEAR } from "../data/energyYears.js";
+import { ELEMENT_BODY_SYSTEM } from "../data/elementBodySystem.js";
 
 const ELEMENT_ROLE_LABELS = {
   self: { role: "Self", text: "core identity, personal will and how directly you assert yourself" },
@@ -6,17 +7,6 @@ const ELEMENT_ROLE_LABELS = {
   output: { role: "Output", text: "expression, communication, creativity and visibility" },
   wealth: { role: "Wealth", text: "opportunity recognition, resource management and how money flows" },
   officer: { role: "Officer", text: "structure, responsibility, discipline and authority" },
-};
-
-// Classical Five-Element body-system associations. Lifestyle/energy framing
-// only, not a diagnostic claim - same boundary healthEngineV1 already states
-// ("does not diagnose, treat or predict medical conditions").
-const ELEMENT_BODY_SYSTEM = {
-  Wood: "liver, gallbladder, tendons and ligaments",
-  Fire: "heart, circulation and blood flow",
-  Earth: "digestion, stomach and spleen function",
-  Metal: "lungs, skin and the respiratory system",
-  Water: "kidneys, bladder, bones and reproductive health",
 };
 
 function buildElementalBalanceWithAnnual(chart) {
@@ -176,6 +166,7 @@ export function buildPaidReportSchemaV1(chart) {
       eightMansions: chart?.eightMansionsV1 || null,
       shenSha: chart?.shenShaV1 || null,
       luckPillars: chart?.luckPillarsV1 || null,
+      luckDecadeDetails: chart?.luckDecadeDetailsV1 || [],
       lifePalace: chart?.lifePalaceV1 || null,
       conceptionPalace: chart?.conceptionPalaceV1 || null,
     },

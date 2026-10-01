@@ -30,6 +30,13 @@ const ELEMENT_DISPLAY = {
   Water: "a small water feature or dark stone decor",
 };
 
+const DETAIL_AREAS = [
+  ["career", "Career"],
+  ["wealth", "Wealth"],
+  ["relationship", "Relationships"],
+  ["health", "Health"],
+];
+
 export default function LuckPillarsSection({ luckPillars, luckTimeline, usefulGod, ageInSelectedYear, selectedYear }) {
   if (!luckTimeline?.length) return null;
 
@@ -57,64 +64,61 @@ export default function LuckPillarsSection({ luckPillars, luckTimeline, usefulGo
         <LuckReadLegend usefulGod={usefulGod} />
       </div>
 
-      <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200 print:rounded-none print:border-[#8B1A1A]">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="bg-slate-50 text-left text-xs font-bold uppercase tracking-[0.12em] text-slate-600 print:bg-[#8B1A1A] print:text-white">
-              <th className="px-4 py-2.5">Age</th>
-              <th className="px-4 py-2.5">Pillar & Energy</th>
-              <th className="px-4 py-2.5">Rating</th>
-              <th className="px-4 py-2.5">What the Decade Brings</th>
-              <th className="px-4 py-2.5">Wear & Display</th>
-            </tr>
-          </thead>
-          <tbody>
-            {luckTimeline.map((p, i) => {
-              const theme = TEN_GOD_THEME[p.tenGod] || null;
-              const hasCaution = p.halves.some((h) => h.read === "caution");
-              const recEl = hasCaution && primaryUsefulEl ? primaryUsefulEl : p.pillar.stem.element;
-              const wearText = ELEMENT_WEAR[recEl] || "—";
-              const displayText = ELEMENT_DISPLAY[recEl] || "—";
-              const wearNote = hasCaution && primaryUsefulEl
-                ? `Balance it with your Element to Enhance (${primaryUsefulEl}). Wear ${wearText}. Display ${displayText}.`
-                : `Wear ${wearText}. Display ${displayText}.`;
-              return (
-                <tr
-                  key={i}
-                  className={`border-t border-slate-100 align-top print:border-[#e5d5c0] odd:print:bg-white even:print:bg-[#FAE5D3] ${p.isCurrent ? "bg-amber-50 print:bg-[#FAE5D3]" : ""}`}
-                >
-                  <td className="px-4 py-3 font-semibold text-slate-800 whitespace-nowrap">
-                    {p.startAge.years}–{p.endAge.years}
-                    {p.isCurrent && (
-                      <span className="ml-2 rounded-full bg-amber-600 px-2 py-0.5 text-[10px] font-bold text-white print:bg-[#8B1A1A]">
-                        NOW
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="font-bold text-slate-900">
-                      {p.pillar.stem.zh}
-                      {p.pillar.branch.zh}
-                    </span>{" "}
-                    <span className="font-semibold text-stone-800">{p.pillar.stem.element} / {p.pillar.branch.element}</span>
-                    {getProfileDisplay(p.tenGod)?.name && (
-                      <span className="text-stone-500"> · {getProfileDisplay(p.tenGod).name}</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <LuckHalves halves={p.halves} />
-                  </td>
-                  <td className="px-4 py-3 text-stone-600 leading-5">
-                    {theme || "—"}
-                  </td>
-                  <td className="px-4 py-3 text-xs text-stone-500 leading-5">
-                    {wearNote}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+      <div className="mt-4 space-y-4">
+        {luckTimeline.map((p, i) => {
+          const theme = TEN_GOD_THEME[p.tenGod] || null;
+          const hasCaution = p.halves.some((h) => h.read === "caution");
+          const recEl = hasCaution && primaryUsefulEl ? primaryUsefulEl : p.pillar.stem.element;
+          const wearText = ELEMENT_WEAR[recEl] || "—";
+          const displayText = ELEMENT_DISPLAY[recEl] || "—";
+          const wearNote = hasCaution && primaryUsefulEl
+            ? `Balance it with your Element to Enhance (${primaryUsefulEl}). Wear ${wearText}. Display ${displayText}.`
+            : `Wear ${wearText}. Display ${displayText}.`;
+          return (
+            <div
+              key={i}
+              className={`rounded-2xl border p-4 print:rounded-none ${p.isCurrent ? "border-amber-400 bg-amber-50 print:border-[#8B1A1A] print:bg-[#FAE5D3]" : "border-slate-200 print:border-[#e5d5c0]"}`}
+              style={{ breakInside: "avoid" }}
+            >
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <p className="text-lg font-bold text-slate-900">
+                  Age {p.startAge.years}–{p.endAge.years}
+                  <span className="ml-2">{p.pillar.stem.zh}{p.pillar.branch.zh}</span>
+                  <span className="ml-2 text-base font-semibold text-stone-700">
+                    {p.pillar.stem.element} / {p.pillar.branch.element}
+                  </span>
+                  {getProfileDisplay(p.tenGod)?.name && (
+                    <span className="text-base font-normal text-stone-500"> · {getProfileDisplay(p.tenGod).name}</span>
+                  )}
+                </p>
+                {p.isCurrent && (
+                  <span className="rounded-full bg-amber-600 px-2 py-0.5 text-[10px] font-bold text-white print:bg-[#8B1A1A]">
+                    NOW
+                  </span>
+                )}
+              </div>
+              <div className="text-sm">
+                <LuckHalves halves={p.halves} />
+              </div>
+              {theme && <p className="mt-2 text-sm leading-6 text-stone-700">{theme}</p>}
+              {p.details && (
+                <dl className="mt-3 grid gap-x-5 gap-y-2.5 text-sm leading-6 md:grid-cols-2 print:grid-cols-2">
+                  {DETAIL_AREAS.map(([key, label]) =>
+                    p.details[key] ? (
+                      <div key={key}>
+                        <dt className="text-xs font-bold uppercase tracking-[0.14em] text-amber-700 print:text-[#8B1A1A]">{label}</dt>
+                        <dd className="text-stone-700">{p.details[key]}</dd>
+                      </div>
+                    ) : null
+                  )}
+                </dl>
+              )}
+              <p className="mt-3 border-t border-slate-200 pt-2 text-xs leading-5 text-stone-500">
+                <strong className="text-stone-600">Wear &amp; display:</strong> {wearNote}
+              </p>
+            </div>
+          );
+        })}
       </div>
       <p className="mt-2 text-xs text-stone-500">
         Ages are exact ages, not Chinese nominal ages (虚岁), which run one year higher.

@@ -82,16 +82,20 @@ export default function AdminFullReport({ report, clientName }) {
         onExportJson={() => downloadReadingExport({ report, clientName, derived })}
         onExportPdf={() => exportAdminReportToPdf()}
         onExportUpgradedPdf={() => exportAdminReportToPdf({ upgraded: true })}
+        destinyChart={
+          rawChartData && (
+            <UpgradedOnly>
+              <RawChartDataSection
+                rawChartData={rawChartData}
+                birthDate={report.client?.birthDate}
+                birthTime={report.client?.birthTime}
+              />
+            </UpgradedOnly>
+          )
+        }
       />
 
       <UpgradedOnly>
-        {rawChartData && (
-          <RawChartDataSection
-            rawChartData={rawChartData}
-            birthDate={report.client?.birthDate}
-            birthTime={report.client?.birthTime}
-          />
-        )}
         <HiddenStrengthsSection topStrengths={personality.topStrengths || []} />
         {blindSpots && <BlindSpotsSection blindSpots={blindSpots} />}
       </UpgradedOnly>

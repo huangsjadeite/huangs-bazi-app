@@ -21,6 +21,7 @@ export default function ChartFoundationSection({
   onExportJson,
   onExportPdf,
   onExportUpgradedPdf,
+  destinyChart,
 }) {
   // Helpful elements beyond the primary and secondary, so this row matches the
   // lists the luck, monthly and stones sections rate against.
@@ -120,8 +121,11 @@ export default function ChartFoundationSection({
         </tbody>
       </table>
 
+      {destinyChart}
+
+      {/* The upgraded PDF shows the Destiny Chart grid instead of this table. */}
       {natalPillars && (
-        <div className="mt-8">
+        <div className="standard-only mt-8">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h3 className="text-xl font-bold text-slate-950">Natal Chart</h3>
 
