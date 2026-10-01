@@ -2,6 +2,8 @@
 // current Luck Pillar side by side, then the full Luck Pillar row. Renders
 // engine output (rawChartDataV1) only.
 
+import DestinyChartGuide from "./DestinyChartGuide";
+
 const ELEMENT_STYLE = {
   Wood: { zh: "木", color: "#2E7D32" },
   Fire: { zh: "火", color: "#C62828" },
@@ -197,11 +199,8 @@ export default function RawChartDataSection({ rawChartData, birthDate, birthTime
       <div style={{ breakInside: "avoid" }}>
         <h3 className="text-xl font-bold text-slate-950">Destiny Chart &amp; Luck Pillars</h3>
         <p className="mt-2 text-sm text-stone-500">
-          Natal pillars with the {annual?.year || "selected"} year and current Luck Pillar. Relation tags
-          show the natal pillar involved: (H) Hour, (D) Day, (M) Month, (Y) Year. Void (空亡) branches:{" "}
-          {rawChartData.voidBranches.join(" ")}. Season shows how strong each stem and branch element is in the
-          birth month ({rawChartData.seasonElement} season): 旺 Prosperous, 相 Strong, 休 Resting, 囚 Trapped,
-          死 Dead.
+          Your birth chart as a Bazi master draws it, with the {annual?.year || "selected"} year and your current
+          10-year Luck Pillar shaded alongside. A plain-language guide to reading it follows the chart.
         </p>
 
         <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200 print:overflow-visible">
@@ -277,6 +276,8 @@ export default function RawChartDataSection({ rawChartData, birthDate, birthTime
           </p>
         </div>
       )}
+
+      <DestinyChartGuide rawChartData={rawChartData} />
     </div>
   );
 }

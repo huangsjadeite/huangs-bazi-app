@@ -1,5 +1,5 @@
 import { getProfileDisplay } from "../../data/profileDisplay";
-import { LuckHalves, LuckReadLegend } from "./LuckCyclesSection";
+import { LuckHalves, LuckReadBadge, LuckReadLegend } from "./LuckCyclesSection";
 import { AdminReportSection } from "./shared";
 
 const TEN_GOD_THEME = {
@@ -93,6 +93,74 @@ function DecadeExtras({ details }) {
   );
 }
 
+const CARD_GUIDE = [
+  ["Heading", "The ages and calendar years the decade covers, its two characters and their elements, and the archetype it brings out (see the 10 Energy Archetypes table at the end)."],
+  ["Age lines", "The top character shapes the first five years and the bottom character the last five. The tag beside each says whether that half helps you or asks for care, using the key above."],
+  ["Bold line", "The decade in one sentence, and how to make the most of it."],
+  ["Career, Wealth, Relationships, Health", "What the decade is likely to bring in each area of life."],
+  ["Personal energy", "How energetic and confident you are likely to feel during the decade."],
+  ["Hidden influences", "Quieter energies inside the decade that surface now and then, and any part of it that feels less solid than it looks."],
+  ["Stars activated", "Special stars the decade switches on, such as helpful people, study luck, romance or travel."],
+  ["Best years / Years to watch", "The specific calendar years in the decade that are most supportive, and the ones that call for extra care, with the reason for each."],
+  ["Wear & display", "Jadeite, crystals and decor that balance the decade's energy."],
+];
+
+function DecadesAtAGlance({ luckTimeline }) {
+  return (
+    <div className="mt-2 overflow-x-auto rounded-2xl border border-slate-200 print:overflow-visible print:rounded-none">
+      <table className="w-full border-collapse text-sm">
+        <thead>
+          <tr className="bg-slate-100 text-left text-xs uppercase tracking-[0.1em] text-stone-600 print:bg-[#FAE5D3]">
+            <th className="px-3 py-2">Age</th>
+            <th className="px-3 py-2">Years</th>
+            <th className="px-3 py-2">Pillar</th>
+            <th className="px-3 py-2">Archetype</th>
+            <th className="px-3 py-2">First half</th>
+            <th className="px-3 py-2">Second half</th>
+          </tr>
+        </thead>
+        <tbody>
+          {luckTimeline.map((p, i) => (
+            <tr key={i} className={`border-t border-slate-100 ${p.isCurrent ? "bg-amber-50 font-semibold print:bg-[#FAE5D3]" : ""}`}>
+              <td className="px-3 py-1.5 whitespace-nowrap">
+                {p.startAge.years}–{p.endAge.years}
+                {p.isCurrent && <span className="ml-1 text-xs text-amber-700 print:text-[#8B1A1A]">now</span>}
+              </td>
+              <td className="px-3 py-1.5 whitespace-nowrap">{p.details?.fromYear ? `${p.details.fromYear}–${p.details.toYear}` : "—"}</td>
+              <td className="px-3 py-1.5 whitespace-nowrap">{p.pillar.stem.zh}{p.pillar.branch.zh}</td>
+              <td className="px-3 py-1.5">{getProfileDisplay(p.tenGod)?.name || p.tenGod}</td>
+              {[0, 1].map((h) => (
+                <td key={h} className="px-3 py-1.5">{p.halves[h] && <LuckReadBadge read={p.halves[h].read} />}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function CardGuide() {
+  return (
+    <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50/40 p-4 print:rounded-none print:border-[#e5d5c0] print:bg-transparent" style={KEEP}>
+      <p className="text-xs font-bold uppercase tracking-[0.14em] text-amber-700 print:text-[#8B1A1A]">How to read each decade card</p>
+      <dl className="mt-1.5 grid gap-x-5 gap-y-1 text-sm leading-6 text-stone-700 md:grid-cols-2 print:grid-cols-2">
+        {CARD_GUIDE.map(([label, text]) => (
+          <div key={label}>
+            <dt className="inline font-bold text-slate-900">{label}: </dt>
+            <dd className="inline">{text}</dd>
+          </div>
+        ))}
+      </dl>
+      <p className="mt-2 text-sm leading-6 text-stone-700">
+        The card marked NOW is the decade you are in. A favourable decade is a time to push forward; a demanding one
+        is a time to pace yourself, build skills and protect what you have, and it often lays the groundwork for the
+        next good stretch.
+      </p>
+    </div>
+  );
+}
+
 export default function LuckPillarsSection({ luckPillars, luckTimeline, usefulGod, ageInSelectedYear, selectedYear }) {
   if (!luckTimeline?.length) return null;
 
@@ -116,9 +184,17 @@ export default function LuckPillarsSection({ luckPillars, luckTimeline, usefulGo
         {ageInSelectedYear !== null && ` You turn ${ageInSelectedYear} in ${selectedYear}.`}
       </p>
 
-      <div style={{ breakInside: "avoid" }}>
+      <div style={KEEP}>
+        <p className="mt-4 text-xs font-bold uppercase tracking-[0.14em] text-amber-700 print:text-[#8B1A1A]">Key to the tags</p>
         <LuckReadLegend usefulGod={usefulGod} />
       </div>
+
+      <div style={KEEP}>
+        <p className="mt-5 text-xs font-bold uppercase tracking-[0.14em] text-amber-700 print:text-[#8B1A1A]">Your decades at a glance</p>
+        <DecadesAtAGlance luckTimeline={luckTimeline} />
+      </div>
+
+      <CardGuide />
 
       <div className="mt-4 space-y-4">
         {luckTimeline.map((p, i) => {
