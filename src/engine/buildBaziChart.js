@@ -19,6 +19,7 @@ import { buildLuckPillarsV1 } from "./luckPillarsV1.js";
 import { buildRawChartDataV1 } from "./rawChartDataV1.js";
 import { buildLuckDecadeDetailsV1 } from "./luckDecadeDetailsV1.js";
 import { buildLifePalaceV1, buildConceptionPalaceV1 } from "./lifePalaceV1.js";
+import { buildPalaceReadingV1 } from "./palaceReadingV1.js";
 import { buildRelationshipEngineV2 } from "./relationshipEngineV2.js";
 import { buildGenderInfluenceV1 } from "./genderInfluenceV1.js";
 import { buildCareerEngineV1 } from "./careerEngineV1.js";
@@ -283,6 +284,7 @@ export function buildBaziChart(input) {
       rawChartData: rawChartDataV1Result,
       usefulGod: usefulGodV4Result,
       gender: normalizedInput.gender,
+      birthYear: normalizedInput.year,
     });
   } catch (error) {
     console.warn("luckDecadeDetailsV1 failed safely:", error);
@@ -325,6 +327,23 @@ export function buildBaziChart(input) {
   } catch (error) {
     console.warn("ConceptionPalaceV1 failed safely:", error);
     conceptionPalaceV1Error = error.message;
+  }
+
+  try {
+    if (lifePalaceV1Result) {
+      lifePalaceV1Result = {
+        ...lifePalaceV1Result,
+        reading: buildPalaceReadingV1({ palace: lifePalaceV1Result, kind: "life", pillars, usefulGod: usefulGodV4Result }),
+      };
+    }
+    if (conceptionPalaceV1Result) {
+      conceptionPalaceV1Result = {
+        ...conceptionPalaceV1Result,
+        reading: buildPalaceReadingV1({ palace: conceptionPalaceV1Result, kind: "conception", pillars, usefulGod: usefulGodV4Result }),
+      };
+    }
+  } catch (error) {
+    console.warn("palaceReadingV1 failed safely:", error);
   }
 
   const consumerEngineInput = buildConsumerEngineInput({

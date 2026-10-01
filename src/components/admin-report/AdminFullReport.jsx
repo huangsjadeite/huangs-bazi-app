@@ -111,16 +111,6 @@ export default function AdminFullReport({ report, clientName }) {
         usefulGod={usefulGod}
       />
 
-      <UpgradedOnly>
-        <LuckPillarsSection
-          luckPillars={luckPillars}
-          luckTimeline={luckTimeline}
-          usefulGod={usefulGod}
-          ageInSelectedYear={ageInSelectedYear}
-          selectedYear={report.annualEnergy?.selectedYear}
-        />
-      </UpgradedOnly>
-
       <p className="mt-10 text-xs font-bold uppercase tracking-[0.3em] text-amber-700">
         The Four Key Areas
       </p>
@@ -196,6 +186,13 @@ export default function AdminFullReport({ report, clientName }) {
         <EightMansionsSection eightMansions={eightMansions} />
         <LifePalaceSection lifePalace={lifePalace} conceptionPalace={conceptionPalace} />
         <ShenShaSection shenSha={shenSha || []} />
+        <LuckPillarsSection
+          luckPillars={luckPillars}
+          luckTimeline={luckTimeline}
+          usefulGod={usefulGod}
+          ageInSelectedYear={ageInSelectedYear}
+          selectedYear={report.annualEnergy?.selectedYear}
+        />
       </UpgradedOnly>
 
       <ReferenceTableSection />

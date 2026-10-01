@@ -18,7 +18,7 @@ import { getBranch, getStem } from "../data/baziConstants.js";
 // Used by Peach Blossom and Sky Horse (year-branch-keyed) and Monthly
 // Virtue (month-branch-keyed) - the grouping shape is identical, only
 // which pillar's branch you look up against it differs.
-const TRIO_GROUPS = [
+export const TRIO_GROUPS = [
   { branches: ["yin", "wu", "xu"], peachBlossom: "mao", skyHorse: "shen", robberySha: "hai", monthlyVirtue: "bing" },
   { branches: ["shen", "zi", "chen"], peachBlossom: "you", skyHorse: "yin", robberySha: "si", monthlyVirtue: "ren" },
   { branches: ["hai", "mao", "wei"], peachBlossom: "zi", skyHorse: "si", robberySha: "shen", monthlyVirtue: "jia" },
@@ -36,7 +36,7 @@ const SEASON_TRIO_GROUPS = [
 ];
 
 // Day Stem -> Noble People (Tian Yi Guiren) branches.
-const NOBLE_PEOPLE_BY_DAY_STEM = {
+export const NOBLE_PEOPLE_BY_DAY_STEM = {
   jia: ["chou", "wei"],
   wu: ["chou", "wei"],
   geng: ["chou", "wei"],
@@ -50,7 +50,7 @@ const NOBLE_PEOPLE_BY_DAY_STEM = {
 };
 
 // Day Stem -> Intelligence Star (Wen Chang Gui Ren) branch.
-const INTELLIGENCE_STAR_BY_DAY_STEM = {
+export const INTELLIGENCE_STAR_BY_DAY_STEM = {
   jia: "si",
   yi: "wu",
   bing: "shen",

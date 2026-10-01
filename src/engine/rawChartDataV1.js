@@ -113,7 +113,7 @@ function describeTenGod(dayStemKey, stemKey) {
   };
 }
 
-function getGrowthPhase(dayStemKey, branchKey) {
+export function getGrowthPhase(dayStemKey, branchKey) {
   const stem = getStem(dayStemKey);
   const start = getBranchIndex(GROWTH_START_BRANCH[stem.key]);
   const step = stem.polarity === "Yang" ? 1 : -1;

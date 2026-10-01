@@ -6,8 +6,17 @@
 // (which area of life it activates) and whether its element helps or strains
 // the chart (favourable / caution lists from usefulGodV4). Clashes and
 // combinations with the natal pillars add change-of-circumstance notes.
+//
+// On top of the four areas each decade gets an overview, the Day Master's
+// energy level (12 Growth Phases), the branch's background hidden stems,
+// Shen Sha stars the branch activates, and the best / watch calendar years
+// inside the decade (each year's pillar read against the chart).
 
+import { EARTHLY_BRANCHES, HEAVENLY_STEMS, cycleMod, getStem } from "../data/baziConstants.js";
 import { ELEMENT_BODY_SYSTEM } from "../data/elementBodySystem.js";
+import { findRelations } from "./rawChartDataV1.js";
+import { INTELLIGENCE_STAR_BY_DAY_STEM, NOBLE_PEOPLE_BY_DAY_STEM, TRIO_GROUPS } from "./shenShaV1.js";
+import { buildPillar } from "./pillars.js";
 
 const GROUP_OF = {
   Friend: "companion",
@@ -230,7 +239,66 @@ const RELATION_NOTES = {
     "combines with your hour pillar (children and later plans), which supports family life and long-term plans."],
 };
 
-function halfRating(element, usefulGod) {
+// Harms, punishments and stem combos: [area, text]. Tag-specific wording
+// names the natal pillar involved.
+const PILLAR_NAME = {
+  D: "Spouse Palace (day branch)",
+  M: "month pillar (career and environment)",
+  Y: "year pillar (family and roots)",
+  H: "hour pillar (children and later plans)",
+};
+const AREA_OF_TAG = { D: "relationship", M: "career", Y: "relationship", H: "relationship" };
+const MINOR_RELATION_TEXT = {
+  Harms: (names) => `quietly harms your ${names}: small misunderstandings can build up, so clear the air early.`,
+  Punishment: (names) => `forms a punishment with your ${names}: take extra care with contracts, paperwork and your health.`,
+};
+const joinNames = (names) =>
+  names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}` : names[0];
+const STEM_COMBO_TEXT = {
+  D: ["relationship", "combines with your Day Master: strong attraction and partnerships, but don't let others sway your judgement."],
+  M: ["career", "combines with your month stem: good for alliances, contracts and teamwork at work."],
+  Y: ["relationship", "combines with your year stem: family and elders draw closer."],
+  H: ["relationship", "combines with your hour stem: children, juniors and long-term plans come into focus."],
+};
+
+// Day Master's 12 Growth Phase in the decade's branch.
+export const GROWTH_PHASE_ENERGY = {
+  Growth: "Fresh, rising energy; a good decade to begin new things.",
+  Bath: "Youthful but unsettled energy; plenty of new experiences, with some ups and downs.",
+  Crowning: "Growing confidence and presence; people start to take you seriously.",
+  Officer: "Strong, capable energy; you can carry a lot and lead.",
+  Peak: "Your personal energy is at its height; powerful, but don't overreach.",
+  Weakening: "Energy starts to ease off; experience and judgement count more than force.",
+  Sick: "Energy runs lower; pace yourself and make health a priority.",
+  Death: "A quieter, inward energy; better for reflection and refining than pushing hard.",
+  Grave: "Energy turns to storing up; a time to consolidate, save and protect what you have.",
+  Extinction: "Old patterns come to an end; let go of what no longer works to make room for the new.",
+  Conceived: "New ideas are forming; plan quietly before you act.",
+  Nurture: "A gentle building phase; patient preparation pays off later.",
+};
+
+const TEN_GOD_KEYWORD = {
+  Friend: "peer support",
+  "Rob Wealth": "competitive drive",
+  "Eating God": "creativity and enjoyment",
+  "Hurting Officer": "independent thinking",
+  "Direct Wealth": "steady income",
+  "Indirect Wealth": "opportunistic gains",
+  "Direct Officer": "responsibility and status",
+  "Seven Killings": "pressure and ambition",
+  "Direct Resource": "learning and support",
+  "Indirect Resource": "intuition and specialist knowledge",
+};
+
+const FOCUS_BY_GROUP = {
+  companion: "build alliances, partnerships and your own network",
+  output: "create, specialise and put your work out there",
+  wealth: "earn, save and build lasting assets",
+  officer: "step up for responsibility, promotion and credentials",
+  resource: "study, earn qualifications and lean on mentors",
+};
+
+export function halfRating(element, usefulGod) {
   if (!element) return "neutral";
   if (element === usefulGod?.primaryUsefulGod) return "favourable";
   if ((usefulGod?.favourableElements || []).includes(element)) return "favourable";
@@ -259,8 +327,124 @@ function healthLine(half) {
   return body ? `${base} Look after your ${body}.` : base;
 }
 
-export function buildLuckDecadeDetailsV1({ rawChartData, usefulGod, gender } = {}) {
+const RATING_SCORE = { favourable: 2, supported: 1, neutral: 0, caution: -2 };
+const isGood = (rating) => rating === "favourable" || rating === "supported";
+
+function overviewLine(halves, young) {
+  const [first, second] = halves;
+  const better = !isGood(first.rating) && isGood(second.rating) ? second : first;
+  const focus = young ? null : FOCUS_BY_GROUP[GROUP_OF[better.tenGod]];
+  const focusText = focus ? ` Make the most of it: ${focus}.` : "";
+  if (isGood(first.rating) && isGood(second.rating)) {
+    return `A supportive decade: both halves bring in elements that help your chart.${focusText}`;
+  }
+  if (first.rating === "caution" && second.rating === "caution") {
+    return "A demanding decade: both halves add elements your chart already has plenty of. Progress comes from steady pacing, good support and protecting what you have built.";
+  }
+  if (first.rating === "caution") {
+    return `A decade that improves: the first five years ask for patience, and things open up from age ${second.startAge}.${focusText}`;
+  }
+  if (second.rating === "caution") {
+    return `A decade of two halves: the first five years are the stronger stretch, so build then, and consolidate from age ${second.startAge} when things ask for more care.${focusText}`;
+  }
+  return `A steady decade without strong headwinds.${focusText}`;
+}
+
+// Shen Sha stars the decade's branch brings in.
+function luckStars(branchKey, natal) {
+  const dayStemKey = natal?.day?.stem?.key;
+  const yearBranchKey = natal?.year?.branch?.key;
+  const trio = TRIO_GROUPS.find((group) => group.branches.includes(yearBranchKey));
+  const stars = [];
+  if ((NOBLE_PEOPLE_BY_DAY_STEM[dayStemKey] || []).includes(branchKey)) {
+    stars.push("Noble People (天乙貴人): mentors and benefactors appear more easily, and help arrives when you need it.");
+  }
+  if (INTELLIGENCE_STAR_BY_DAY_STEM[dayStemKey] === branchKey) {
+    stars.push("Intelligence Star (文昌): study, exams, writing and expert recognition are favoured.");
+  }
+  if (trio?.peachBlossom === branchKey) {
+    stars.push("Peach Blossom (桃花): more charm and social pull, and more romantic opportunities, so stay clear about what you want.");
+  }
+  if (trio?.skyHorse === branchKey) {
+    stars.push("Sky Horse (驛馬): travel, relocation or a change of environment is likely.");
+  }
+  if (trio?.robberySha === branchKey) {
+    stars.push("Robbery Sha (劫殺): guard against sudden losses; be careful with deals and lending.");
+  }
+  return stars;
+}
+
+function yearPillarFor(year) {
+  const offset = year - 1984;
+  return buildPillar({
+    stemKey: HEAVENLY_STEMS[cycleMod(offset, 10)].key,
+    branchKey: EARTHLY_BRANCHES[cycleMod(offset, 12)].key,
+  });
+}
+
+// Each calendar year in the decade, scored by its stem and branch elements
+// against the chart, plus clashes and combos with the Spouse Palace, the
+// year of birth and the decade's own branch.
+function keyYears(decade, { natal, usefulGod, birthYear }) {
+  if (!birthYear || decade.startAge == null || decade.endAge == null) return { best: [], watch: [] };
+  const dayStemKey = natal?.day?.stem?.key;
+  const natalEntries = ["day", "year"]
+    .filter((key) => natal?.[key])
+    .map((key) => ({ tag: key === "day" ? "D" : "Y", pillar: natal[key] }));
+  natalEntries.push({ tag: "L", pillar: decade });
+
+  const years = [];
+  for (let age = decade.startAge; age < decade.endAge; age += 1) {
+    const year = birthYear + age;
+    const pillar = yearPillarFor(year);
+    const stemRating = halfRating(pillar.stem.element, usefulGod);
+    const branchRating = halfRating(pillar.branch.element, usefulGod);
+    let score = RATING_SCORE[stemRating] + RATING_SCORE[branchRating];
+    const good = [];
+    const bad = [];
+    const yearEls = [...new Set([pillar.stem.element, pillar.branch.element])].join(" and ");
+    if (isGood(stemRating) && isGood(branchRating)) good.push(`brings in ${yearEls}, which ${yearEls.includes(" and ") ? "help" : "helps"} you`);
+    if (stemRating === "caution" && branchRating === "caution") bad.push(`adds more ${yearEls} than your chart needs`);
+
+    findRelations(pillar, natalEntries).forEach(({ type, with: tags }) => {
+      tags.forEach((tag) => {
+        if (type === "Clashes") {
+          score -= tag === "L" ? 1 : 2;
+          bad.push(tag === "D" ? "clashes your Spouse Palace" : tag === "Y" ? "clashes your birth-year animal (Tai Sui clash)" : "clashes this decade's pillar");
+        }
+        if (type === "EB Combo" && tag === "D") {
+          score += 1;
+          good.push("combines with your Spouse Palace");
+        }
+      });
+    });
+    if ((NOBLE_PEOPLE_BY_DAY_STEM[dayStemKey] || []).includes(pillar.branch.key)) {
+      score += 1;
+      good.push("brings Noble People help");
+    }
+    if (natal?.year?.branch?.key === pillar.branch.key) bad.push("is your own animal year (本命年)");
+
+    years.push({ year, age, zh: `${pillar.stem.zh}${pillar.branch.zh}`, animal: pillar.branch.animal, score, good, bad });
+  }
+
+  const best = years
+    .filter((y) => y.score >= 3 && y.good.length)
+    .sort((a, b) => b.score - a.score || a.year - b.year)
+    .slice(0, 3)
+    .sort((a, b) => a.year - b.year)
+    .map(({ year, age, zh, animal, good }) => ({ year, age, zh, animal, reason: good.join("; ") }));
+  const watch = years
+    .filter((y) => y.score <= -2 && y.bad.length)
+    .sort((a, b) => a.score - b.score || a.year - b.year)
+    .slice(0, 3)
+    .sort((a, b) => a.year - b.year)
+    .map(({ year, age, zh, animal, bad }) => ({ year, age, zh, animal, reason: bad.join("; ") }));
+  return { best, watch };
+}
+
+export function buildLuckDecadeDetailsV1({ rawChartData, usefulGod, gender, birthYear } = {}) {
   const decades = rawChartData?.luck || [];
+  const natal = rawChartData?.natal || null;
 
   return decades.map((decade) => {
     const midAge = decade.startAge + 5;
@@ -321,9 +505,58 @@ export function buildLuckDecadeDetailsV1({ rawChartData, usefulGod, gender } = {
       });
     });
 
+    (decade.relations || []).forEach((relation) => {
+      const textFor = MINOR_RELATION_TEXT[relation.type];
+      if (textFor) {
+        const byArea = {};
+        relation.with.forEach((tag) => {
+          if (!PILLAR_NAME[tag]) return;
+          const area = relation.type === "Punishment" ? "health" : AREA_OF_TAG[tag];
+          const name = tag === "D" && halves[1].startAge < YOUTH_AGE ? "day branch (home life)" : PILLAR_NAME[tag];
+          (byArea[area] ||= []).push(name);
+        });
+        Object.entries(byArea).forEach(([area, names]) => {
+          areas[area] = `${areas[area]} ${branchName} ${textFor(joinNames(names))}`.trim();
+        });
+      }
+      if (relation.type === "HS Combo") {
+        relation.with.forEach((tag) => {
+          const note = STEM_COMBO_TEXT[tag];
+          if (!note) return;
+          const stemName = `The ${decade.stem.zh} ${getStem(decade.stem.key)?.name || ""}`.trim();
+          areas[note[0]] = `${areas[note[0]]} ${stemName} ${note[1]}`.trim();
+        });
+      }
+    });
+
+    const hiddenBackground = (decade.hiddenStems || []).slice(1).filter((h) => TEN_GOD_KEYWORD[h.tenGod]);
+    const undercurrent = hiddenBackground.length
+      ? `Beneath the surface, the ${decade.branch.zh} ${decade.branch.animal} also carries ${hiddenBackground
+          .map((h) => `${h.zh} ${h.element} (${h.tenGod}: ${TEN_GOD_KEYWORD[h.tenGod]})`)
+          .join(" and ")}, a quieter influence in the background of the last five years.`
+      : null;
+
+    const phase = decade.growthPhase?.en;
+    const energy = GROWTH_PHASE_ENERGY[phase]
+      ? `${GROWTH_PHASE_ENERGY[phase]} (${decade.growthPhase.zh} ${phase})`
+      : null;
+    const voidNote = decade.isVoid
+      ? `${branchName} is void (空亡) in your chart, so the last five years' effects, good or bad, tend to feel lighter or arrive late.`
+      : null;
+
+    const youngDecade = halves[0].startAge < YOUTH_AGE;
+
     return {
       startAge: decade.startAge,
       endAge: decade.endAge,
+      fromYear: birthYear && decade.startAge != null ? birthYear + decade.startAge : null,
+      toYear: birthYear && decade.endAge != null ? birthYear + decade.endAge : null,
+      overview: overviewLine(halves, youngDecade),
+      energy,
+      undercurrent,
+      voidNote,
+      stars: luckStars(decade.branch.key, natal),
+      keyYears: keyYears(decade, { natal, usefulGod, birthYear }),
       halves: halves.map(({ startAge, endAge, zh, element, tenGod, rating }) => ({
         startAge, endAge, zh, element, tenGod, rating,
       })),

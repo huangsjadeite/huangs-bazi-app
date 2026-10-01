@@ -29,6 +29,27 @@ const CONCEPTION_STEM_MEANING = {
   Earth: "arrived with an instinctive groundedness, practicality and a deep orientation toward service and stability",
 };
 
+function PalaceReading({ reading }) {
+  if (!reading) return null;
+  const rows = [
+    ["What it points to", [reading.drive, reading.motive].filter(Boolean).join(" ")],
+    ["Element fit", reading.elementFit],
+    ["Energy", reading.energy],
+    ["Links to your chart", reading.links?.join(" ")],
+    ["How to use it", reading.useIt],
+  ].filter(([, text]) => text);
+  return (
+    <dl className="mt-3 space-y-2.5 text-sm leading-6">
+      {rows.map(([label, text]) => (
+        <div key={label}>
+          <dt className="text-xs font-bold uppercase tracking-[0.14em] text-amber-700 print:text-[#8B1A1A]">{label}</dt>
+          <dd className="text-stone-700">{text}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
 export default function LifePalaceSection({ lifePalace, conceptionPalace }) {
   if (!lifePalace && !conceptionPalace) return null;
 
@@ -53,6 +74,7 @@ export default function LifePalaceSection({ lifePalace, conceptionPalace }) {
                   : "."}
               </p>
             )}
+            <PalaceReading reading={lifePalace.reading} />
           </div>
         )}
         {conceptionPalace && (
@@ -70,6 +92,7 @@ export default function LifePalaceSection({ lifePalace, conceptionPalace }) {
                   : "."}
               </p>
             )}
+            <PalaceReading reading={conceptionPalace.reading} />
           </div>
         )}
       </div>
