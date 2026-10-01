@@ -43,18 +43,14 @@ export default function MonthlyOutlookSection({ monthlyOutlook, selectedYear }) 
         zodiac animal: Tiger is always the first month of spring, Rabbit the second, and so on. This is not related
         to the Western zodiac.
       </p>
-      {/* Rows are plain blocks, not a <table>: print engines leave large gaps
-          when keeping table rows whole, while blocks fill each page. */}
-      <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200 text-sm print:overflow-visible print:rounded-none print:border-[#8B1A1A]">
-        <div className={`${MONTH_ROW} bg-slate-50 text-left text-xs font-bold uppercase tracking-[0.12em] text-slate-600 print:bg-[#8B1A1A] print:text-white`}>
-          <p className="px-4 py-2.5">Month</p>
-          <p className="px-4 py-2.5">Rating</p>
-          <p className="px-4 py-2.5">Forecast</p>
-        </div>
+      {/* Each month is its own card, not a row in one big box: print engines
+          leave gaps when keeping rows whole, and a single outer border then
+          frames that blank space as if content were missing. */}
+      <div className="mt-4 space-y-3 text-sm">
         {monthlyOutlook.map((item) => (
           <div
             key={item.month}
-            className={`${MONTH_ROW} border-t border-slate-100 print:border-[#e5d5c0] even:print:bg-white odd:print:bg-[#FAE5D3]`}
+            className={`${MONTH_ROW} rounded-2xl border border-slate-200 print:rounded-none print:border-[#e5d5c0] print:border-l-4 print:border-l-[#8B1A1A]`}
             style={{ breakInside: "avoid" }}
           >
             <div className="px-4 py-2.5">
