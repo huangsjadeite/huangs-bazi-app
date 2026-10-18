@@ -11,6 +11,7 @@ import LifeDirectionSection from "./LifeDirectionSection";
 import LifePalaceSection from "./LifePalaceSection";
 import LuckCyclesSection from "./LuckCyclesSection";
 import LuckPillarsSection from "./LuckPillarsSection";
+import LuckyElementsSection from "./LuckyElementsSection";
 import MonthlyOutlookSection from "./MonthlyOutlookSection";
 import RawChartDataSection from "./RawChartDataSection";
 import ReferenceTableSection from "./ReferenceTableSection";
@@ -18,6 +19,7 @@ import RelationshipSection from "./RelationshipSection";
 import { UpgradedOnly } from "./shared";
 import ShenShaSection from "./ShenShaSection";
 import StonesSection from "./StonesSection";
+import TaiSuiSection from "./TaiSuiSection";
 import WealthSection from "./WealthSection";
 import WellnessSection from "./WellnessSection";
 import ZodiacCompatibilitySection from "./ZodiacCompatibilitySection";
@@ -37,7 +39,7 @@ export default function AdminFullReport({ report, clientName }) {
   const derived = deriveAdminReportData(report);
   const {
     narrative, personality, usefulGod, stones, eightMansions, shenSha,
-    luckPillars, luckTimeline, lifePalace, conceptionPalace, zodiacCompatibility,
+    luckPillars, luckTimeline, lifePalace, conceptionPalace, zodiacCompatibility, taiSui, luckyElements,
     blindSpots, lifeThemes, growthAdvice,
     natalPillars, tenGodByPillar, rankedProfiles,
     annualPillar, annualZodiac,
@@ -112,6 +114,10 @@ export default function AdminFullReport({ report, clientName }) {
         usefulGod={usefulGod}
       />
 
+      <UpgradedOnly>
+        <TaiSuiSection taiSui={taiSui} />
+      </UpgradedOnly>
+
       <p className="mt-10 text-xs font-bold uppercase tracking-[0.3em] text-amber-700">
         The Four Key Areas
       </p>
@@ -179,6 +185,10 @@ export default function AdminFullReport({ report, clientName }) {
         primaryDzi={primaryDzi}
         secondaryDzi={secondaryDzi}
       />
+
+      <UpgradedOnly>
+        <LuckyElementsSection luckyElements={luckyElements} />
+      </UpgradedOnly>
 
       <MonthlyOutlookSection
         monthlyOutlook={monthlyOutlook}

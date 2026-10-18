@@ -20,6 +20,8 @@ import { buildRawChartDataV1 } from "./rawChartDataV1.js";
 import { buildLuckDecadeDetailsV1 } from "./luckDecadeDetailsV1.js";
 import { buildLifePalaceV1, buildConceptionPalaceV1 } from "./lifePalaceV1.js";
 import { buildZodiacCompatibilityV1 } from "./zodiacCompatibilityV1.js";
+import { buildTaiSuiV1 } from "./taiSuiV1.js";
+import { buildLuckyElementsV1 } from "./luckyElementsV1.js";
 import { buildPalaceReadingV1 } from "./palaceReadingV1.js";
 import { buildRelationshipEngineV2 } from "./relationshipEngineV2.js";
 import { buildGenderInfluenceV1 } from "./genderInfluenceV1.js";
@@ -318,6 +320,31 @@ export function buildBaziChart(input) {
   } catch (error) {
     console.warn("ZodiacCompatibilityV1 failed safely:", error);
     zodiacCompatibilityV1Error = error.message;
+  }
+
+  let taiSuiV1Result = null;
+  let taiSuiV1Error = null;
+
+  try {
+    taiSuiV1Result = buildTaiSuiV1({ pillars, selectedYear });
+  } catch (error) {
+    console.warn("TaiSuiV1 failed safely:", error);
+    taiSuiV1Error = error.message;
+  }
+
+  let luckyElementsV1Result = null;
+  let luckyElementsV1Error = null;
+
+  try {
+    luckyElementsV1Result = buildLuckyElementsV1({
+      usefulGod: usefulGodV4Result,
+      eightMansions: eightMansionsV1Result,
+      taiSui: taiSuiV1Result,
+      selectedYear,
+    });
+  } catch (error) {
+    console.warn("LuckyElementsV1 failed safely:", error);
+    luckyElementsV1Error = error.message;
   }
 
   let lifePalaceV1Result = null;
@@ -775,6 +802,8 @@ export function buildBaziChart(input) {
       lifePalaceV1: lifePalaceV1Result,
       conceptionPalaceV1: conceptionPalaceV1Result,
       zodiacCompatibilityV1: zodiacCompatibilityV1Result,
+      taiSuiV1: taiSuiV1Result,
+      luckyElementsV1: luckyElementsV1Result,
 
       archetypes,
       adjustedArchetypes,
@@ -871,6 +900,14 @@ export function buildBaziChart(input) {
 
   if (zodiacCompatibilityV1Error) {
     warnings.push(`ZodiacCompatibilityV1 failed safely: ${zodiacCompatibilityV1Error}`);
+  }
+
+  if (taiSuiV1Error) {
+    warnings.push(`TaiSuiV1 failed safely: ${taiSuiV1Error}`);
+  }
+
+  if (luckyElementsV1Error) {
+    warnings.push(`LuckyElementsV1 failed safely: ${luckyElementsV1Error}`);
   }
 
   if (lifePalaceV1Error) {
@@ -1053,6 +1090,8 @@ export function buildBaziChart(input) {
     lifePalaceV1: lifePalaceV1Result,
     conceptionPalaceV1: conceptionPalaceV1Result,
     zodiacCompatibilityV1: zodiacCompatibilityV1Result,
+    taiSuiV1: taiSuiV1Result,
+    luckyElementsV1: luckyElementsV1Result,
     archetypeOverlayV3,
 
     elementBalance,

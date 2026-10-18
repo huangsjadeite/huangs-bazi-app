@@ -84,6 +84,8 @@ export function deriveAdminReportData(report) {
   const lifePalace = report.personalDirectionsAndStars?.lifePalace || null;
   const conceptionPalace = report.personalDirectionsAndStars?.conceptionPalace || null;
   const zodiacCompatibility = report.personalDirectionsAndStars?.zodiacCompatibility || null;
+  const taiSui = report.personalDirectionsAndStars?.taiSui || null;
+  const luckyElements = report.personalDirectionsAndStars?.luckyElements || null;
   const natalPillars = report.chartFoundation?.pillars || null;
   const tenGodByPillar = report.chartFoundation?.tenGodByPillar || null;
   const rawChartData = report.chartFoundation?.rawChartData || null;
@@ -301,7 +303,7 @@ export function deriveAdminReportData(report) {
 
   return {
     narrative, personality, usefulGod, lifeAreas, stones, eightMansions, shenSha,
-    luckPillars, lifePalace, conceptionPalace, zodiacCompatibility, natalPillars, tenGodByPillar,
+    luckPillars, lifePalace, conceptionPalace, zodiacCompatibility, taiSui, luckyElements, natalPillars, tenGodByPillar,
     rawChartData,
     annualPillar, annualZodiac,
     luckTimeline, currentLuck, annualRead, ageInSelectedYear, luckOverview,
