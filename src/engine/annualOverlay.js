@@ -121,6 +121,7 @@ function getDominantElementFromAnnualElements(annualElements, fallbackElement) {
 const YEAR_THEMES = {
   2026: "Visibility, momentum and emotional activation",
   2027: "Stability, refinement and emotional consolidation",
+  2028: "Grounded action, adaptability and building new foundations",
 };
 
 function getYearData(selectedYear) {

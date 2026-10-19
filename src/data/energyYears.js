@@ -4,7 +4,7 @@
 // local dev server (`npm run dev`) and with the admin link; public visitors see
 // them as "Coming Soon" and can't pick them. To release a year, move it from PREVIEW to RELEASED.
 export const RELEASED_YEARS = [2026];
-export const PREVIEW_YEARS = [2027];
+export const PREVIEW_YEARS = [2027, 2028];
 
 export const DEFAULT_YEAR = RELEASED_YEARS[RELEASED_YEARS.length - 1];
 
