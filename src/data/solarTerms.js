@@ -93,7 +93,7 @@ export function getSolarYearApprox(year, month, day) {
 // this is what year-pillar and Eight Mansions gua should use instead.
 // timeKnown matters only when the birth lands on the 立春 day itself; when
 // it does and time is unknown, needsTime comes back true rather than
-// guessing. Falls outside the timestamp table's 1899-2036 range, this
+// guessing. Falls outside the timestamp table's 1899-2100 range, this
 // falls back to the approximation and flags outOfRange.
 export function getSolarYearPrecise(year, month, day, hour = 0, minute = 0, timeKnown = false) {
   const terms = SOLAR_TERM_TIMESTAMPS_BY_YEAR[year];

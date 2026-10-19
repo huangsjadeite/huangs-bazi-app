@@ -24,7 +24,7 @@ import { dirname, join } from "path";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const START_YEAR = 1899;
-const END_YEAR = 2036;
+const END_YEAR = 2100;
 
 // The 12 Jie (節) terms that occur within a given Gregorian calendar year
 // (Jan-Dec of that same year), with the branch they open, the ecliptic
