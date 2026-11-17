@@ -1,7 +1,25 @@
+import { QRCodeSVG } from "qrcode.react";
+import { ELEMENT_COLLECTION_URLS, SHOW_SHOP_LINKS } from "../../config/shopLinks";
 import { AdminBulletList, AdminReportSection } from "./shared";
 
-// Featured stones are picked for the client's focus areas; the rest of that
-// element's stones follow as one "also suitable" line.
+// Featured stones are picked for the client's focus areas; up to 6 more of
+// that element's stones follow as one "also suitable" line, then a QR code and
+// link to that element's shop collection.
+const MAX_ALSO_SUITABLE = 6;
+
+function ShopLink({ element }) {
+  const url = ELEMENT_COLLECTION_URLS[element];
+  if (!SHOW_SHOP_LINKS || !url) return null;
+  return (
+    <div className="mt-3 flex items-center gap-3" style={{ breakInside: "avoid" }}>
+      <QRCodeSVG value={url} size={64} marginSize={1} aria-hidden="true" className="shrink-0" />
+      <a href={url} target="_blank" rel="noreferrer" className="text-sm font-semibold text-amber-700 hover:underline print:text-[#8B1A1A] print:no-underline">
+        Shop {element} stones at HUANGS
+      </a>
+    </div>
+  );
+}
+
 function StoneGroup({ label, group }) {
   return (
     <div className="mt-4">
@@ -22,9 +40,10 @@ function StoneGroup({ label, group }) {
       {!!group.alsoSuitable?.length && (
         <p className="mt-2 text-sm text-stone-600">
           <span className="font-semibold text-slate-700">Also suitable for your {group.element}:</span>{" "}
-          {group.alsoSuitable.join(", ")}.
+          {group.alsoSuitable.slice(0, MAX_ALSO_SUITABLE).join(", ")}.
         </p>
       )}
+      <ShopLink element={group.element} />
     </div>
   );
 }

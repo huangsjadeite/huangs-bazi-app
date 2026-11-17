@@ -243,7 +243,8 @@ export function deriveAdminReportData(report) {
   );
 
   const annualZodiacName = annualZodiac?.displayName || "";
-  const coverYearLabel = `${report.annualEnergy?.selectedYear || new Date().getFullYear()}${annualZodiacName ? ` ${annualZodiacName}` : ""} Year`;
+  const coverYear = report.annualEnergy?.selectedYear || new Date().getFullYear();
+  const coverYearLabel = `${coverYear}${annualZodiacName ? ` ${annualZodiacName}` : ""} Year`;
 
   // Plain-text version of a month's forecast (used by the JSON export).
   function expandMonthlyNote(item) {
@@ -301,6 +302,34 @@ export function deriveAdminReportData(report) {
   const secondaryDziRaw = DZI_BEAD_MAP[usefulGod.secondaryUsefulGod] || null;
   const secondaryDzi = secondaryDziRaw?.label !== primaryDzi?.label ? secondaryDziRaw : null;
 
+  // Money Snapshot page: a one-page summary built only from values above.
+  // Best months: the top 3 by Monthly Outlook rating (Excellent, then Good,
+  // then Mixed) from the Wealth "Easiest months" plus any Wealth-focus month
+  // (never a Challenging/Difficult one or a Pace yourself month). Ties go to
+  // the Wealth "Easiest months", then the earlier month; shown in calendar order.
+  const RATING_RANK = { Excellent: 0, Good: 1, Mixed: 2 };
+  const ratingOf = (monthName) => monthlyOutlook.find((m) => m.monthName === monthName)?.rating || null;
+  const bestMoneyMonths = monthlyOutlook
+    .filter((m) => m.rating in RATING_RANK && !wealthCautionMonths.includes(m.monthName))
+    .filter((m) => wealthStrongMonths.includes(m.monthName) || (m.focusAreas || []).includes("Wealth"))
+    .sort(
+      (a, b) =>
+        RATING_RANK[a.rating] - RATING_RANK[b.rating] ||
+        wealthStrongMonths.includes(b.monthName) - wealthStrongMonths.includes(a.monthName) ||
+        a.month - b.month
+    )
+    .slice(0, 3)
+    .sort((a, b) => a.month - b.month)
+    .map((m) => m.monthName);
+  const moneySnapshot = {
+    year: coverYear,
+    annualRead,
+    luckOverview,
+    bestMonths: bestMoneyMonths.map((name) => ({ name, rating: ratingOf(name) })),
+    carefulMonths: wealthCautionMonths.slice(0, 4),
+    incomeStyle: wealth.incomeStyle || null,
+  };
+
   return {
     narrative, personality, usefulGod, lifeAreas, stones, eightMansions, shenSha,
     luckPillars, lifePalace, conceptionPalace, zodiacCompatibility, taiSui, luckyElements, natalPillars, tenGodByPillar,
@@ -320,9 +349,12 @@ export function deriveAdminReportData(report) {
     peachBlossomAnimal, peachBlossomYears, peachBlossomMonth, peachBlossomRating,
     careerStrongMonths, careerCautionMonths,
     wealthStrongMonths, wealthCautionMonths,
+    // The same top 3 as the Money Snapshot, so the Wealth page agrees with it.
+    wealthBestMonths: bestMoneyMonths,
     relationshipGoodMonths, relationshipCautionMonths,
     wellnessEasierMonths, wellnessCautionMonths,
-    annualZodiacName, coverYearLabel, expandMonthlyNote,
+    annualZodiacName, coverYear, coverYearLabel, expandMonthlyNote,
     dziBeadMap: DZI_BEAD_MAP, primaryDzi, secondaryDzi,
+    moneySnapshot,
   };
 }

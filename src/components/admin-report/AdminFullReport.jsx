@@ -1,6 +1,7 @@
 import BlindSpotsSection from "./BlindSpotsSection";
 import CareerSection from "./CareerSection";
 import ChartFoundationSection from "./ChartFoundationSection";
+import CreditSection from "./CreditSection";
 import { deriveAdminReportData } from "./deriveAdminReportData";
 import DisclaimerAndDebugSection from "./DisclaimerAndDebugSection";
 import { downloadReadingExport } from "./downloadReadingExport";
@@ -12,6 +13,7 @@ import LifePalaceSection from "./LifePalaceSection";
 import LuckCyclesSection from "./LuckCyclesSection";
 import LuckPillarsSection from "./LuckPillarsSection";
 import LuckyElementsSection from "./LuckyElementsSection";
+import MoneySnapshotSection from "./MoneySnapshotSection";
 import MonthlyOutlookSection from "./MonthlyOutlookSection";
 import RawChartDataSection from "./RawChartDataSection";
 import ReferenceTableSection from "./ReferenceTableSection";
@@ -55,12 +57,12 @@ export default function AdminFullReport({ report, clientName }) {
     dayBranchAnimal, dayBranchZh, dayBranchElement, spousePalaceNoteText,
     peachBlossomAnimal, peachBlossomYears, peachBlossomMonth, peachBlossomRating,
     careerStrongMonths, careerCautionMonths,
-    wealthStrongMonths, wealthCautionMonths,
+    wealthBestMonths, wealthCautionMonths,
     relationshipGoodMonths, relationshipCautionMonths,
     wellnessEasierMonths, wellnessCautionMonths,
-    coverYearLabel,
+    coverYear, annualZodiacName,
     primaryDzi, secondaryDzi,
-    rawChartData,
+    rawChartData, moneySnapshot,
   } = derived;
 
   return (
@@ -81,10 +83,12 @@ export default function AdminFullReport({ report, clientName }) {
         weakerElements={weakerElements}
         usefulGod={usefulGod}
         elementalBalance={elementalBalance}
-        coverYearLabel={coverYearLabel}
+        coverYear={coverYear}
+        annualZodiacName={annualZodiacName}
         onExportJson={() => downloadReadingExport({ report, clientName, derived })}
         onExportPdf={() => exportAdminReportToPdf()}
         onExportUpgradedPdf={() => exportAdminReportToPdf({ upgraded: true })}
+        moneySnapshot={<MoneySnapshotSection snapshot={moneySnapshot} clientName={clientName} />}
         destinyChart={
           rawChartData && (
             <UpgradedOnly>
@@ -137,7 +141,7 @@ export default function AdminFullReport({ report, clientName }) {
       <WealthSection
         directWealthPct={directWealthPct}
         indirectWealthPct={indirectWealthPct}
-        wealthStrongMonths={wealthStrongMonths}
+        wealthStrongMonths={wealthBestMonths}
         wealthCautionMonths={wealthCautionMonths}
         wealthArchetype={wealthArchetype}
         wealth={wealth}
@@ -211,6 +215,8 @@ export default function AdminFullReport({ report, clientName }) {
       <ReferenceTableSection />
 
       <DisclaimerAndDebugSection report={report} />
+
+      <CreditSection />
     </div>
   );
 }

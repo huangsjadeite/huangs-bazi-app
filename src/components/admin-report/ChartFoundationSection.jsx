@@ -17,11 +17,13 @@ export default function ChartFoundationSection({
   weakerElements,
   usefulGod,
   elementalBalance,
-  coverYearLabel,
+  coverYear,
+  annualZodiacName,
   onExportJson,
   onExportPdf,
   onExportUpgradedPdf,
   destinyChart,
+  moneySnapshot,
 }) {
   // Helpful elements beyond the primary and secondary, so this row matches the
   // lists the luck, monthly and stones sections rate against.
@@ -40,11 +42,14 @@ export default function ChartFoundationSection({
       <div className="print-cover hidden print:flex print:flex-col print:items-center print:justify-center print:py-24 print:text-center">
         <img src={huangsLogo} alt="Huangs Jadeite and Jewelry" className="h-16 w-auto mb-6" />
         <p className="text-sm font-bold tracking-widest uppercase mb-4" style={{color:"#8B1A1A"}}>HUANGS JADEITE AND JEWELRY</p>
-        <h1 className="text-2xl font-bold mb-6 leading-snug" style={{color:"#8B1A1A"}}>
-          Personal Feng Shui Energy Analysis<br/>for {coverYearLabel}
+        <h1 className="text-2xl font-bold mb-2 leading-snug" style={{color:"#8B1A1A"}}>
+          Your {coverYear} Wealth &amp; Luck Forecast
         </h1>
+        <p className="text-base font-medium mb-6" style={{color:"#8B1A1A"}}>
+          {annualZodiacName ? `${annualZodiacName} Year · ` : ""}Personal Bazi Reading
+        </p>
         <div className="print-cover-body max-w-md text-sm text-gray-600 leading-relaxed text-left mt-4">
-          <p>This personalized Bazi report is designed to help you better understand your elemental balance, natural strengths, emotional tendencies and life direction.</p>
+          <p>This personalised Bazi report shows how {coverYear} is likely to treat your money, career, relationships and energy, and which stones suit you best.</p>
           <p className="mt-3">The purpose of this analysis is to provide guidance and self-awareness in areas such as career, wealth, relationships and health.</p>
         </div>
       </div>
@@ -80,6 +85,8 @@ export default function ChartFoundationSection({
           </button>
         </div>
       </div>
+
+      {moneySnapshot}
 
       {/* Client Profile heading for print */}
       <h2 className="hidden print:block mt-4 text-3xl font-bold" style={{color:"#8B1A1A"}}>Client Profile</h2>
