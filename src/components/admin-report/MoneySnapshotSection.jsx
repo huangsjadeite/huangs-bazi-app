@@ -57,7 +57,7 @@ function Block({ title, children }) {
 
 export default function MoneySnapshotSection({ snapshot, clientName }) {
   if (!snapshot) return null;
-  const { year, annualRead, luckOverview, bestMonths, carefulMonths, incomeStyle } = snapshot;
+  const { year, annualRead, luckOverview, bestMonths, carefulMonths, incomeStyle, wealthDirection } = snapshot;
   const yearType = YEAR_TYPES[READ_TO_TYPE[annualRead]];
 
   return (
@@ -110,7 +110,18 @@ export default function MoneySnapshotSection({ snapshot, clientName }) {
         </Block>
       )}
 
-      <p className="mt-8 text-sm text-stone-500">Full details on the Wealth Opportunities and Monthly Outlook pages.</p>
+      {wealthDirection && (
+        <Block title="Your wealth direction">
+          <p className="text-base leading-7 text-stone-700">
+            <strong className="text-slate-900">{wealthDirection}</strong>. Face this way when you work, sell, negotiate or
+            sign.
+          </p>
+        </Block>
+      )}
+
+      <p className="mt-8 text-sm text-stone-500">
+        Full details on the Wealth Opportunities, Personal Directions and Monthly Outlook pages.
+      </p>
     </section>
   );
 }

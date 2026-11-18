@@ -328,6 +328,7 @@ export function deriveAdminReportData(report) {
     bestMonths: bestMoneyMonths.map((name) => ({ name, rating: ratingOf(name) })),
     carefulMonths: wealthCautionMonths.slice(0, 4),
     incomeStyle: wealth.incomeStyle || null,
+    wealthDirection: eightMansions?.favourableDirections?.find((item) => item.name === "Sheng Qi")?.direction || null,
   };
 
   return {

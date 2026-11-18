@@ -5,7 +5,6 @@ import CreditSection from "./CreditSection";
 import { deriveAdminReportData } from "./deriveAdminReportData";
 import DisclaimerAndDebugSection from "./DisclaimerAndDebugSection";
 import { downloadReadingExport } from "./downloadReadingExport";
-import EightMansionsSection from "./EightMansionsSection";
 import { exportAdminReportToPdf } from "./exportAdminReportToPdf";
 import HiddenStrengthsSection from "./HiddenStrengthsSection";
 import LifeDirectionSection from "./LifeDirectionSection";
@@ -13,6 +12,7 @@ import LifePalaceSection from "./LifePalaceSection";
 import LuckCyclesSection from "./LuckCyclesSection";
 import LuckPillarsSection from "./LuckPillarsSection";
 import LuckyElementsSection from "./LuckyElementsSection";
+import PersonalDirectionsSection from "./PersonalDirectionsSection";
 import MoneySnapshotSection from "./MoneySnapshotSection";
 import MonthlyOutlookSection from "./MonthlyOutlookSection";
 import RawChartDataSection from "./RawChartDataSection";
@@ -190,6 +190,8 @@ export default function AdminFullReport({ report, clientName }) {
         secondaryDzi={secondaryDzi}
       />
 
+      <PersonalDirectionsSection eightMansions={eightMansions} luckyElements={luckyElements} />
+
       <UpgradedOnly>
         <LuckyElementsSection luckyElements={luckyElements} />
       </UpgradedOnly>
@@ -200,7 +202,6 @@ export default function AdminFullReport({ report, clientName }) {
       />
 
       <UpgradedOnly>
-        <EightMansionsSection eightMansions={eightMansions} />
         <LifePalaceSection lifePalace={lifePalace} conceptionPalace={conceptionPalace} />
         <ShenShaSection shenSha={shenSha || []} />
         <LuckPillarsSection
