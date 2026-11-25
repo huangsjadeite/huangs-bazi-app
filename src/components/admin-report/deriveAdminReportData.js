@@ -122,7 +122,15 @@ export function deriveAdminReportData(report) {
     : report.chartFoundation?.dayMasterElement || "-";
   const dayMasterTrait = dayMasterStem ? DAY_MASTER_TRAITS[dayMasterStem.name] : null;
 
-  const careerAuthorityProfile = findTopProfilePct(rankedProfiles, ["Direct Officer", "Seven Killings"]);
+  // Authority-structure charts (Supporters, 权力型) get Career text about
+  // the Officer stars, so the heading names their Officer profile even when
+  // it ranks below the top four.
+  const isAuthorityStructure = personality.structureScoring?.mainStructure?.key === "supporters";
+  const careerAuthorityProfile = findTopProfilePct(
+    rankedProfiles,
+    ["Direct Officer", "Seven Killings"],
+    isAuthorityStructure ? rankedProfiles.length : 4
+  );
   const careerOutputProfile = findTopProfilePct(rankedProfiles, ["Hurting Officer", "Eating God"]);
 
   const weakestElement = elementalBalance[elementalBalance.length - 1];

@@ -6,7 +6,7 @@ import { AdminReportSection } from "./shared";
 
 const KEEP = { breakInside: "avoid" };
 const EXACT = { printColorAdjust: "exact", WebkitPrintColorAdjust: "exact" };
-const HEADING = "text-xs font-bold uppercase tracking-[0.14em] text-amber-700 print:text-[#8B1A1A]";
+const HEADING = "keep-with-next text-xs font-bold uppercase tracking-[0.14em] text-amber-700 print:text-[#8B1A1A]";
 
 // Plain-language meaning of each direction, wealth first.
 const FAVOURABLE = {
@@ -105,31 +105,37 @@ export default function PersonalDirectionsSection({ eightMansions, luckyElements
   const hasYearNotes = favourable.some((item) => item.yearNotes.length);
 
   return (
-    <AdminReportSection icon="🧭" title="Your Personal Directions">
-      <p className="mt-3 text-base leading-7 text-stone-700">
-        Your birth year and gender give you a personal Gua number, and with it four directions that support you and
-        four that drain you. These stay the same for life. Turning your desk, your bed or your seat in a meeting
-        towards a good direction is one of the simplest ways to put the odds on your side.
-      </p>
-
-      <div className="mt-5 flex flex-col items-center gap-5 sm:flex-row sm:items-start" style={KEEP}>
-        <CompassRose favourable={favourable} unfavourable={unfavourable} />
-        <div className="w-full">
-          {wealth && (
-            <div className="rounded-2xl border-2 border-emerald-300 bg-emerald-50 px-5 py-4" style={EXACT}>
-              <p className="text-xs font-bold uppercase tracking-[0.14em] text-emerald-800">{FAVOURABLE["Sheng Qi"].title}</p>
-              <p className="mt-1 text-2xl font-extrabold text-emerald-900">{wealth.direction}</p>
-              <p className="mt-1 text-sm leading-6 text-slate-800">{FAVOURABLE["Sheng Qi"].use}</p>
-              <YearNotes notes={wealth.yearNotes} year={year} />
-            </div>
-          )}
-          <p className="mt-3 text-sm leading-6 text-stone-500">
-            Your Gua: {eightMansions.gua} ({eightMansions.trigram} {eightMansions.trigramZh}, {eightMansions.element}) ·{" "}
-            {eightMansions.group}
+    <AdminReportSection
+      icon="🧭"
+      title="Your Personal Directions"
+      lead={
+        <>
+          <p className="mt-3 text-base leading-7 text-stone-700">
+            Your birth year and gender give you a personal Gua number, and with it four directions that support you and
+            four that drain you. These stay the same for life. Turning your desk, your bed or your seat in a meeting
+            towards a good direction is one of the simplest ways to put the odds on your side.
           </p>
-        </div>
-      </div>
 
+          <div className="mt-5 flex flex-col items-center gap-5 sm:flex-row sm:items-start" style={KEEP}>
+            <CompassRose favourable={favourable} unfavourable={unfavourable} />
+            <div className="w-full">
+              {wealth && (
+                <div className="rounded-2xl border-2 border-emerald-300 bg-emerald-50 px-5 py-4" style={EXACT}>
+                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-emerald-800">{FAVOURABLE["Sheng Qi"].title}</p>
+                  <p className="mt-1 text-2xl font-extrabold text-emerald-900">{wealth.direction}</p>
+                  <p className="mt-1 text-sm leading-6 text-slate-800">{FAVOURABLE["Sheng Qi"].use}</p>
+                  <YearNotes notes={wealth.yearNotes} year={year} />
+                </div>
+              )}
+              <p className="mt-3 text-sm leading-6 text-stone-500">
+                Your Gua: {eightMansions.gua} ({eightMansions.trigram} {eightMansions.trigramZh}, {eightMansions.element}) ·{" "}
+                {eightMansions.group}
+              </p>
+            </div>
+          </div>
+        </>
+      }
+    >
       <div className="mt-5">
         <p className={HEADING} style={KEEP}>Your other good directions</p>
         {others.map((item) => (

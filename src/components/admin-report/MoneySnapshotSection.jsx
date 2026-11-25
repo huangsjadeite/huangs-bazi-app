@@ -1,7 +1,7 @@
 // One-page money summary printed right after the cover, from the
 // moneySnapshot values in deriveAdminReportData. Both PDFs.
 
-const HEADING = "text-xs font-bold uppercase tracking-[0.18em] text-amber-700 print:text-[#8B1A1A]";
+const HEADING = "keep-with-next text-xs font-bold uppercase tracking-[0.18em] text-amber-700 print:text-[#8B1A1A]";
 const EXACT = { printColorAdjust: "exact", WebkitPrintColorAdjust: "exact" };
 
 const YEAR_TYPES = {

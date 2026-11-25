@@ -5,11 +5,11 @@ import { AdminReportSection } from "./shared";
 
 function ZodiacMatchList({ title, tone, items }) {
   return (
-    <div style={{ breakInside: "avoid" }}>
-      <p className={`text-xs font-bold uppercase tracking-[0.14em] ${tone}`}>{title}</p>
+    <div>
+      <p className={`keep-with-next text-xs font-bold uppercase tracking-[0.14em] ${tone}`}>{title}</p>
       <ul className="mt-1.5 space-y-1.5 text-sm leading-6 text-stone-700">
         {items.map((item) => (
-          <li key={item.key}>
+          <li key={item.key} style={{ breakInside: "avoid" }}>
             <strong>
               {item.zh} {item.animal}
             </strong>{" "}

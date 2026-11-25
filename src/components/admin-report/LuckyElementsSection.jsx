@@ -4,7 +4,7 @@
 import { AdminReportSection } from "./shared";
 
 const KEEP = { breakInside: "avoid" };
-const HEADING = "text-xs font-bold uppercase tracking-[0.14em] text-amber-700 print:text-[#8B1A1A]";
+const HEADING = "keep-with-next text-xs font-bold uppercase tracking-[0.14em] text-amber-700 print:text-[#8B1A1A]";
 
 const SWATCH = {
   green: "#2E7D32", teal: "#00897B",

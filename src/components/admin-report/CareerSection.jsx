@@ -9,7 +9,7 @@ const ELEMENT_COLOR = {
   Water: "#1565C0",
 };
 
-const HEADING = "text-sm font-bold uppercase tracking-[0.18em] text-amber-700";
+const HEADING = "keep-with-next text-sm font-bold uppercase tracking-[0.18em] text-amber-700";
 
 const KEEP = { breakInside: "avoid" };
 

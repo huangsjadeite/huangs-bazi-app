@@ -1,1 +1,16 @@
 @import "tailwindcss";
+/* Print: a heading never ends a page on its own. The invisible tail reserves
+   room for the first lines after it, so a heading near the page bottom moves
+   to the next page with its content. */
+@media print {
+  .keep-with-next {
+    break-inside: avoid;
+    break-after: avoid;
+  }
+  .keep-with-next::after {
+    content: "";
+    display: block;
+    height: 7rem;
+    margin-bottom: -7rem;
+  }
+}

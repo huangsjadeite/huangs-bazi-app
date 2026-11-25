@@ -21,13 +21,18 @@ export function AdminBulletList({ items, render }) {
   );
 }
 
-export function AdminReportSection({ icon, title, children }) {
+// `lead` is printed in one unbreakable block with the heading, for sections
+// whose opening (e.g. an intro plus a diagram) must not be split from it.
+export function AdminReportSection({ icon, title, lead, children }) {
   return (
     <div className="mt-10 border-t border-amber-100 pt-8 print:border-[#8B1A1A] print:mt-8 print:pt-6">
-      <h3 className="text-2xl font-bold text-slate-950 print:text-[#8B1A1A]">
-        {icon && <span className="print:hidden">{icon} </span>}{title}
-      </h3>
-      <div className="hidden print:block print:border-b print:border-[#8B1A1A] print:mt-1 print:mb-4" />
+      <div style={lead ? { breakInside: "avoid" } : undefined}>
+        <h3 className="keep-with-next text-2xl font-bold text-slate-950 print:text-[#8B1A1A]">
+          {icon && <span className="print:hidden">{icon} </span>}{title}
+        </h3>
+        <div className="hidden print:block print:border-b print:border-[#8B1A1A] print:mt-1 print:mb-4" />
+        {lead}
+      </div>
       {children}
     </div>
   );
@@ -54,13 +59,13 @@ export function AdminStrengthRiskGrid({ strengths, risks, strengthLabel = "Stren
   return (
     <div className="mt-5 grid gap-5 md:grid-cols-2">
       <div>
-        <p className="text-sm font-bold uppercase tracking-[0.18em] text-green-700">
+        <p className="keep-with-next text-sm font-bold uppercase tracking-[0.18em] text-green-700">
           {strengthLabel}
         </p>
         <AdminBulletList items={strengths} />
       </div>
       <div>
-        <p className="text-sm font-bold uppercase tracking-[0.18em] text-red-700">
+        <p className="keep-with-next text-sm font-bold uppercase tracking-[0.18em] text-red-700">
           {riskLabel}
         </p>
         <AdminBulletList items={risks} />

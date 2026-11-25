@@ -113,9 +113,21 @@ export default function ChartFoundationSection({
             ["Weaker Elements", weakerElements.join(", ") || "-"],
             [
               "Elements to Enhance",
-              `${usefulGod.primaryUsefulGod || "-"} (primary) · ${
-                usefulGod.secondaryUsefulGod || "-"
-              } (secondary)${alsoHelpful.length ? ` · ${alsoHelpful.join(", ")} (also helpful)` : ""}`,
+              // An element can be both already strong and still helpful (it
+              // supports the Day Master); say so, or the two rows look contradictory.
+              [
+                [usefulGod.primaryUsefulGod, "primary"],
+                [usefulGod.secondaryUsefulGod, "secondary"],
+                ...alsoHelpful.map((element) => [element, "also helpful"]),
+              ]
+                .map(([element, tag]) =>
+                  !element
+                    ? `- (${tag})`
+                    : strongerElements.includes(element)
+                    ? `${element} (${tag}; already strong, so in moderation)`
+                    : `${element} (${tag})`
+                )
+                .join(" · "),
             ],
           ].map(([label, value]) => (
             <tr key={label} className="border-b border-slate-100 last:border-0 print:border-[#e5d5c0]">

@@ -3,7 +3,7 @@
 import { AdminReportSection } from "./shared";
 
 const KEEP = { breakInside: "avoid" };
-const HEADING = "text-xs font-bold uppercase tracking-[0.14em] text-amber-700 print:text-[#8B1A1A]";
+const HEADING = "keep-with-next text-xs font-bold uppercase tracking-[0.14em] text-amber-700 print:text-[#8B1A1A]";
 
 const STATUS_STYLE = {
   major: "border-red-300 bg-red-50/60",
