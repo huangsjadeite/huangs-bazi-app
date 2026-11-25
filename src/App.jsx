@@ -11,6 +11,7 @@ import StoneTeaserSection from "./components/public-report/StoneTeaserSection";
 import TopProfileStrengthSection from "./components/public-report/TopProfileStrengthSection";
 import TopStrengthsSection from "./components/public-report/TopStrengthsSection";
 import WealthTeaserSection from "./components/public-report/WealthTeaserSection";
+import { adminToolHref, isAdminUrl } from "./config/adminAccess";
 import { getBirthCountryTimezone } from "./data/birthCountryTimezones";
 import { DEFAULT_YEAR } from "./data/energyYears";
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -19,20 +20,7 @@ import { mapChartToUi } from "./data/mapChartToUi";
 import { motion } from "framer-motion";
 
 export default function HuangsBaziUIFrontend() {
-  // Admin mode: visit with ?admin=PASSWORD to unlock the full paid report.
-  // Password comes from VITE_ADMIN_PASSWORD (set in Vercel / .env); falls back
-  // to a default for local dev. Light internal gate, not strong security.
-  const isAdmin = (() => {
-    if (typeof window === "undefined") return false;
-    try {
-      const provided = new URLSearchParams(window.location.search).get("admin");
-      if (!provided) return false;
-      const expected = import.meta.env?.VITE_ADMIN_PASSWORD || "huangs2026";
-      return provided === expected;
-    } catch {
-      return false;
-    }
-  })();
+  const isAdmin = isAdminUrl();
 
   const [form, setForm] = useState({
     name: "",
@@ -143,6 +131,17 @@ export default function HuangsBaziUIFrontend() {
   return (
     <main className="min-h-screen bg-[#F7F3EB]">
       <div className="mx-auto max-w-[1600px] space-y-5 px-4 py-6 md:px-8 md:pb-6">
+        {isAdmin && (
+          <div className="flex justify-end">
+            <a
+              href={adminToolHref("zodiac")}
+              className="rounded-full border border-amber-300 bg-white px-4 py-1.5 text-sm font-semibold text-amber-800 hover:bg-amber-50"
+            >
+              Zodiac Luck tool →
+            </a>
+          </div>
+        )}
+
         <GenerateProfilePanel
           form={form}
           onChange={updateForm}
