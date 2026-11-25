@@ -51,10 +51,10 @@ export function buildPracticalGuidanceV6({
 
   if (structure === "Supporters") {
     careerStrengths.push(
-      "Your career growth is strongest when your reliability, care and long-term contribution are recognised."
+      "Your career growth is strongest when you are given real responsibility and the authority to match it."
     );
     careerStrengths.push(
-      "You create value through practical support, steadiness and the ability to make others feel guided."
+      "You create value through high standards, steadiness under pressure and doing things properly."
     );
   }
 
@@ -127,7 +127,7 @@ export function buildPracticalGuidanceV6({
 
   if (structure === "Supporters") {
     wealthStrengths.push(
-      "Your financial strength improves through consistency, reliability and long-term contribution."
+      "Your financial strength improves as you take on more responsibility and are paid for it."
     );
   }
 

@@ -138,6 +138,7 @@ export function buildShenShaV1({ pillars }) {
   const monthTrioGroup = monthBranchKey ? findTrioGroup(monthBranchKey) : null;
 
   const peachBlossomBranchKey = yearTrioGroup?.peachBlossom || null;
+  const dayPeachBlossomKey = findTrioGroup(dayBranchKey)?.peachBlossom || null;
   const skyHorseBranchKey = yearTrioGroup?.skyHorse || null;
   const robberyShaBranchKey = yearTrioGroup?.robberySha || null;
   const solitaryBranchKey = daySeasonGroup?.solitary || null;
@@ -173,6 +174,15 @@ export function buildShenShaV1({ pillars }) {
       theme: "Charm, attractiveness, romantic and social opportunities.",
       caution: "Can also bring romantic complications or scattered attention.",
       active: branchPresentInPillars(pillars, peachBlossomBranchKey),
+      // Second classical method: Peach Blossom counted from the Day branch.
+      // Only set when it differs from the year-branch one. `dayBranchIn`
+      // lists the natal pillars that already hold it (born-with charm).
+      ...(dayPeachBlossomKey && dayPeachBlossomKey !== peachBlossomBranchKey
+        ? {
+            dayBranch: branchLabel(dayPeachBlossomKey),
+            dayBranchIn: ["year", "month", "day", "hour"].filter((name) => pillars[name]?.branch?.key === dayPeachBlossomKey),
+          }
+        : {}),
     });
   }
 

@@ -215,7 +215,7 @@ function buildRelationshipStyle({ mainStructure, dayStatus }) {
 
   if (mainStructure === "Supporters") {
     strengths.push(
-      "You bring loyalty, care and emotional consistency into relationships."
+      "You bring loyalty, commitment and steadiness into relationships."
     );
     cautions.push(
       "Avoid over-giving or becoming responsible for the other person's emotional stability."

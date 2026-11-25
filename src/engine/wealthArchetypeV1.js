@@ -50,22 +50,22 @@ const STRUCTURE_WEALTH_MODIFIERS = {
   Supporters: {
     wealthStyle: "Stability-driven wealth",
     incomePath:
-      "Your wealth grows through consistency, reliability, service, care, long-term trust and dependable contribution.",
+      "Your wealth grows through responsibility, rank, discipline, long-term trust and dependable results.",
     moneyStrengths: [
       "You build wealth steadily when people trust your reliability.",
-      "You are able to create long-term value through service and consistency.",
+      "Your income tends to rise with each step up in responsibility and authority.",
       "You are good at maintaining systems, relationships and responsibilities over time.",
     ],
     moneyBlindSpots: [
-      "You may undercharge because you focus more on helping than receiving.",
+      "You may accept more duty than reward, out of a sense of obligation.",
       "You may carry too much responsibility without asking for proper compensation.",
       "You may stay in stable but limiting income paths for too long.",
     ],
     idealIncomeModels: [
-      "Retainer-based services",
-      "Long-term client care",
+      "Salaried leadership roles",
+      "Professional or licensed practice",
       "Operations or management",
-      "Service-based business",
+      "Contract or regulated services",
       "Stable recurring income models",
     ],
   },

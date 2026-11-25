@@ -92,8 +92,8 @@ export function buildNarrativePersonalizationV1({
 
     Supporters: {
       "Direct Resource": {
-        personalityFlavor: "Reliable Guide",
-        careerFlavor: "Service",
+        personalityFlavor: "Principled Advisor",
+        careerFlavor: "Expert Authority",
         wealthFlavor: "Consistency",
         relationshipFlavor: "Nurturing Stability",
       },

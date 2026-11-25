@@ -50,14 +50,14 @@ export const LABEL_TO_NARRATIVE = {
   // SUPPORTER FAMILY
   // =========================
 
-  "Support-Oriented Expert":
-    "You create value by helping others succeed through reliability, practical support and consistent contribution.",
+  "Principled Professional":
+    "You create value by holding high standards, taking responsibility and getting things done properly, especially under pressure.",
 
-  "Supportive Mentor":
-    "People may naturally turn to you for guidance because you are able to offer both encouragement and practical perspective.",
+  "Authority Leader":
+    "People tend to follow you because you are fair, consistent and willing to make the hard call.",
 
-  "Service-driven income":
-    "Opportunities often emerge when your ability to support, guide or care for others creates meaningful value.",
+  "Position-driven income":
+    "Opportunities often grow as you take on more responsibility, rank and trust within a well-run organisation.",
 
   "Security-Oriented":
     "You value stability, trust and predictability, often making decisions based on long-term sustainability rather than short-term excitement.",

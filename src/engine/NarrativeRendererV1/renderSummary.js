@@ -88,7 +88,7 @@ export function renderSummary({
     profile === "Direct Resource"
   ) {
     openingText =
-      "Your chart shows someone who grows through reliability, care and meaningful contribution. People may value your steadiness more than you realise, and many of your long-term opportunities come from consistently creating value over time.";
+      "Your chart shows someone who grows through responsibility, discipline and sound judgement. Authority tends to come to you because you prepare well and do things properly, and many of your long-term opportunities come from being the person others trust to get it right.";
   } else {
     openingText =
       `This phase of life highlights ${cleanText(

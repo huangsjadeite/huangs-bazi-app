@@ -29,8 +29,8 @@ export function personalizeHeadline({
     return "Turning knowledge, insight and careful thinking into practical direction.";
   }
 
-  if (careerStyle === "Support-Oriented Expert") {
-    return "Creating stability through care, reliability and long-term contribution.";
+  if (careerStyle === "Principled Professional") {
+    return "Earning authority through discipline, standards and follow-through.";
   }
 
   return baseHeadline || coreTheme || "Understanding your growth path with greater clarity.";
@@ -59,8 +59,8 @@ export function personalizeSummaryOpening({
     return "Your chart shows someone who grows through understanding. You may need time to observe, analyse and make sense of things before moving forward with confidence.";
   }
 
-  if (careerStyle === "Support-Oriented Expert") {
-    return "Your chart shows someone who grows through reliability, care and meaningful contribution. People may value your steadiness more than you realise.";
+  if (careerStyle === "Principled Professional") {
+    return "Your chart shows someone who grows through responsibility, discipline and high standards. People may trust your judgement more than you realise.";
   }
 
   if (vitalityLevel === "Sensitive") {

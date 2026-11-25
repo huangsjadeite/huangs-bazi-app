@@ -17,18 +17,20 @@ const GUA_INFO = {
 };
 
 // Per-Gua favourable (Sheng Qi/Tian Yi/Yan Nian/Fu Wei) and unfavourable
-// (Huo Hai/Wu Gui/Liu Sha/Jue Ming) direction tables. Entries for Gua 1, 2,
-// 4, 6 verified against real reference output; 3, 7, 8, 9 from the standard
-// classical table.
+// (Huo Hai/Wu Gui/Liu Sha/Jue Ming) direction tables, from the classical
+// 大游年 line-flip rule: starting at the Fu Wei trigram, flip top -> Sheng Qi,
+// middle -> Wu Gui, bottom -> Yan Nian, middle -> Liu Sha, top -> Huo Hai,
+// middle -> Tian Yi, bottom -> Jue Ming. Until 2026-11-25 the four
+// unfavourable labels were mixed up for every Gua except 1.
 const DIRECTIONS_BY_GUA = {
   1: { shengQi: "Southeast", tianYi: "East", yanNian: "South", fuWei: "North", huoHai: "West", wuGui: "Northeast", liuSha: "Northwest", jueMing: "Southwest" },
-  2: { shengQi: "Northeast", tianYi: "West", yanNian: "Northwest", fuWei: "Southwest", huoHai: "South", wuGui: "North", liuSha: "Southeast", jueMing: "East" },
-  3: { shengQi: "South", tianYi: "North", yanNian: "Southeast", fuWei: "East", huoHai: "Northeast", wuGui: "West", liuSha: "Southwest", jueMing: "Northwest" },
-  4: { shengQi: "North", tianYi: "South", yanNian: "East", fuWei: "Southeast", huoHai: "Southwest", wuGui: "Northwest", liuSha: "Northeast", jueMing: "West" },
-  6: { shengQi: "West", tianYi: "Northeast", yanNian: "Southwest", fuWei: "Northwest", huoHai: "Southeast", wuGui: "South", liuSha: "East", jueMing: "North" },
-  7: { shengQi: "Northwest", tianYi: "Southwest", yanNian: "Northeast", fuWei: "West", huoHai: "North", wuGui: "Southeast", liuSha: "South", jueMing: "East" },
-  8: { shengQi: "Southwest", tianYi: "Northwest", yanNian: "West", fuWei: "Northeast", huoHai: "East", wuGui: "South", liuSha: "North", jueMing: "Southeast" },
-  9: { shengQi: "East", tianYi: "Southeast", yanNian: "North", fuWei: "South", huoHai: "Northwest", wuGui: "Southwest", liuSha: "West", jueMing: "Northeast" },
+  2: { shengQi: "Northeast", tianYi: "West", yanNian: "Northwest", fuWei: "Southwest", huoHai: "East", wuGui: "Southeast", liuSha: "South", jueMing: "North" },
+  3: { shengQi: "South", tianYi: "North", yanNian: "Southeast", fuWei: "East", huoHai: "Southwest", wuGui: "Northwest", liuSha: "Northeast", jueMing: "West" },
+  4: { shengQi: "North", tianYi: "South", yanNian: "East", fuWei: "Southeast", huoHai: "Northwest", wuGui: "Southwest", liuSha: "West", jueMing: "Northeast" },
+  6: { shengQi: "West", tianYi: "Northeast", yanNian: "Southwest", fuWei: "Northwest", huoHai: "Southeast", wuGui: "East", liuSha: "North", jueMing: "South" },
+  7: { shengQi: "Northwest", tianYi: "Southwest", yanNian: "Northeast", fuWei: "West", huoHai: "North", wuGui: "South", liuSha: "Southeast", jueMing: "East" },
+  8: { shengQi: "Southwest", tianYi: "Northwest", yanNian: "West", fuWei: "Northeast", huoHai: "South", wuGui: "North", liuSha: "East", jueMing: "Southeast" },
+  9: { shengQi: "East", tianYi: "Southeast", yanNian: "North", fuWei: "South", huoHai: "Northeast", wuGui: "West", liuSha: "Southwest", jueMing: "Northwest" },
 };
 
 function reduceToSingleDigit(value) {

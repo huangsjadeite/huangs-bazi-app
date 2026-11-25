@@ -70,9 +70,7 @@ export default function MonthlyOutlookSection({ monthlyOutlook, selectedYear }) 
                   {item.theme} <span className="font-normal text-stone-500">({item.tenGod?.primary})</span>
                 </p>
               ) : null}
-              <p>
-                {item.dominantElement} month, which {ELEMENT_FIT_TEXT[item.read]}.
-              </p>
+              <p>{item.elementText || `${item.dominantElement} month, which ${ELEMENT_FIT_TEXT[item.read]}.`}</p>
               {item.doText && <Line label="Do">{item.doText}</Line>}
               {!!item.support?.length && <Line label="Support">{item.support.join("; ")}</Line>}
               <Line label="Watch">

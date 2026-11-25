@@ -165,6 +165,19 @@ export function deriveAdminReportData(report) {
   // This year's rating for the Peach Blossom month, so the report never calls
   // a month a romantic peak while the Monthly Outlook rates it Challenging.
   const peachBlossomRating = monthlyOutlook.find((m) => m.monthName === peachBlossomMonth)?.rating || null;
+  // Peach Blossom counted from the Day branch, when it differs from the
+  // year-branch one above.
+  const peachBlossomDay = peachBlossomStar?.dayBranch
+    ? (() => {
+        const month = ANIMAL_TO_MONTH[peachBlossomStar.dayBranch.animal] || null;
+        return {
+          animal: peachBlossomStar.dayBranch.animal,
+          inPillars: peachBlossomStar.dayBranchIn || [],
+          month,
+          rating: monthlyOutlook.find((m) => m.monthName === month)?.rating || null,
+        };
+      })()
+    : null;
   const peachBlossomYears = (() => {
     if (!peachBlossomAnimal) return [];
     const order = ["Rat","Ox","Tiger","Rabbit","Dragon","Snake","Horse","Goat","Monkey","Rooster","Dog","Pig"];
@@ -248,7 +261,7 @@ export function deriveAdminReportData(report) {
 
   // Plain-text version of a month's forecast (used by the JSON export).
   function expandMonthlyNote(item) {
-    const parts = [`${item.chinese} (${item.branchAnimal}) brings ${item.dominantElement} energy. Rated ${item.rating}.`];
+    const parts = [`${item.chinese} (${item.branchAnimal}). ${item.elementText || `Brings ${item.dominantElement} energy.`} Rated ${item.rating}.`];
     if (item.theme) parts.push(`Theme: ${item.theme} (${item.tenGod?.primary}).`);
     if (item.doText) parts.push(`Do: ${item.doText}.`);
     [...(item.support || []), ...(item.watch || [])].forEach((line) => parts.push(`${line}.`));
@@ -347,7 +360,7 @@ export function deriveAdminReportData(report) {
     weakestElement, officerElement, outputElement, wealthElement,
     favourableSet, cautionSet, partnerStarElement,
     dayBranchAnimal, dayBranchZh, dayBranchElement, spousePalaceNoteText,
-    peachBlossomAnimal, peachBlossomYears, peachBlossomMonth, peachBlossomRating,
+    peachBlossomAnimal, peachBlossomYears, peachBlossomMonth, peachBlossomRating, peachBlossomDay,
     careerStrongMonths, careerCautionMonths,
     wealthStrongMonths, wealthCautionMonths,
     // The same top 3 as the Money Snapshot, so the Wealth page agrees with it.

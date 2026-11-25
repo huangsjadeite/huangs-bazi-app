@@ -16,7 +16,7 @@ function safeName(value) {
 function getCareerStyle(mainStructure, dominantProfile) {
   if (mainStructure === "Connectors") return "Connector Strategist";
   if (mainStructure === "Thinkers") return "Analytical Specialist";
-  if (mainStructure === "Supporters") return "Support-Oriented Expert";
+  if (mainStructure === "Supporters") return "Principled Professional";
   if (mainStructure === "Creators") return "Creative Builder";
   if (mainStructure === "Managers") return "Systems Manager";
 
@@ -31,8 +31,10 @@ function getIdealWorkEnvironment(mainStructure) {
       "Relationship-driven environments where communication, trust-building, networking and opportunity creation are important.",
     Thinkers:
       "Knowledge-based environments where research, strategy, analysis and thoughtful decision-making are valued.",
+    // Supporters = 权力型, the Officer / Seven Killings group: structure,
+    // standards and authority (not care work, despite the English name).
     Supporters:
-      "Stable and service-oriented environments where care, reliability, guidance and long-term contribution matter.",
+      "Structured, well-run organisations where clear standards, accountability and earned authority matter.",
     Creators:
       "Creative or flexible environments where expression, originality, problem-solving and independence are encouraged.",
     Managers:
@@ -48,7 +50,7 @@ function getIdealWorkEnvironment(mainStructure) {
 function getLeadershipStyle(mainStructure, dominantProfile, dayStatus) {
   if (mainStructure === "Connectors") return "Influence-Based Leader";
   if (mainStructure === "Thinkers") return "Technical Expert Leader";
-  if (mainStructure === "Supporters") return "Supportive Mentor";
+  if (mainStructure === "Supporters") return "Authority Leader";
   if (mainStructure === "Creators") return "Visionary Creator";
   if (mainStructure === "Managers") return "Operational Leader";
 
@@ -71,9 +73,9 @@ function getCareerStrengths(mainStructure) {
       "Can become highly skilled in specialised knowledge areas.",
     ],
     Supporters: [
-      "Brings consistency, loyalty and reliability to work.",
-      "Supports teams and clients with patience and care.",
-      "Creates trust through responsibility and follow-through.",
+      "Holds high standards and follows through on responsibility.",
+      "Stays steady under pressure and makes the hard call when needed.",
+      "Earns trust as the person who does things properly.",
     ],
     Creators: [
       "Generates fresh ideas and original solutions.",
@@ -112,8 +114,8 @@ function getCareerRisks(mainStructure, dayStatus) {
   }
 
   if (mainStructure === "Supporters") {
-    risks.push("May over-give or carry other people's responsibilities.");
-    risks.push("May stay too long in roles that feel safe but limiting.");
+    risks.push("May take on too much pressure or responsibility without pushing back.");
+    risks.push("May stay too long in a rigid role out of duty.");
   }
 
   if (mainStructure === "Creators") {
@@ -154,11 +156,11 @@ function getRecommendedDirections(mainStructure, dayMasterElement) {
       "Specialist Advisory",
     ],
     Supporters: [
-      "Teaching",
-      "Wellness",
-      "Human Resources",
-      "Client Care",
-      "Advisory Services",
+      "Management",
+      "Operations",
+      "Compliance & Risk",
+      "Law & Public Service",
+      "Professional Practice",
     ],
     Creators: [
       "Content Creation",
@@ -228,13 +230,13 @@ const ROLE_DETAILS = {
     },
   },
   Supporters: {
-    summary: "Your chart leans toward care and reliability, so you do best in roles where you look after, guide or develop other people.",
+    summary: "Your chart leans toward structure, standards and authority, so you do best in roles where you carry real responsibility and are trusted to make decisions.",
     roles: {
-      Teaching: "Teacher, coach",
-      Wellness: "Therapist, wellness practitioner",
-      "Human Resources": "HR manager, people partner",
-      "Client Care": "Customer success manager, service lead",
-      "Advisory Services": "Counsellor, financial planner",
+      Management: "Department head, general manager",
+      Operations: "Operations manager, operations lead",
+      "Compliance & Risk": "Compliance officer, risk manager, auditor",
+      "Law & Public Service": "Lawyer, civil servant, regulator",
+      "Professional Practice": "Accountant, engineer, licensed professional",
     },
   },
   Creators: {

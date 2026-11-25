@@ -2,9 +2,11 @@
 //
 // Monthly forecast (流月). Each month's pillar is read against the natal
 // chart in layers:
-//   1. Element fit — the month's dominant element vs the Elements to Enhance
-//      (Good +1 / Neutral 0 / Caution −1). The starting score.
-//   2. Ten God — the dominant element's Ten God for the Day Master sets the
+//   1. Element fit — the top character (stem) and the bottom character
+//      (branch) each count for half: Good +1 / Neutral 0 / Caution −1 per
+//      character, averaged. The starting score. The branch (月令, the season)
+//      is the month's element when one is named.
+//   2. Ten God — the branch's main qi's Ten God for the Day Master sets the
 //      month's theme, what to do, what to watch and the life area it touches.
 //   3. Branch relations with the natal pillars (clash / combine / harm /
 //      punishment / destruction), located by pillar.
@@ -145,10 +147,6 @@ function scoreMonthPillarElements(monthPillar) {
   return scores;
 }
 
-function getDominantElement(scores) {
-  return Object.entries(scores).sort((a, b) => b[1] - a[1])[0][0];
-}
-
 function getElementFit(dominantElement, usefulGodV4) {
   const favourable = usefulGodV4?.favourableElements || [];
   const secondaryFavourable = usefulGodV4?.secondaryFavourableElements || [];
@@ -171,14 +169,6 @@ function getRating(score) {
   return "Difficult";
 }
 
-// The stem carrying the dominant element: the branch's main qi first (the
-// branch rules the month), then the month stem, then any other hidden stem.
-function getPrimaryStemKey(monthPillar, dominantElement) {
-  const [mainQi, ...rest] = monthPillar.branch.hiddenStems;
-  if (mainQi?.element === dominantElement) return mainQi.key;
-  if (monthPillar.stem.element === dominantElement) return monthPillar.stem.key;
-  return rest.find((hidden) => hidden.element === dominantElement)?.key || mainQi?.key;
-}
 
 function isPartnerStar(group, gender) {
   const normalized = (gender || "").toLowerCase();
@@ -188,7 +178,7 @@ function isPartnerStar(group, gender) {
 const isClash = (a, b) => cycleMod(getBranchIndex(a) - getBranchIndex(b), 12) === 6;
 
 function starBranchKeys(star) {
-  if (star.branch?.key) return [star.branch.key];
+  if (star.branch?.key) return [star.branch.key, ...(star.dayBranch?.key ? [star.dayBranch.key] : [])];
   return (star.branches || []).map((branch) => branch.key);
 }
 
@@ -228,8 +218,31 @@ function readRelations(monthPillar, natalEntries) {
   return { watch, support, clashedPillars, combinesDay, scoreChange };
 }
 
-function buildMonthNote({ chinese, branchAnimal, dominantElement, rating, theme }) {
-  const lead = `${chinese} (${branchAnimal}) brings ${dominantElement} energy`;
+const FIT_TEXT = {
+  Good: "brings an element you need",
+  Neutral: "neither helps nor strains your chart",
+  Caution: "strains your chart",
+};
+const FIT_TEXT_BOTH = {
+  Good: "both bring elements you need",
+  Neutral: "neither helps nor strains your chart",
+  Caution: "both strain your chart",
+};
+
+// One line on the month's elements. When the top and bottom characters
+// differ, both are named so the reader sees why the month is rated as it is.
+function describeMonthElements({ chinese, stemElement, branchElement, stemRead, branchRead }) {
+  if (stemElement === branchElement) return `${branchElement} month, which ${FIT_TEXT[branchRead]}.`;
+  const [stemZh, branchZh] = [...chinese];
+  if (stemRead === branchRead) {
+    return `${stemElement} over ${branchElement} (${stemZh} on top, ${branchZh} below), and ${FIT_TEXT_BOTH[branchRead]}.`;
+  }
+  return `${stemElement} over ${branchElement}: the ${stemZh} ${stemElement} on top ${FIT_TEXT[stemRead]}, the ${branchZh} ${branchElement} below ${FIT_TEXT[branchRead]}.`;
+}
+
+function buildMonthNote({ chinese, branchAnimal, stemElement, dominantElement, rating, theme }) {
+  const energy = stemElement === dominantElement ? dominantElement : `${stemElement} and ${dominantElement}`;
+  const lead = `${chinese} (${branchAnimal}) brings ${energy} energy`;
   return theme ? `${lead}: ${theme.toLowerCase()}. Rated ${rating}.` : `${lead}. Rated ${rating}.`;
 }
 
@@ -264,13 +277,19 @@ export function buildMonthlyOverlayV1({
     );
 
     const elementScores = scoreMonthPillarElements(monthPillar);
-    const dominantElement = getDominantElement(elementScores);
-    const read = getElementFit(dominantElement, usefulGodV4);
+    // One rule for every month: stem and branch each count for half, and the
+    // branch (月令) names the month's element and sets its Ten God theme.
+    const stemElement = monthPillar.stem.element;
+    const dominantElement = monthPillar.branch.element;
+    const stemRead = getElementFit(stemElement, usefulGodV4);
+    const branchRead = getElementFit(dominantElement, usefulGodV4);
+    const elementFitScore = (ELEMENT_FIT_SCORE[stemRead] + ELEMENT_FIT_SCORE[branchRead]) / 2;
+    const read = elementFitScore > 0 ? "Good" : elementFitScore < 0 ? "Caution" : "Neutral";
     const branchKey = monthPillar.branch.key;
     const branchAnimal = monthPillar.branch.animal;
     const chinese = `${monthPillar.stem.zh}${monthPillar.branch.zh}`;
 
-    let score = ELEMENT_FIT_SCORE[read];
+    let score = elementFitScore;
 
     // Ten God layer
     let tenGod = null;
@@ -278,7 +297,7 @@ export function buildMonthlyOverlayV1({
     let focusAreas = [];
     let activatesPartnerStar = false;
     if (dayStemKey) {
-      const primary = calculateTenGod(dayStemKey, getPrimaryStemKey(monthPillar, dominantElement));
+      const primary = calculateTenGod(dayStemKey, monthPillar.branch.hiddenStems[0].key);
       tenGod = {
         primary,
         stem: calculateTenGod(dayStemKey, monthPillar.stem.key),
@@ -330,7 +349,11 @@ export function buildMonthlyOverlayV1({
       branchAnimal,
       elementScores,
       dominantElement,
+      stemElement,
+      stemRead,
+      branchRead,
       read,
+      elementText: describeMonthElements({ chinese, stemElement, branchElement: dominantElement, stemRead, branchRead }),
       score,
       rating,
       tenGod,
@@ -346,7 +369,7 @@ export function buildMonthlyOverlayV1({
       combinesDay: relationRead.combinesDay,
       stars: activeStars,
       isVoid,
-      note: buildMonthNote({ chinese, branchAnimal, dominantElement, rating, theme: guidance?.theme }),
+      note: buildMonthNote({ chinese, branchAnimal, stemElement, dominantElement, rating, theme: guidance?.theme }),
     };
   });
 

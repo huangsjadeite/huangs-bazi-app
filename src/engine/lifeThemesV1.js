@@ -47,7 +47,7 @@ function getStructureCoreTheme(mainStructure) {
       core: "Responsibility and Leadership",
       supporting: [
         "Creating Stability",
-        "Service and Contribution",
+        "Standards and Accountability",
         "Steady Long-Term Growth",
         "Protecting What Matters",
       ],
@@ -117,7 +117,7 @@ function getStrengthGrowthTheme(dayStatus, dominantProfileName, mainStructure) {
     }
 
     if (mainStructure === "Supporters") {
-      return "Creating Stability Through Support";
+      return "Creating Stability Through Responsibility";
     }
 
     if (profile === "Direct Resource" || profile === "Indirect Resource") {

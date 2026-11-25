@@ -55,7 +55,7 @@ export default function AdminFullReport({ report, clientName }) {
     weakestElement,
     favourableSet,
     dayBranchAnimal, dayBranchZh, dayBranchElement, spousePalaceNoteText,
-    peachBlossomAnimal, peachBlossomYears, peachBlossomMonth, peachBlossomRating,
+    peachBlossomAnimal, peachBlossomYears, peachBlossomMonth, peachBlossomRating, peachBlossomDay,
     careerStrongMonths, careerCautionMonths,
     wealthBestMonths, wealthCautionMonths,
     relationshipGoodMonths, relationshipCautionMonths,
@@ -165,6 +165,7 @@ export default function AdminFullReport({ report, clientName }) {
         peachBlossomYears={peachBlossomYears}
         peachBlossomMonth={peachBlossomMonth}
         peachBlossomRating={peachBlossomRating}
+        peachBlossomDay={peachBlossomDay}
       />
 
       <WellnessSection

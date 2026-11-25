@@ -26,6 +26,7 @@ export default function RelationshipSection({
   peachBlossomYears,
   peachBlossomMonth,
   peachBlossomRating,
+  peachBlossomDay,
 }) {
   return (
     <AdminReportSection icon="❤️" title="Relationship Dynamics">
@@ -91,6 +92,19 @@ export default function RelationshipSection({
               more easily.
               {peachBlossomRating && ` In ${selectedYear || "this year"} it is rated ${peachBlossomRating}`}
               {peachBlossomRating && PEACH_MONTH_ADVICE[peachBlossomRating]}
+            </>
+          )}
+          {peachBlossomDay && (
+            <>
+              {" "}Counted from your Day pillar, the second classical method, your Peach Blossom is also the{" "}
+              <strong>{peachBlossomDay.animal}</strong>
+              {peachBlossomDay.inPillars.length
+                ? `, and it already sits in your ${peachBlossomDay.inPillars.map((name) => name[0].toUpperCase() + name.slice(1)).join(" and ")} pillar. That is charm you were born with: people tend to warm to you easily, so romance often grows out of the people already around you.`
+                : `, so ${peachBlossomDay.animal} years bring romantic chances too.`}
+              {peachBlossomDay.month &&
+                ` ${peachBlossomDay.month} is your second Peach Blossom month${
+                  peachBlossomDay.rating ? `, rated ${peachBlossomDay.rating} in ${selectedYear || "this year"}` : ""
+                }.`}
             </>
           )}
         </p>
