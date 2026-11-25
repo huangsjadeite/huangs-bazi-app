@@ -32,8 +32,8 @@ const INCOME_STYLE_MEANINGS = {
     "Your money tends to come through people: the clients, contacts, partners and friends who trust you. Referrals, introductions, partnerships and repeat customers matter more for you than working alone, so the stronger your network and reputation, the stronger your income.",
   "Expertise-driven income":
     "Your money tends to come from what you know: skills, qualifications, specialist knowledge and sound judgement are what people pay you for. Keep learning and become the go-to person in your field, and your income grows with it.",
-  "Position-driven income":
-    "Your money tends to come from responsibility and rank: the roles, titles and trust you earn in well-run organisations. Taking on more accountability, and asking to be paid for it, grows your income.",
+  "Responsibility-driven income":
+    "Your money tends to come from the responsibility you carry: people pay for someone they can trust to do things properly. Taking on more, and asking to be paid for it, grows your income.",
   "Creative income":
     "Your money tends to come from what you make or express: ideas, products, content, design or performance. Turning your talent into something people can see and buy grows your income.",
   "Structure-driven income":

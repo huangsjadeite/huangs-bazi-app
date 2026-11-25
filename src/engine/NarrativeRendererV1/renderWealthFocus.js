@@ -51,7 +51,7 @@ export function renderWealthFocus({
 
   // STABILITY / SERVICE
   if (
-    incomeStyle.includes("service") || incomeStyle.includes("position") ||
+    incomeStyle.includes("service") || incomeStyle.includes("responsibility") ||
     wealthBehaviour.includes("security") ||
     moneyMindset.includes("security")
   ) {

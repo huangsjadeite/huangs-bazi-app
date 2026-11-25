@@ -50,7 +50,7 @@ const STRUCTURE_WEALTH_MODIFIERS = {
   Supporters: {
     wealthStyle: "Stability-driven wealth",
     incomePath:
-      "Your wealth grows through responsibility, rank, discipline, long-term trust and dependable results.",
+      "Your wealth grows through responsibility, discipline, long-term trust and dependable results.",
     moneyStrengths: [
       "You build wealth steadily when people trust your reliability.",
       "Your income tends to rise with each step up in responsibility and authority.",
@@ -62,10 +62,10 @@ const STRUCTURE_WEALTH_MODIFIERS = {
       "You may stay in stable but limiting income paths for too long.",
     ],
     idealIncomeModels: [
-      "Salaried leadership roles",
+      "Stable salaried roles",
       "Professional or licensed practice",
       "Operations or management",
-      "Contract or regulated services",
+      "Retainer-based services",
       "Stable recurring income models",
     ],
   },

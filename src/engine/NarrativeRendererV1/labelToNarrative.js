@@ -53,10 +53,10 @@ export const LABEL_TO_NARRATIVE = {
   "Principled Professional":
     "You create value by holding high standards, taking responsibility and getting things done properly, especially under pressure.",
 
-  "Authority Leader":
-    "People tend to follow you because you are fair, consistent and willing to make the hard call.",
+  "Steady Guardian":
+    "People tend to rely on you because you are fair, consistent and keep standards when others let them slip.",
 
-  "Position-driven income":
+  "Responsibility-driven income":
     "Opportunities often grow as you take on more responsibility, rank and trust within a well-run organisation.",
 
   "Security-Oriented":

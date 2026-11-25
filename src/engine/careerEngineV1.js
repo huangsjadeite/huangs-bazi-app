@@ -34,7 +34,7 @@ function getIdealWorkEnvironment(mainStructure) {
     // Supporters = 权力型, the Officer / Seven Killings group: structure,
     // standards and authority (not care work, despite the English name).
     Supporters:
-      "Structured, well-run organisations where clear standards, accountability and earned authority matter.",
+      "Stable, well-run organisations where reliability, clear standards and long-term contribution matter.",
     Creators:
       "Creative or flexible environments where expression, originality, problem-solving and independence are encouraged.",
     Managers:
@@ -50,7 +50,7 @@ function getIdealWorkEnvironment(mainStructure) {
 function getLeadershipStyle(mainStructure, dominantProfile, dayStatus) {
   if (mainStructure === "Connectors") return "Influence-Based Leader";
   if (mainStructure === "Thinkers") return "Technical Expert Leader";
-  if (mainStructure === "Supporters") return "Authority Leader";
+  if (mainStructure === "Supporters") return "Steady Guardian";
   if (mainStructure === "Creators") return "Visionary Creator";
   if (mainStructure === "Managers") return "Operational Leader";
 
@@ -159,8 +159,8 @@ function getRecommendedDirections(mainStructure, dayMasterElement) {
       "Management",
       "Operations",
       "Compliance & Risk",
-      "Law & Public Service",
       "Professional Practice",
+      "Advisory Services",
     ],
     Creators: [
       "Content Creation",
@@ -230,13 +230,13 @@ const ROLE_DETAILS = {
     },
   },
   Supporters: {
-    summary: "Your chart leans toward structure, standards and authority, so you do best in roles where you carry real responsibility and are trusted to make decisions.",
+    summary: "Your chart leans toward structure, standards and responsibility, so you do best in roles where you are trusted to keep things running properly.",
     roles: {
       Management: "Department head, general manager",
       Operations: "Operations manager, operations lead",
       "Compliance & Risk": "Compliance officer, risk manager, auditor",
-      "Law & Public Service": "Lawyer, civil servant, regulator",
       "Professional Practice": "Accountant, engineer, licensed professional",
+      "Advisory Services": "Counsellor, financial planner",
     },
   },
   Creators: {

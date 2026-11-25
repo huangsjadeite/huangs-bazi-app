@@ -52,10 +52,10 @@ export function renderCareerFocus({
   // SUPPORTERS
   if (
     careerStyle.includes("principled") ||
-    leadershipStyle.includes("authority") ||
-    idealWorkEnvironment.includes("earned authority")
+    leadershipStyle.includes("guardian") ||
+    idealWorkEnvironment.includes("clear standards")
   ) {
-    return "Your career growth is strongest when you hold real responsibility and authority. You tend to do well in well-run organisations with clear standards, where people are trusted with decisions and judged on results. Pressure tends to sharpen you rather than wear you down, so roles in management, operations, compliance or professional practice let your discipline show. Success often comes from earning authority step by step and then using it fairly.";
+    return "Your career growth is strongest when you hold real responsibility and authority. You tend to do well in well-run organisations with clear standards, where people are trusted with decisions and judged on results. Pressure tends to sharpen you rather than wear you down, so roles in management, operations, compliance or professional practice let your discipline show. Success often comes from becoming the person others trust to keep standards, and growing your responsibility step by step.";
   }
 
   return "Your career growth improves when your work environment allows you to use your natural strengths consistently, while also giving you enough room to grow with clarity and purpose. Sustainable progress tends to come from focusing your energy on opportunities that align with your strengths rather than trying to force growth in every direction at once.";

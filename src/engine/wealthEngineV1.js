@@ -36,7 +36,7 @@ function getWealthBehaviour(mainStructure, dominantProfile) {
 function getIncomeStyle(mainStructure, dominantProfile) {
   if (mainStructure === "Connectors") return "Network-driven income";
   if (mainStructure === "Thinkers") return "Expertise-driven income";
-  if (mainStructure === "Supporters") return "Position-driven income";
+  if (mainStructure === "Supporters") return "Responsibility-driven income";
   if (mainStructure === "Creators") return "Creative income";
   if (mainStructure === "Managers") return "Structure-driven income";
 
@@ -74,7 +74,7 @@ function getWealthStrengths(mainStructure) {
     ],
     Supporters: [
       "Builds wealth steadily through reliability and consistent contribution.",
-      "Grows income through rank, responsibility and the trust placed in you.",
+      "Grows income through responsibility and the trust placed in you.",
       "Can develop financial stability through patience and commitment.",
     ],
     Creators: [
@@ -157,7 +157,7 @@ function getWealthStrategy(mainStructure, wealthElement, dominantProfile) {
     Thinkers:
       "Build wealth through specialised knowledge, strategy, research and consistent monetisation.",
     Supporters:
-      "Build wealth through responsibility, rank, discipline and steady, well-planned decisions.",
+      "Build wealth through responsibility, discipline and steady, well-planned decisions.",
     Creators:
       "Build wealth through creativity, branding, expression and repeatable business systems.",
     Managers:

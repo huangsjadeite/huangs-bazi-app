@@ -155,7 +155,7 @@ function buildWealthStrength(wealth) {
     return "Financial strength grows when you build stable systems, consistent habits and long-term foundations.";
   }
 
-  if (incomeStyle.includes("service") || incomeStyle.includes("position") || wealthBehaviour.includes("security")) {
+  if (incomeStyle.includes("service") || incomeStyle.includes("responsibility") || wealthBehaviour.includes("security")) {
     return "You are able to build stability by offering reliable value that others can depend on.";
   }
 
