@@ -5,6 +5,8 @@
 // it lacks. The older recommendedDirections list still uses the Day Master's
 // own element and is kept for compatibility; the admin report no longer shows it.
 
+import { readOfficerResourceChainV1 } from "./officerResourceChainV1.js";
+
 const VERSION = "career-engine-v1";
 
 function safeName(value) {
@@ -98,7 +100,7 @@ function getCareerStrengths(mainStructure) {
   ).slice(0, 3);
 }
 
-function getCareerRisks(mainStructure, dayStatus) {
+function getCareerRisks(mainStructure, dayStatus, chain = {}) {
   const risks = [];
 
   if (mainStructure === "Connectors") {
@@ -115,7 +117,12 @@ function getCareerRisks(mainStructure, dayStatus) {
 
   if (mainStructure === "Supporters") {
     risks.push("May take on too much pressure or responsibility without pushing back.");
-    risks.push("May stay too long in a rigid role out of duty.");
+    // 傷官見官: Hurting Officer meeting Direct Officer.
+    risks.push(
+      chain.hurtingOfficerMeetsOfficer
+        ? "May speak too bluntly to bosses when standards slip, even when you're right."
+        : "May stay too long in a rigid role out of duty."
+    );
   }
 
   if (mainStructure === "Creators") {
@@ -159,8 +166,9 @@ function getRecommendedDirections(mainStructure, dayMasterElement) {
       "Management",
       "Operations",
       "Compliance & Risk",
+      "Law & Public Service",
       "Professional Practice",
-      "Advisory Services",
+      "Advisory & Consulting",
     ],
     Creators: [
       "Content Creation",
@@ -235,8 +243,9 @@ const ROLE_DETAILS = {
       Management: "Department head, general manager",
       Operations: "Operations manager, operations lead",
       "Compliance & Risk": "Compliance officer, risk manager, auditor",
+      "Law & Public Service": "Lawyer, civil servant, regulator",
       "Professional Practice": "Accountant, engineer, licensed professional",
-      "Advisory Services": "Counsellor, financial planner",
+      "Advisory & Consulting": "Consultant, financial planner",
     },
   },
   Creators: {
@@ -261,7 +270,12 @@ const ROLE_DETAILS = {
   },
 };
 
-function getBestFitIndustryGroups(primaryElement, secondaryElement) {
+// Authority-profile wording for the Wood industry block (Education & Training).
+const AUTHORITY_INDUSTRY_REASON = {
+  Wood: "Education & Training: you thrive where your knowledge earns respect and you set the standard others learn from.",
+};
+
+function getBestFitIndustryGroups(primaryElement, secondaryElement, { authorityProfile = false } = {}) {
   const hasSecondary = secondaryElement && secondaryElement !== primaryElement;
   return [
     { element: primaryElement, rank: "Main element to enhance", count: hasSecondary ? 3 : 5 },
@@ -271,17 +285,28 @@ function getBestFitIndustryGroups(primaryElement, secondaryElement) {
     .map(({ element, rank, count }) => ({
       element,
       rank,
-      reason: `${element} industries surround you with ${INDUSTRY_ELEMENT_REASON[element]}, which your chart needs more of.`,
+      reason:
+        (authorityProfile && AUTHORITY_INDUSTRY_REASON[element]) ||
+        `${element} industries surround you with ${INDUSTRY_ELEMENT_REASON[element]}, which your chart needs more of.`,
       industries: INDUSTRIES_BY_ELEMENT[element].slice(0, count),
     }));
 }
 
-function getBestFitRoleDetails(mainStructure) {
+// Officer + Resource charts (官印相生) are the classic teacher / academic
+// pattern: teaching here means authority through knowledge, so it leads the
+// authority role list rather than sitting with care roles.
+const EDUCATION_ROLE = {
+  role: "Education & Training",
+  examples: "Lecturer, corporate or professional trainer, head of department, examiner, curriculum lead",
+};
+
+function getBestFitRoleDetails(mainStructure, { addEducation = false } = {}) {
   const details = ROLE_DETAILS[mainStructure];
   if (!details) return null;
+  const roles = Object.entries(details.roles).map(([role, examples]) => ({ role, examples }));
   return {
     summary: details.summary,
-    roles: Object.entries(details.roles).map(([role, examples]) => ({ role, examples })),
+    roles: addEducation && mainStructure === "Supporters" ? [EDUCATION_ROLE, ...roles] : roles,
   };
 }
 
@@ -332,13 +357,26 @@ export function buildCareerEngineV1({
   const secondaryUsefulGod = usefulGodV4?.secondaryUsefulGod || null;
   const dayMasterElement = usefulGodV4?.dayMasterElement || null;
 
+  const chain = readOfficerResourceChainV1({ structureScoringV2, tenProfileScoringV2 });
+  const favourableElements = [
+    primaryUsefulGod,
+    secondaryUsefulGod,
+    ...(usefulGodV4?.favourableElements || []),
+    ...(usefulGodV4?.secondaryFavourableElements || []),
+  ];
+
   const careerStyle = getCareerStyle(mainStructure, dominantProfile);
-  const idealWorkEnvironment = getIdealWorkEnvironment(mainStructure);
-  const leadershipStyle = getLeadershipStyle(
-    mainStructure,
-    dominantProfile,
-    dayStatus
-  );
+  const idealWorkEnvironment = chain.officerResourceChain
+    ? "Well-run organisations where clear standards matter, and where people who handle pressure well are given more authority over time."
+    : getIdealWorkEnvironment(mainStructure);
+  const leadershipStyle = chain.officerResourceChain
+    ? "Trusted Leader"
+    : getLeadershipStyle(mainStructure, dominantProfile, dayStatus);
+
+  const careerStrengths = getCareerStrengths(mainStructure);
+  if (chain.pressureIntoProgress) {
+    careerStrengths.push("Turns pressure into progress: tough periods tend to make you more capable, not less.");
+  }
   const careerStrategy = getCareerStrategy(idealWorkEnvironment, dominantProfile);
 
   return {
@@ -349,8 +387,9 @@ export function buildCareerEngineV1({
     leadershipStyle,
     careerStrategy,
 
-    careerStrengths: getCareerStrengths(mainStructure),
-    careerRisks: getCareerRisks(mainStructure, dayStatus),
+    officerResourceChain: chain.officerResourceChain,
+    careerStrengths,
+    careerRisks: getCareerRisks(mainStructure, dayStatus, chain),
     recommendedDirections: getRecommendedDirections(
       mainStructure,
       dayMasterElement
@@ -360,8 +399,12 @@ export function buildCareerEngineV1({
       (element, index, list) => element && list.indexOf(element) === index
     ),
     bestFitRoles: getBestFitRoles(mainStructure),
-    bestFitIndustryGroups: getBestFitIndustryGroups(primaryUsefulGod, secondaryUsefulGod),
-    bestFitRoleDetails: getBestFitRoleDetails(mainStructure),
+    bestFitIndustryGroups: getBestFitIndustryGroups(primaryUsefulGod, secondaryUsefulGod, {
+      authorityProfile: chain.officerResourceChain,
+    }),
+    bestFitRoleDetails: getBestFitRoleDetails(mainStructure, {
+      addEducation: chain.officerResourceChain || favourableElements.includes("Wood"),
+    }),
 
     debug: {
       mainStructure,

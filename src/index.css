@@ -3,11 +3,14 @@
    room for the first lines after it, so a heading near the page bottom moves
    to the next page with its content. */
 @media print {
-  .keep-with-next {
+  /* Every small-capitals sub-heading in the report counts as a heading. */
+  .keep-with-next,
+  #admin-full-report p.uppercase {
     break-inside: avoid;
     break-after: avoid;
   }
-  .keep-with-next::after {
+  .keep-with-next::after,
+  #admin-full-report p.uppercase::after {
     content: "";
     display: block;
     height: 7rem;

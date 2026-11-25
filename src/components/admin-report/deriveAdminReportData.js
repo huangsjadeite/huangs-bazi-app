@@ -36,6 +36,10 @@ const DZI_BEAD_MAP = {
 // Only surface a career-relevant profile's % if it's actually prominent
 // in this chart (top 4) - forcing it into every report regardless of
 // rank would misrepresent charts where it's dormant.
+const SIX_HARMONY_ZH = new Set(
+  ["子丑", "寅亥", "卯戌", "辰酉", "巳申", "午未"].flatMap((pair) => [pair, `${pair[1]}${pair[0]}`])
+);
+
 function findTopProfilePct(rankedProfiles, names, topN = 4) {
   for (const name of names) {
     const idx = rankedProfiles.findIndex((p) => p.profile === name);
@@ -100,8 +104,8 @@ export function deriveAdminReportData(report) {
   const career = lifeAreas.career || {};
   const wealth = lifeAreas.wealth || {};
   const wealthArchetype = lifeAreas.wealthArchetype || {};
-  const relationship = lifeAreas.relationship || {};
-  const relationshipArchetype = lifeAreas.relationshipArchetype || {};
+  const baseRelationship = lifeAreas.relationship || {};
+  const baseRelationshipArchetype = lifeAreas.relationshipArchetype || {};
   const relationshipPattern = lifeAreas.relationshipPattern || {};
   const health = lifeAreas.health || {};
   const blindSpots = personality.blindSpots || {};
@@ -154,7 +158,7 @@ export function deriveAdminReportData(report) {
     monthlyOutlook.filter(predicate).map((m) => m.monthName);
 
   const cautionSet = new Set(usefulGod.cautionElements || []);
-  const partnerStarElement = relationship.spouseStar?.element || null;
+  const partnerStarElement = baseRelationship.spouseStar?.element || null;
 
   // Day Branch (Spouse Palace) — the earthly branch of the day pillar is the
   // classical "relationship palace" in Bazi. Its element indicates the quality
@@ -351,6 +355,44 @@ export function deriveAdminReportData(report) {
     incomeStyle: wealth.incomeStyle || null,
     wealthDirection: eightMansions?.favourableDirections?.find((item) => item.name === "Sheng Qi")?.direction || null,
   };
+
+  // A reading year whose branch forms a Six Harmony (六合) with the Day branch
+  // (the partner palace) is a strong relationship year, so its note is more
+  // positive than the generic "partner themes may be more visible" caution.
+  const yearCombinesPartnerPalace = Boolean(
+    annualPillar?.branch && dayBranchZh && SIX_HARMONY_ZH.has(`${annualPillar.branch}${dayBranchZh}`)
+  );
+  const relationship = yearCombinesPartnerPalace
+    ? {
+        ...baseRelationship,
+        timingNotes: {
+          ...baseRelationship.timingNotes,
+          annualInfluence:
+            "One of your stronger relationship years: the year's energy links directly with your partner palace. If you're single, someone serious may appear; if you're attached, it's a natural year to deepen commitment. As always, take it at your own pace.",
+          caution: "",
+        },
+      }
+    : baseRelationship;
+
+  // Partner star sitting in the partner palace (female: Officer / Seven
+  // Killings, male: Wealth, as the Day branch main qi) together with Hurting
+  // Officer: high standards for partners, and a sharp tongue under stress.
+  const dayBranchMainTenGod = tenGodByPillar?.day?.hiddenStems?.[0]?.tenGod || null;
+  const partnerStars = String(report.client?.gender || "").toLowerCase() === "male"
+    ? ["Direct Wealth", "Indirect Wealth"]
+    : ["Direct Officer", "Seven Killings"];
+  const partnerStarInPalace = partnerStars.includes(dayBranchMainTenGod);
+  const relationshipArchetype =
+    partnerStarInPalace && (findProfilePct("Hurting Officer") || 0) > 0
+      ? {
+          ...baseRelationshipArchetype,
+          blindSpots: [
+            "You hold partners to high standards, and can quietly judge them on reliability.",
+            "When you're stressed, you may criticise a partner when you mean to help.",
+            "You may take a long time to settle because few people meet your standards.",
+          ],
+        }
+      : baseRelationshipArchetype;
 
   return {
     narrative, personality, usefulGod, lifeAreas, stones, eightMansions, shenSha,

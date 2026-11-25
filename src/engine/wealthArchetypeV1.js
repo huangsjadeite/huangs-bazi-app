@@ -234,6 +234,8 @@ function unique(items) {
   return [...new Set(items.filter(Boolean))];
 }
 
+import { readOfficerResourceChainV1 } from "./officerResourceChainV1.js";
+
 export function buildWealthArchetypeV1({
   wealthEngineV1,
   structureScoringV2,
@@ -242,6 +244,7 @@ export function buildWealthArchetypeV1({
   usefulGodV4,
 }) {
   const mainStructure = getStructureName(structureScoringV2);
+  const { officerResourceChain } = readOfficerResourceChainV1({ structureScoringV2, tenProfileScoringV2 });
   const dominantProfile = getDominantProfileName(tenProfileScoringV2);
   const dayMasterStatus = getDayMasterStatus(dayMasterStrengthV4);
 
@@ -314,8 +317,12 @@ export function buildWealthArchetypeV1({
       ...(structureRule.moneyBlindSpots || []),
     ]).slice(0, 4),
 
+    // Officer + Resource charts lead from the front, so their salaried
+    // option is a leadership role.
     idealIncomeModels: unique([
-      ...(structureRule.idealIncomeModels || []),
+      ...(structureRule.idealIncomeModels || []).map((model) =>
+        officerResourceChain && model === "Stable salaried roles" ? "Salaried leadership roles" : model
+      ),
     ]).slice(0, 5),
 
     reasoning: [

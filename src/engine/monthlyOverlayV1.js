@@ -322,7 +322,17 @@ export function buildMonthlyOverlayV1({
     const activeStars = stars
       .filter((star) => STAR_NOTES[star.key] && starBranchKeys(star).includes(branchKey))
       .map((star) => ({ key: star.key, ...STAR_NOTES[star.key] }));
-    if (activeStars.some((star) => star.key === "noblePeople")) score += 0.5;
+    const hasNoblePeople = activeStars.some((star) => star.key === "noblePeople");
+    if (hasNoblePeople) score += 0.5;
+
+    // Helpful people arriving (Noble People) in a month that also combines
+    // the Day branch is a month to act, not to rest: it leads on Career and
+    // Relationships whatever the Ten God theme says.
+    let doText = guidance?.do || null;
+    if (hasNoblePeople && relationRead.combinesDay) {
+      focusAreas = ["Career", "Relationships"];
+      doText = "ask for sponsorship, meet decision-makers, have the important relationship conversation";
+    }
 
     // Void layer
     const isVoid = voidBranches.includes(branchKey);
@@ -359,7 +369,7 @@ export function buildMonthlyOverlayV1({
       tenGod,
       tenGodGroup: guidance?.group || null,
       theme: guidance?.theme || null,
-      doText: guidance?.do || null,
+      doText,
       watchText: guidance?.watch || null,
       focusAreas,
       activatesPartnerStar,

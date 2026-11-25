@@ -53,6 +53,9 @@ export const LABEL_TO_NARRATIVE = {
   "Principled Professional":
     "You create value by holding high standards, taking responsibility and getting things done properly, especially under pressure.",
 
+  "Trusted Leader":
+    "People tend to rely on you most when things are hard, because you stay steady and keep standards under pressure.",
+
   "Steady Guardian":
     "People tend to rely on you because you are fair, consistent and keep standards when others let them slip.",
 
